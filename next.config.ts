@@ -1,15 +1,15 @@
-import type { NextConfig } from 'next'
+﻿import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
   images: {
     remotePatterns: [
-      // Supabase Storage CDN (dev)
+      // Supabase Storage CDN
       {
         protocol: 'https',
         hostname: '*.supabase.co',
         pathname: '/storage/v1/object/public/**',
       },
-      // Yaygın etkinlik siteleri OG görselleri için
+      // Etkinlik sitelerinin OG görselleri için geniş izin
       {
         protocol: 'https',
         hostname: '**',
@@ -17,9 +17,19 @@ const nextConfig: NextConfig = {
     ],
   },
 
-  // Sunucu taraflı environment değişkenlerini sızdırma kontrolü
-  // SUPABASE_SERVICE_ROLE_KEY ve OPENAI_API_KEY hiçbir zaman
-  // NEXT_PUBLIC_ öneki almamalıdır.
+  // Native Node.js modülleri ve metascraper paketlerini bundle etme
+  // re2, got gibi native/CJS modüller Turbopack ile bundle edilemiyor
+  serverExternalPackages: [
+    're2',
+    'metascraper',
+    'metascraper-title',
+    'metascraper-description',
+    'metascraper-image',
+    'metascraper-url',
+    'metascraper-date',
+    'metascraper-publisher',
+    'got',
+  ],
 }
 
 export default nextConfig
