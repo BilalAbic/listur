@@ -2,12 +2,13 @@ import { notFound } from 'next/navigation'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { ReportButton } from '@/components/events/ReportButton'
 
 type Params = Promise<{ slug: string }>
 
-// SSG: T?m yay?ndaki etkinliklerin slug'lar?n? ?nceden ?ret
-// NOT: generateStaticParams build zaman?nda ?al???r, cookies() kullanamaz
-// createAdminClient service_role key ile ?al???r, cookie gerektirmez
+// SSG: Tüm yayındaki etkinliklerin slug'larını önceden üret
+// NOT: generateStaticParams build zamanında çalışır, cookies() kullanamaz
+// createAdminClient service_role key ile çalışır, cookie gerektirmez
 export async function generateStaticParams() {
   const supabase = createAdminClient()
   const { data } = await supabase
@@ -18,7 +19,7 @@ export async function generateStaticParams() {
   return (data ?? []).map((e) => ({ slug: e.slug }))
 }
 
-// OG metadata ?ret
+// OG metadata üret
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params
   const supabase = await createClient()
@@ -29,10 +30,10 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     .eq('status', 'published')
     .single()
 
-  if (!event) return { title: 'Etkinlik Bulunamad?' }
+  if (!event) return { title: 'Etkinlik Bulunamadı' }
 
   const title = `${event.title}`
-  const description = event.description?.slice(0, 160) ?? `${event.category} etkinli?i ? ${event.city ?? 'Online'}`
+  const description = event.description?.slice(0, 160) ?? `${event.category} etkinliği — ${event.city ?? 'Online'}`
 
   return {
     title,
@@ -64,14 +65,14 @@ function formatDate(dateStr: string, includeTime = false): string {
 const categoryColors: Record<string, string> = {
   'Yapay Zeka / ML': 'bg-purple-100 text-purple-700',
   'Blockchain / Web3': 'bg-orange-100 text-orange-700',
-  'Mobil Geli?tirme': 'bg-blue-100 text-blue-700',
+  'Mobil Geliştirme': 'bg-blue-100 text-blue-700',
   'Backend / DevOps': 'bg-green-100 text-green-700',
-  'Siber G?venlik': 'bg-red-100 text-red-700',
-  'Giri?imcilik / Startup': 'bg-yellow-100 text-yellow-700',
-  'Tasar?m / UX': 'bg-pink-100 text-pink-700',
-  'Oyun Geli?tirme': 'bg-indigo-100 text-indigo-700',
+  'Siber Güvenlik': 'bg-red-100 text-red-700',
+  'Girişimcilik / Startup': 'bg-yellow-100 text-yellow-700',
+  'Tasarım / UX': 'bg-pink-100 text-pink-700',
+  'Oyun Geliştirme': 'bg-indigo-100 text-indigo-700',
   'Veri Bilimi': 'bg-teal-100 text-teal-700',
-  'A??k Kaynak': 'bg-emerald-100 text-emerald-700',
+  'Açık Kaynak': 'bg-emerald-100 text-emerald-700',
 }
 
 export default async function EtkinlikDetay({ params }: { params: Params }) {
@@ -92,7 +93,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-10">
-      {/* Kapak g?rseli */}
+      {/* Kapak görseli */}
       {event.cover_image && (
         <div className="relative h-72 rounded-2xl overflow-hidden mb-8 shadow-md">
           <Image
@@ -118,7 +119,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
         )}
       </div>
 
-      {/* Ba?l?k */}
+      {/* Başlık */}
       <h1 className="text-3xl font-extrabold text-gray-900 mb-6 leading-tight">
         {event.title}
       </h1>
@@ -133,7 +134,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
             </svg>
           </div>
           <div>
-            <p className="text-xs text-gray-500 mb-0.5">Ba?lang??</p>
+            <p className="text-xs text-gray-500 mb-0.5">Başlangıç</p>
             <p className="text-sm font-semibold text-gray-900">{formatDate(event.start_date, true)}</p>
             {event.end_date && (
               <p className="text-xs text-gray-500 mt-0.5">Son: {formatDate(event.end_date, true)}</p>
@@ -152,7 +153,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
           <div>
             <p className="text-xs text-gray-500 mb-0.5">Konum</p>
             <p className="text-sm font-semibold text-gray-900">
-              {event.is_online ? 'Online' : event.city ?? 'Belirtilmemi?'}
+              {event.is_online ? 'Online' : event.city ?? 'Belirtilmemiş'}
             </p>
             {event.venue_name && (
               <p className="text-xs text-gray-500 mt-0.5">{event.venue_name}</p>
@@ -161,14 +162,14 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
         </div>
       </div>
 
-      {/* A??klama */}
+      {/* Açıklama */}
       {event.description && (
         <div className="prose prose-gray max-w-none mb-8">
           <p className="text-gray-700 leading-relaxed whitespace-pre-line">{event.description}</p>
         </div>
       )}
 
-      {/* Eylem butonlar? */}
+      {/* Eylem butonları */}
       <div className="flex flex-col sm:flex-row gap-3 mb-10">
         {event.registration_url && (
           <a
@@ -177,7 +178,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
             rel="noopener noreferrer"
             className="flex-1 text-center py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 transition-colors"
           >
-            Kay?t Ol ?
+            Kayıt Ol →
           </a>
         )}
         <ShareButtons title={event.title} url={eventUrl} />
@@ -195,18 +196,13 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
 
       {/* Rapor butonu */}
       <div className="mt-8 text-center">
-        <a
-          href={`/etkinlik/${slug}/rapor`}
-          className="text-xs text-gray-400 hover:text-red-500 transition-colors"
-        >
-          Uygunsuz i?erik bildir
-        </a>
+        <ReportButton eventId={event.id} eventTitle={event.title} />
       </div>
     </article>
   )
 }
 
-// Payla? butonlar? ? sadece client gerekiyor
+// Paylaş butonları — sadece client gerekiyor
 function ShareButtons({ title, url }: { title: string; url: string }) {
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`
   const linkedinUrl = `https://www.linkedin.com/shareArticle?mini=true&url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}`
