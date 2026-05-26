@@ -1,65 +1,120 @@
-import Image from "next/image";
+﻿import { Suspense } from 'react'
+import { createClient } from '@/lib/supabase/server'
+import { EventCard } from '@/components/events/EventCard'
+import { EventFilters } from '@/components/events/EventFilters'
+import type { Tables } from '@/types/database'
 
-export default function Home() {
+type Event = Tables<'events'>
+type SearchParams = Promise<Record<string, string | string[] | undefined>>
+
+function getParam(params: Record<string, string | string[] | undefined>, key: string): string {
+  const val = params[key]
+  return typeof val === 'string' ? val : ''
+}
+
+async function getEvents(searchParams: Record<string, string | string[] | undefined>): Promise<Event[]> {
+  const supabase = await createClient()
+
+  let query = supabase
+    .from('events')
+    .select('*')
+    .eq('status', 'published')
+    .order('start_date', { ascending: true })
+
+  const kategori = getParam(searchParams, 'kategori')
+  if (kategori) query = query.eq('category', kategori)
+
+  const sehir = getParam(searchParams, 'sehir')
+  if (sehir) query = query.eq('city', sehir)
+
+  const format = getParam(searchParams, 'format')
+  if (format === 'online') query = query.eq('is_online', true)
+  else if (format === 'yuzyuze') query = query.eq('is_online', false)
+
+  const tarih = getParam(searchParams, 'tarih')
+  const now = new Date()
+  if (tarih === 'bugun') {
+    const end = new Date(now)
+    end.setHours(23, 59, 59, 999)
+    query = query.gte('start_date', now.toISOString()).lte('start_date', end.toISOString())
+  } else if (tarih === 'bu-hafta') {
+    const end = new Date(now)
+    end.setDate(end.getDate() + (7 - end.getDay()))
+    end.setHours(23, 59, 59, 999)
+    query = query.gte('start_date', now.toISOString()).lte('start_date', end.toISOString())
+  } else if (tarih === 'bu-ay') {
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999)
+    query = query.gte('start_date', now.toISOString()).lte('start_date', end.toISOString())
+  }
+
+  const { data, error } = await query.limit(60)
+  if (error) {
+    console.error('Events fetch error:', error)
+    return []
+  }
+  return data ?? []
+}
+
+export default async function AnaSayfa({ searchParams }: { searchParams: SearchParams }) {
+  const params = await searchParams
+  const events = await getEvents(params)
+  const hasFilters = !!(
+    getParam(params, 'kategori') ||
+    getParam(params, 'sehir') ||
+    getParam(params, 'format') ||
+    getParam(params, 'tarih')
+  )
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+    <div className="max-w-6xl mx-auto px-4 py-8">
+      {/* Hero */}
+      <div className="text-center mb-10">
+        <h1 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-3">
+          Türkiye&apos;nin Teknoloji Etkinlikleri
+        </h1>
+        <p className="text-gray-500 text-lg max-w-xl mx-auto">
+          Hackathon, meetup, workshop ve konferansları keşfet. Toplulukla buluş.
+        </p>
+      </div>
+
+      {/* Filtreler */}
+      <div className="mb-8">
+        <Suspense fallback={<div className="h-16 animate-pulse bg-white rounded-2xl" />}>
+          <EventFilters />
+        </Suspense>
+      </div>
+
+      {/* Etkinlik listesi */}
+      {events.length === 0 ? (
+        <EmptyState hasFilters={hasFilters} />
+      ) : (
+        <>
+          <p className="text-sm text-gray-400 mb-4">{events.length} etkinlik bulundu</p>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {events.map((event) => (
+              <EventCard key={event.id} event={event} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
-  );
+  )
+}
+
+function EmptyState({ hasFilters }: { hasFilters: boolean }) {
+  return (
+    <div className="text-center py-20">
+      <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mx-auto mb-4">
+        <svg className="w-10 h-10 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+      </div>
+      <h2 className="text-xl font-semibold text-gray-700 mb-2">
+        {hasFilters ? 'Bu kriterlere uygun etkinlik yok' : 'Henüz etkinlik eklenmemiş'}
+      </h2>
+      <p className="text-gray-400 text-sm">
+        {hasFilters ? 'Farklı filtreler deneyin.' : 'İlk etkinliği siz ekleyebilirsiniz!'}
+      </p>
+    </div>
+  )
 }
