@@ -18,11 +18,11 @@ export function Header() {
           Listur
         </Link>
 
-        {/* Sa? navigasyon */}
+        {/* Sağ navigasyon */}
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              {/* Etkinlik g?nder butonu */}
+              {/* Etkinlik gönder butonu */}
               <Link
                 href="/etkinlik-gonder"
                 className="hidden sm:flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
@@ -30,7 +30,7 @@ export function Header() {
                 <span>+ Etkinlik Ekle</span>
               </Link>
 
-              {/* Bildirim ?an? */}
+              {/* Bildirim çanı */}
               <Link
                 href="/bildirimler"
                 className="relative p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
@@ -46,7 +46,7 @@ export function Header() {
                 )}
               </Link>
 
-              {/* Kullan?c? men?s? */}
+              {/* Kullanıcı menüsü */}
               <div className="relative">
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
@@ -62,7 +62,7 @@ export function Header() {
                     <div className="fixed inset-0" onClick={() => setMenuOpen(false)} />
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
                       <div className="px-4 py-2 border-b border-gray-50">
-                        <p className="text-sm font-medium text-gray-900 truncate">{profile?.name || 'Kullan?c?'}</p>
+                        <p className="text-sm font-medium text-gray-900 truncate">{profile?.name || 'Kullanıcı'}</p>
                         <p className="text-xs text-gray-500 truncate">{user.email}</p>
                       </div>
                       <Link href="/profil" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
@@ -70,7 +70,7 @@ export function Header() {
                       </Link>
                       {(profile?.role === 'moderator' || profile?.role === 'admin') && (
                         <Link href="/moderator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                          Moderat?r Paneli
+                          Moderatör Paneli
                         </Link>
                       )}
                       {profile?.role === 'admin' && (
@@ -82,7 +82,7 @@ export function Header() {
                         onClick={() => { signOut(); setMenuOpen(false) }}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                       >
-                        ??k?? Yap
+                        Çıkış Yap
                       </button>
                     </div>
                   </>
@@ -92,13 +92,13 @@ export function Header() {
           ) : (
             <>
               <Link href="/giris" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-                Giri? Yap
+                Giriş Yap
               </Link>
               <Link
                 href="/giris?tab=signup"
                 className="px-4 py-2 rounded-lg bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
               >
-                Kay?t Ol
+                Kayıt Ol
               </Link>
             </>
           )}
