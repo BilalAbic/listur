@@ -12,7 +12,7 @@ export function useInterests() {
   const { user } = useAuth()
   const supabase = createClient()
 
-  /** localStorage'dan ilgi alanlar?n? oku */
+  /** localStorage'dan ilgi alanlarını oku */
   const getLocalInterests = (): InterestCategory[] => {
     if (typeof window === 'undefined') return []
     try {
@@ -23,27 +23,27 @@ export function useInterests() {
     }
   }
 
-  /** localStorage'a ilgi alanlar?n? kaydet */
+  /** localStorage'a ilgi alanlarını kaydet */
   const setLocalInterests = (interests: InterestCategory[]) => {
     if (typeof window === 'undefined') return
     localStorage.setItem(LS_KEY_INTERESTS, JSON.stringify(interests))
   }
 
-  /** Modal?n daha ?nce g?sterilip g?sterilmedi?ini kontrol et */
+  /** Modalın daha önce gösterilip gösterilmediğini kontrol et */
   const isModalShown = (): boolean => {
     if (typeof window === 'undefined') return true
     return localStorage.getItem(LS_KEY_SHOWN) === 'true'
   }
 
-  /** Modal? g?sterildi olarak i?aretle */
+  /** Modalı gösterildi olarak işaretle */
   const markModalShown = () => {
     if (typeof window === 'undefined') return
     localStorage.setItem(LS_KEY_SHOWN, 'true')
   }
 
   /**
-   * Kullan?c? giri? yapt?ktan sonra localStorage ilgi alanlar?n?
-   * Supabase profile'?na ta??r
+   * Kullanıcı giriş yaptıktan sonra localStorage ilgi alanlarını
+   * Supabase profile'ına taşır
    */
   const syncInterestsToSupabase = useCallback(async () => {
     if (!user) return
@@ -56,17 +56,17 @@ export function useInterests() {
       .eq('id', user.id)
 
     if (!error) {
-      // Ba?ar?l? sync ? localStorage'? temizle (art?k Supabase'de)
+      // Başarılı sync → localStorage'ı temizle (artık Supabase'de)
       localStorage.removeItem(LS_KEY_INTERESTS)
     }
   }, [user, supabase])
 
   /**
-   * Kay?tl? kullan?c? i?in Supabase'den ilgi alanlar?n? g?ncelle
+   * Kayıtlı kullanıcı için Supabase'den ilgi alanlarını güncelle
    */
   const updateSupabaseInterests = useCallback(
     async (interests: string[]) => {
-      if (!user) return { error: new Error('Giri? yap?lmam??') }
+      if (!user) return { error: new Error('Giriş yapılmamış') }
       const { error } = await supabase
         .from('profiles')
         .update({ interests })

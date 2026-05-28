@@ -23,7 +23,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     .update({ status: 'removed', removed_at: new Date().toISOString() })
     .eq('id', eventId)
 
-  if (error) return NextResponse.json({ error: 'G?ncelleme ba?ar?s?z.', code: 'UPDATE_FAILED' }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Güncelleme başarısız.', code: 'UPDATE_FAILED' }, { status: 500 })
 
   await supabaseAdmin.from('moderation_logs').insert({
     moderator_id: user.id,
@@ -32,5 +32,5 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     note: note ?? null,
   })
 
-  return NextResponse.json({ success: true, message: 'Etkinlik kald?r?ld?.' })
+  return NextResponse.json({ success: true, message: 'Etkinlik kaldırıldı.' })
 }

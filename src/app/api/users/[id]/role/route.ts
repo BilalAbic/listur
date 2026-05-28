@@ -13,13 +13,13 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
   if (profile?.role !== 'admin') {
-    return NextResponse.json({ error: 'Sadece adminler rol de?i?tirebilir.', code: 'FORBIDDEN' }, { status: 403 })
+    return NextResponse.json({ error: 'Sadece adminler rol değiştirebilir.', code: 'FORBIDDEN' }, { status: 403 })
   }
 
   const { role } = await request.json()
   const allowedRoles = ['user', 'verified_user', 'moderator', 'admin']
   if (!allowedRoles.includes(role)) {
-    return NextResponse.json({ error: 'Ge?ersiz rol.', code: 'INVALID_ROLE' }, { status: 400 })
+    return NextResponse.json({ error: 'Geçersiz rol.', code: 'INVALID_ROLE' }, { status: 400 })
   }
 
   const supabaseAdmin = createAdminClient()
@@ -28,7 +28,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     .update({ role })
     .eq('id', targetUserId)
 
-  if (error) return NextResponse.json({ error: 'G?ncelleme ba?ar?s?z.', code: 'UPDATE_FAILED' }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Güncelleme başarısız.', code: 'UPDATE_FAILED' }, { status: 500 })
 
-  return NextResponse.json({ success: true, message: `Rol g?ncellendi: ${role}` })
+  return NextResponse.json({ success: true, message: `Rol güncellendi: ${role}` })
 }

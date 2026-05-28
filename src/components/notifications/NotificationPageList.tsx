@@ -24,10 +24,10 @@ interface Props {
 }
 
 const typeConfig: Record<string, { icon: string; label: string; color: string }> = {
-  new_event: { icon: '??', label: 'Yeni etkinlik', color: 'bg-indigo-50' },
-  submission_approved: { icon: '?', label: 'Etkinli?iniz onayland?', color: 'bg-green-50' },
-  submission_rejected: { icon: '?', label: 'Etkinli?iniz reddedildi', color: 'bg-red-50' },
-  report_resolved: { icon: '??', label: 'Raporunuz incelendi', color: 'bg-yellow-50' },
+  new_event: { icon: '🔔', label: 'Yeni etkinlik', color: 'bg-indigo-50' },
+  submission_approved: { icon: '✅', label: 'Etkinliğiniz onaylandı', color: 'bg-green-50' },
+  submission_rejected: { icon: '❌', label: 'Etkinliğiniz reddedildi', color: 'bg-red-50' },
+  report_resolved: { icon: '🔍', label: 'Raporunuz incelendi', color: 'bg-yellow-50' },
 }
 
 export function NotificationPageList({ notifications, userId }: Props) {
@@ -55,10 +55,10 @@ export function NotificationPageList({ notifications, userId }: Props) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
         <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4 text-2xl">
-          ??
+          🔔
         </div>
-        <h3 className="text-base font-semibold text-gray-900 mb-1">Hen?z bildirim yok</h3>
-        <p className="text-sm text-gray-500">?lgi alanlar?n?za uygun etkinlikler payla??ld???nda bildirim alacaks?n?z.</p>
+        <h3 className="text-base font-semibold text-gray-900 mb-1">Henüz bildirim yok</h3>
+        <p className="text-sm text-gray-500">İlgi alanlarınıza uygun etkinlikler paylaşıldığında bildirim alacaksınız.</p>
       </div>
     )
   }
@@ -74,7 +74,7 @@ export function NotificationPageList({ notifications, userId }: Props) {
             disabled={markingAll}
             className="text-sm text-indigo-600 hover:underline disabled:opacity-50"
           >
-            {markingAll ? '??leniyor?' : 'T?m?n? okundu i?aretle'}
+            {markingAll ? 'İşleniyor…' : 'Tümünü okundu işaretle'}
           </button>
         </div>
       )}
@@ -82,7 +82,7 @@ export function NotificationPageList({ notifications, userId }: Props) {
       <div className="space-y-2">
         {notifications.map((notif) => {
           const isRead = localRead.has(notif.id)
-          const config = typeConfig[notif.type] ?? { icon: '??', label: notif.type, color: 'bg-gray-50' }
+          const config = typeConfig[notif.type] ?? { icon: '🔔', label: notif.type, color: 'bg-gray-50' }
           const href = notif.events?.slug ? `/etkinlik/${notif.events.slug}` : '#'
 
           return (
@@ -94,12 +94,12 @@ export function NotificationPageList({ notifications, userId }: Props) {
                 isRead ? 'border-gray-100 bg-white' : `border-indigo-200 ${config.color}`
               }`}
             >
-              {/* ?kon */}
+              {/* İkon */}
               <div className="w-10 h-10 rounded-full bg-white border border-gray-200 flex items-center justify-center text-xl flex-shrink-0 shadow-sm">
                 {config.icon}
               </div>
 
-              {/* ??erik */}
+              {/* İçerik */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <p className={`text-sm font-medium ${isRead ? 'text-gray-700' : 'text-gray-900'}`}>

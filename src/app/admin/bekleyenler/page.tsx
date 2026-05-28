@@ -2,7 +2,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { PendingEventsList } from '@/components/moderation/PendingEventsList'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Bekleyenler ? Admin' }
+export const metadata: Metadata = { title: 'Bekleyenler — Admin' }
 
 export default async function AdminBekleyenlerPage() {
   const supabase = await createClient()

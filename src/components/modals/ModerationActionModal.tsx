@@ -17,28 +17,28 @@ export function ModerationActionModal({ eventId, eventTitle, action, onSuccess, 
 
   const config = {
     approve: {
-      title: 'Etkinli?i Onayla',
-      description: `"${eventTitle}" etkinli?ini yay?nl?yorsunuz.`,
-      buttonLabel: 'Onayla ve Yay?nla',
+      title: 'Etkinliği Onayla',
+      description: `"${eventTitle}" etkinliğini yayınlıyorsunuz.`,
+      buttonLabel: 'Onayla ve Yayınla',
       buttonClass: 'bg-green-600 hover:bg-green-700',
       endpoint: 'approve',
       noteLabel: 'Not (opsiyonel)',
     },
     reject: {
-      title: 'Etkinli?i Reddet',
-      description: `"${eventTitle}" etkinli?i reddedilecek. G?nderici bildirim alacak.`,
+      title: 'Etkinliği Reddet',
+      description: `"${eventTitle}" etkinliği reddedilecek. Gönderici bildirim alacak.`,
       buttonLabel: 'Reddet',
       buttonClass: 'bg-red-600 hover:bg-red-700',
       endpoint: 'reject',
-      noteLabel: 'Ret sebebi (g?nderici g?recek)',
+      noteLabel: 'Ret sebebi (gönderici görecek)',
     },
     remove: {
-      title: 'Etkinli?i Kald?r',
-      description: `"${eventTitle}" yay?ndan kald?r?lacak.`,
-      buttonLabel: 'Kald?r',
+      title: 'Etkinliği Kaldır',
+      description: `"${eventTitle}" yayından kaldırılacak.`,
+      buttonLabel: 'Kaldır',
       buttonClass: 'bg-red-600 hover:bg-red-700',
       endpoint: 'remove',
-      noteLabel: 'Kald?rma sebebi',
+      noteLabel: 'Kaldırma sebebi',
     },
   }[action]
 
@@ -57,7 +57,7 @@ export function ModerationActionModal({ eventId, eventTitle, action, onSuccess, 
     const data = await res.json()
 
     if (!res.ok) {
-      setError(data.error ?? '??lem ba?ar?s?z.')
+      setError(data.error ?? 'İşlem başarısız.')
       setLoading(false)
       return
     }
@@ -88,14 +88,14 @@ export function ModerationActionModal({ eventId, eventTitle, action, onSuccess, 
             onClick={onCancel}
             className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50"
           >
-            ?ptal
+            İptal
           </button>
           <button
             onClick={handleSubmit}
             disabled={loading}
             className={`flex-1 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 transition-colors ${config.buttonClass}`}
           >
-            {loading ? '??leniyor?' : config.buttonLabel}
+            {loading ? 'İşleniyor…' : config.buttonLabel}
           </button>
         </div>
       </div>

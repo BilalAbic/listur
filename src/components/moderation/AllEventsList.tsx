@@ -24,11 +24,11 @@ interface Props {
 }
 
 const STATUS_TABS = [
-  { value: 'published', label: 'Yay?nda' },
+  { value: 'published', label: 'Yayında' },
   { value: 'pending', label: 'Bekliyor' },
   { value: 'rejected', label: 'Reddedildi' },
-  { value: 'removed', label: 'Kald?r?ld?' },
-  { value: 'all', label: 'T?m?' },
+  { value: 'removed', label: 'Kaldırıldı' },
+  { value: 'all', label: 'Tümü' },
 ]
 
 const statusBadge: Record<string, string> = {
@@ -39,10 +39,10 @@ const statusBadge: Record<string, string> = {
 }
 
 const statusLabel: Record<string, string> = {
-  published: 'Yay?nda',
+  published: 'Yayında',
   pending: 'Bekliyor',
   rejected: 'Reddedildi',
-  removed: 'Kald?r?ld?',
+  removed: 'Kaldırıldı',
 }
 
 export function AllEventsList({ events, currentStatus, currentPage, totalPages }: Props) {
@@ -66,7 +66,7 @@ export function AllEventsList({ events, currentStatus, currentPage, totalPages }
 
   return (
     <>
-      {/* Filtre tablar? */}
+      {/* Filtre tabları */}
       <div className="flex gap-1 mb-5 bg-gray-100 rounded-xl p-1 overflow-x-auto">
         {STATUS_TABS.map((tab) => (
           <button
@@ -102,14 +102,14 @@ export function AllEventsList({ events, currentStatus, currentPage, totalPages }
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-xs text-gray-500">
                     <span>{event.category}</span>
-                    {event.city && <span>? {event.city}</span>}
+                    {event.city && <span>· {event.city}</span>}
                     <span>
-                      ? {new Date(event.start_date).toLocaleDateString('tr-TR', {
+                      · {new Date(event.start_date).toLocaleDateString('tr-TR', {
                         day: 'numeric', month: 'short', year: 'numeric'
                       })}
                     </span>
                     {event.profiles?.name && (
-                      <span className="text-gray-400">? {event.profiles.name}</span>
+                      <span className="text-gray-400">· {event.profiles.name}</span>
                     )}
                   </div>
                 </div>
@@ -120,7 +120,7 @@ export function AllEventsList({ events, currentStatus, currentPage, totalPages }
                     rel="noopener noreferrer"
                     className="px-3 py-1.5 text-xs text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
                   >
-                    G?r?nt?le
+                    Görüntüle
                   </a>
                   {event.status === 'pending' && (
                     <>
@@ -143,7 +143,7 @@ export function AllEventsList({ events, currentStatus, currentPage, totalPages }
                       onClick={() => setModal({ eventId: event.id, eventTitle: event.title, action: 'remove' })}
                       className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
                     >
-                      Kald?r
+                      Kaldır
                     </button>
                   )}
                 </div>
@@ -161,7 +161,7 @@ export function AllEventsList({ events, currentStatus, currentPage, totalPages }
             disabled={currentPage <= 1}
             className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            ? ?nceki
+            ← Önceki
           </button>
           <span className="text-sm text-gray-500 px-2">
             {currentPage} / {totalPages}
@@ -171,7 +171,7 @@ export function AllEventsList({ events, currentStatus, currentPage, totalPages }
             disabled={currentPage >= totalPages}
             className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Sonraki ?
+            Sonraki →
           </button>
         </div>
       )}

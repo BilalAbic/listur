@@ -21,10 +21,10 @@ interface Props {
 }
 
 const ROLE_OPTIONS = [
-  { value: '', label: 'T?m Roller' },
-  { value: 'user', label: 'Kullan?c?' },
-  { value: 'verified_user', label: 'Do?rulanm??' },
-  { value: 'moderator', label: 'Moderat?r' },
+  { value: '', label: 'Tüm Roller' },
+  { value: 'user', label: 'Kullanıcı' },
+  { value: 'verified_user', label: 'Doğrulanmış' },
+  { value: 'moderator', label: 'Moderatör' },
   { value: 'admin', label: 'Admin' },
 ]
 
@@ -36,9 +36,9 @@ const roleBadge: Record<string, string> = {
 }
 
 const roleLabel: Record<string, string> = {
-  user: 'Kullan?c?',
-  verified_user: 'Do?rulanm??',
-  moderator: 'Moderat?r',
+  user: 'Kullanıcı',
+  verified_user: 'Doğrulanmış',
+  moderator: 'Moderatör',
   admin: 'Admin',
 }
 
@@ -64,7 +64,7 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
 
   const handleRoleChange = async (userId: string, newRole: string) => {
     if (userId === currentUserId) {
-      setError('Kendi rol?n?z? de?i?tiremezsiniz.')
+      setError('Kendi rolünüzü değiştiremezsiniz.')
       return
     }
     setUpdating(userId)
@@ -78,7 +78,7 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
       })
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? 'G?ncelleme ba?ar?s?z.')
+        setError(data.error ?? 'Güncelleme başarısız.')
         return
       }
       router.refresh()
@@ -96,7 +96,7 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="?sim veya e-posta ara?"
+            placeholder="İsim veya e-posta ara…"
             className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
           <button
@@ -126,7 +126,7 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
       )}
 
       {users.length === 0 ? (
-        <div className="py-16 text-center text-gray-500">Kullan?c? bulunamad?.</div>
+        <div className="py-16 text-center text-gray-500">Kullanıcı bulunamadı.</div>
       ) : (
         <div className="space-y-2">
           {users.map((user) => (
@@ -137,7 +137,7 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="font-medium text-gray-900 truncate">
-                    {user.name ?? '?simsiz'}
+                    {user.name ?? 'İsimsiz'}
                   </span>
                   {user.id === currentUserId && (
                     <span className="text-xs text-gray-400">(siz)</span>
@@ -177,7 +177,7 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
             disabled={currentPage <= 1}
             className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            ? ?nceki
+            ← Önceki
           </button>
           <span className="text-sm text-gray-500 px-2">
             {currentPage} / {totalPages}
@@ -187,7 +187,7 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
             disabled={currentPage >= totalPages}
             className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            Sonraki ?
+            Sonraki →
           </button>
         </div>
       )}

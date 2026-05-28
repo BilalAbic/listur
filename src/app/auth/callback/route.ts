@@ -14,6 +14,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Hata durumunda giri? sayfas?na y?nlendir
+  // Hata durumunda giriş sayfasına yönlendir
   return NextResponse.redirect(`${origin}/giris?error=auth_callback_failed`)
 }

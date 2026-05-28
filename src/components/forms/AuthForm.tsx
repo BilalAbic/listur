@@ -32,7 +32,7 @@ export function AuthForm() {
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      setMessage({ type: 'error', text: 'E-posta veya ?ifre hatal?.' })
+      setMessage({ type: 'error', text: 'E-posta veya şifre hatalı.' })
       setLoading(false)
       return
     }
@@ -65,10 +65,10 @@ export function AuthForm() {
     await syncInterestsToSupabase()
     setMessage({
       type: 'success',
-      text: 'Hesab?n?z olu?turuldu! E-postan?z? kontrol edin (gerekiyorsa).',
+      text: 'Hesabınız oluşturuldu! E-postanızı kontrol edin (gerekiyorsa).',
     })
     setLoading(false)
-    // Ba?ar?l? kay?t ? y?nlendir
+    // Başarılı kayıt → yönlendir
     setTimeout(() => {
       router.push(redirectTo)
       router.refresh()
@@ -98,8 +98,8 @@ export function AuthForm() {
   }
 
   const tabs: { id: Tab; label: string }[] = [
-    { id: 'login', label: 'Giri? Yap' },
-    { id: 'signup', label: 'Kay?t Ol' },
+    { id: 'login', label: 'Giriş Yap' },
+    { id: 'signup', label: 'Kayıt Ol' },
     { id: 'magic', label: 'Magic Link' },
   ]
 
@@ -111,9 +111,9 @@ export function AuthForm() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">E-postan?z? kontrol edin</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">E-postanızı kontrol edin</h3>
         <p className="text-gray-500 text-sm">
-          <strong>{email}</strong> adresine giri? ba?lant?s? g?nderdik.
+          <strong>{email}</strong> adresine giriş bağlantısı gönderdik.
         </p>
       </div>
     )
@@ -148,10 +148,10 @@ export function AuthForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">?ifre</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
             <input
               type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-              required placeholder="????????"
+              required placeholder="••••••••"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
           </div>
@@ -164,7 +164,7 @@ export function AuthForm() {
             type="submit" disabled={loading}
             className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Giri? yap?l?yor?' : 'Giri? Yap'}
+            {loading ? 'Giriş yapılıyor…' : 'Giriş Yap'}
           </button>
         </form>
       )}
@@ -175,7 +175,7 @@ export function AuthForm() {
             <label className="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
             <input
               type="text" value={name} onChange={(e) => setName(e.target.value)}
-              required placeholder="Ad?n?z Soyad?n?z"
+              required placeholder="Adınız Soyadınız"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
           </div>
@@ -188,7 +188,7 @@ export function AuthForm() {
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">?ifre</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
             <input
               type="password" value={password} onChange={(e) => setPassword(e.target.value)}
               required placeholder="En az 8 karakter" minLength={8}
@@ -204,7 +204,7 @@ export function AuthForm() {
             type="submit" disabled={loading}
             className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'Hesap olu?turuluyor?' : 'Kay?t Ol'}
+            {loading ? 'Hesap oluşturuluyor…' : 'Kayıt Ol'}
           </button>
         </form>
       )}
@@ -212,7 +212,7 @@ export function AuthForm() {
       {tab === 'magic' && (
         <form onSubmit={handleMagicLink} className="space-y-4">
           <p className="text-sm text-gray-500">
-            E-posta adresinize ?ifresiz giri? ba?lant?s? g?nderece?iz.
+            E-posta adresinize şifresiz giriş bağlantısı göndereceğiz.
           </p>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
@@ -231,7 +231,7 @@ export function AuthForm() {
             type="submit" disabled={loading}
             className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
           >
-            {loading ? 'G?nderiliyor?' : 'Ba?lant? G?nder'}
+            {loading ? 'Gönderiliyor…' : 'Bağlantı Gönder'}
           </button>
         </form>
       )}

@@ -9,16 +9,16 @@ interface Props {
 
 export default function Error({ error, reset }: Props) {
   useEffect(() => {
-    // Hatalar? bir izleme servisine g?nderilebilir
+    // Hataları bir izleme servisine gönderilebilir
     console.error('App error:', error)
   }, [error])
 
   return (
     <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
-      <div className="text-6xl mb-4">??</div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-2">Bir Hata Olu?tu</h1>
+      <div className="text-6xl mb-4">⚠️</div>
+      <h1 className="text-2xl font-bold text-gray-900 mb-2">Bir Hata Oluştu</h1>
       <p className="text-gray-500 mb-8 max-w-sm">
-        Beklenmedik bir hata meydana geldi. L?tfen tekrar deneyin.
+        Beklenmedik bir hata meydana geldi. Lütfen tekrar deneyin.
       </p>
       {error.digest && (
         <p className="text-xs text-gray-400 mb-6 font-mono">Hata kodu: {error.digest}</p>
@@ -34,7 +34,7 @@ export default function Error({ error, reset }: Props) {
           href="/"
           className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
         >
-          Ana Sayfaya D?n
+          Ana Sayfaya Dön
         </a>
       </div>
     </div>

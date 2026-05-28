@@ -9,11 +9,11 @@ interface Props {
 }
 
 const REASONS = [
-  { value: 'misleading', label: 'Yan?lt?c? bilgi', description: 'Tarih, konum veya i?erik yanl??' },
-  { value: 'spam', label: 'Spam', description: 'Reklam ama?l? veya tekrar eden i?erik' },
-  { value: 'irrelevant', label: 'Konuyla alakas?z', description: 'Teknoloji etkinli?i de?il' },
-  { value: 'inappropriate', label: 'Uygunsuz', description: 'Kural d??? veya zararl? i?erik' },
-  { value: 'other', label: 'Di?er', description: 'Yukar?dakilere girmeyen ba?ka bir sorun' },
+  { value: 'misleading', label: 'Yanıltıcı bilgi', description: 'Tarih, konum veya içerik yanlış' },
+  { value: 'spam', label: 'Spam', description: 'Reklam amaçlı veya tekrar eden içerik' },
+  { value: 'irrelevant', label: 'Konuyla alakasız', description: 'Teknoloji etkinliği değil' },
+  { value: 'inappropriate', label: 'Uygunsuz', description: 'Kural dışı veya zararlı içerik' },
+  { value: 'other', label: 'Diğer', description: 'Yukarıdakilere girmeyen başka bir sorun' },
 ]
 
 export function ReportModal({ eventId, eventTitle, onClose }: Props) {
@@ -25,7 +25,7 @@ export function ReportModal({ eventId, eventTitle, onClose }: Props) {
 
   const handleSubmit = async () => {
     if (!reason) {
-      setError('L?tfen bir sebep se?in.')
+      setError('Lütfen bir sebep seçin.')
       return
     }
 
@@ -42,7 +42,7 @@ export function ReportModal({ eventId, eventTitle, onClose }: Props) {
       const data = await res.json()
 
       if (!res.ok) {
-        setError(data.error ?? 'Rapor g?nderilemedi.')
+        setError(data.error ?? 'Rapor gönderilemedi.')
         return
       }
 
@@ -62,8 +62,8 @@ export function ReportModal({ eventId, eventTitle, onClose }: Props) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-base font-semibold text-gray-900 mb-1">Raporunuz Al?nd?</h3>
-            <p className="text-sm text-gray-500 mb-5">Ekibimiz en k?sa s?rede inceleyecek.</p>
+            <h3 className="text-base font-semibold text-gray-900 mb-1">Raporunuz Alındı</h3>
+            <p className="text-sm text-gray-500 mb-5">Ekibimiz en kısa sürede inceleyecek.</p>
             <button
               onClick={onClose}
               className="w-full py-2.5 rounded-xl bg-gray-100 text-gray-700 text-sm font-medium hover:bg-gray-200"
@@ -75,7 +75,7 @@ export function ReportModal({ eventId, eventTitle, onClose }: Props) {
           <>
             <div className="flex items-start justify-between mb-4">
               <div>
-                <h3 className="text-base font-bold text-gray-900">Uygunsuz ??erik Bildir</h3>
+                <h3 className="text-base font-bold text-gray-900">Uygunsuz İçerik Bildir</h3>
                 <p className="text-xs text-gray-500 mt-0.5 truncate max-w-[280px]">{eventTitle}</p>
               </div>
               <button
@@ -118,13 +118,13 @@ export function ReportModal({ eventId, eventTitle, onClose }: Props) {
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ek a??klama <span className="text-gray-400 font-normal">(opsiyonel)</span>
+                Ek açıklama <span className="text-gray-400 font-normal">(opsiyonel)</span>
               </label>
               <textarea
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={2}
-                placeholder="Daha fazla detay payla??n?"
+                placeholder="Daha fazla detay paylaşın"
                 className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
               />
             </div>
@@ -136,14 +136,14 @@ export function ReportModal({ eventId, eventTitle, onClose }: Props) {
                 onClick={onClose}
                 className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50"
               >
-                ?ptal
+                İptal
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={loading || !reason}
                 className="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
               >
-                {loading ? 'G?nderiliyor?' : 'Rapor Et'}
+                {loading ? 'Gönderiliyor…' : 'Rapor Et'}
               </button>
             </div>
           </>

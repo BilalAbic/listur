@@ -2,7 +2,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { ApprovedEventsList } from '@/components/moderation/ApprovedEventsList'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Onaylad?klar?m ? Moderat?r' }
+export const metadata: Metadata = { title: 'Onayladıklarım — Moderatör' }
 
 export default async function OnayladiklarimPage() {
   const supabase = await createClient()
@@ -11,7 +11,7 @@ export default async function OnayladiklarimPage() {
 
   const supabaseAdmin = createAdminClient()
 
-  // Bu moderat?r?n onaylad??? etkinlikleri moderation_logs ?zerinden getir
+  // Bu moderatörün onayladığı etkinlikleri moderation_logs üzerinden getir
   const { data: logs } = await supabaseAdmin
     .from('moderation_logs')
     .select('event_id, created_at, note')
@@ -40,7 +40,7 @@ export default async function OnayladiklarimPage() {
     events = data ?? []
   }
 
-  // Log tarihlerini etkinlik ID'sine g?re map et
+  // Log tarihlerini etkinlik ID'sine göre map et
   const logMap = Object.fromEntries(
     (logs ?? []).map((l) => [l.event_id, l.created_at])
   )
@@ -48,7 +48,7 @@ export default async function OnayladiklarimPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Onaylad?klar?m</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Onayladıklarım</h2>
         <span className="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full">
           {events.length} etkinlik
         </span>

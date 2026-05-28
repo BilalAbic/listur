@@ -5,7 +5,7 @@ import type { Database } from '@/types/database'
 
 type EventStatus = Database['public']['Enums']['event_status']
 
-export const metadata: Metadata = { title: 'Etkinlikler ? Admin' }
+export const metadata: Metadata = { title: 'Etkinlikler — Admin' }
 
 export default async function AdminEtkinliklerPage({
   searchParams,
@@ -42,7 +42,7 @@ export default async function AdminEtkinliklerPage({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">T?m Etkinlikler</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Tüm Etkinlikler</h2>
         <span className="text-sm text-gray-500">{count ?? 0} toplam</span>
       </div>
       <AllEventsList

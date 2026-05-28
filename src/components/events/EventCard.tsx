@@ -11,14 +11,14 @@ interface EventCardProps {
 const categoryColors: Record<string, string> = {
   'Yapay Zeka / ML': 'bg-purple-100 text-purple-700',
   'Blockchain / Web3': 'bg-orange-100 text-orange-700',
-  'Mobil Geli?tirme': 'bg-blue-100 text-blue-700',
+  'Mobil Geliştirme': 'bg-blue-100 text-blue-700',
   'Backend / DevOps': 'bg-green-100 text-green-700',
-  'Siber G?venlik': 'bg-red-100 text-red-700',
-  'Giri?imcilik / Startup': 'bg-yellow-100 text-yellow-700',
-  'Tasar?m / UX': 'bg-pink-100 text-pink-700',
-  'Oyun Geli?tirme': 'bg-indigo-100 text-indigo-700',
+  'Siber Güvenlik': 'bg-red-100 text-red-700',
+  'Girişimcilik / Startup': 'bg-yellow-100 text-yellow-700',
+  'Tasarım / UX': 'bg-pink-100 text-pink-700',
+  'Oyun Geliştirme': 'bg-indigo-100 text-indigo-700',
   'Veri Bilimi': 'bg-teal-100 text-teal-700',
-  'A??k Kaynak': 'bg-emerald-100 text-emerald-700',
+  'Açık Kaynak': 'bg-emerald-100 text-emerald-700',
 }
 
 function formatDate(dateStr: string): string {
@@ -37,7 +37,7 @@ export function EventCard({ event }: EventCardProps) {
   return (
     <Link href={`/etkinlik/${event.slug}`} className="group block">
       <article className="bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 h-full flex flex-col">
-        {/* Kapak g?rseli */}
+        {/* Kapak görseli */}
         <div className="relative h-44 bg-gradient-to-br from-indigo-100 to-purple-100 overflow-hidden">
           {event.cover_image ? (
             <Image
@@ -62,14 +62,14 @@ export function EventCard({ event }: EventCardProps) {
           )}
         </div>
 
-        {/* ??erik */}
+        {/* İçerik */}
         <div className="p-5 flex flex-col flex-1 gap-3">
           {/* Kategori etiketi */}
           <span className={`self-start text-xs font-semibold px-2.5 py-1 rounded-full ${catColor}`}>
             {event.category}
           </span>
 
-          {/* Ba?l?k */}
+          {/* Başlık */}
           <h3 className="font-semibold text-gray-900 text-base leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
             {event.title}
           </h3>
@@ -92,11 +92,11 @@ export function EventCard({ event }: EventCardProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
               </svg>
-              <span>{event.is_online ? 'Online' : event.city ?? 'Belirtilmemi?'}</span>
+              <span>{event.is_online ? 'Online' : event.city ?? 'Belirtilmemiş'}</span>
             </div>
           </div>
 
-          {/* Kay?t butonu */}
+          {/* Kayıt butonu */}
           {event.registration_url && (
             <a
               href={event.registration_url}
@@ -105,7 +105,7 @@ export function EventCard({ event }: EventCardProps) {
               onClick={(e) => e.stopPropagation()}
               className="mt-2 w-full text-center py-2 rounded-xl bg-indigo-50 text-indigo-700 text-sm font-semibold hover:bg-indigo-100 transition-colors"
             >
-              Kay?t Ol ?
+              Kayıt Ol →
             </a>
           )}
         </div>

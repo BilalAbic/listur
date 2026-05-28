@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
 
   const allowedReasons = ['misleading', 'spam', 'irrelevant', 'inappropriate', 'other']
   if (!allowedReasons.includes(reason)) {
-    return NextResponse.json({ error: 'Ge?ersiz sebep.', code: 'INVALID_REASON' }, { status: 400 })
+    return NextResponse.json({ error: 'Geçersiz sebep.', code: 'INVALID_REASON' }, { status: 400 })
   }
 
   // IP adresi
@@ -20,13 +20,13 @@ export async function POST(request: NextRequest) {
     request.headers.get('x-real-ip') ??
     'unknown'
 
-  // Giri? yapm?? kullan?c?y? kontrol et (opsiyonel)
+  // Giriş yapmış kullanıcıyı kontrol et (opsiyonel)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   const supabaseAdmin = createAdminClient()
 
-  // Rate limiting: ayn? IP'den 10 dakikada 1 rapor
+  // Rate limiting: aynı IP'den 10 dakikada 1 rapor
   const tenMinutesAgo = new Date(Date.now() - 10 * 60 * 1000).toISOString()
   const { count: recentCount } = await supabaseAdmin
     .from('reports')
@@ -36,12 +36,12 @@ export async function POST(request: NextRequest) {
 
   if ((recentCount ?? 0) >= 1) {
     return NextResponse.json(
-      { error: '?ok s?k rapor g?nderdiniz. L?tfen 10 dakika bekleyin.', code: 'RATE_LIMITED' },
+      { error: 'Çok sık rapor gönderdiniz. Lütfen 10 dakika bekleyin.', code: 'RATE_LIMITED' },
       { status: 429 }
     )
   }
 
-  // Kay?tl? kullan?c?: ayn? event_id i?in tekrar rapor kontrol?
+  // Kayıtlı kullanıcı: aynı event_id için tekrar rapor kontrolü
   if (user) {
     const { count: existingCount } = await supabaseAdmin
       .from('reports')
@@ -51,13 +51,13 @@ export async function POST(request: NextRequest) {
 
     if ((existingCount ?? 0) > 0) {
       return NextResponse.json(
-        { error: 'Bu etkinli?i zaten raporlad?n?z.', code: 'ALREADY_REPORTED' },
+        { error: 'Bu etkinliği zaten raporladınız.', code: 'ALREADY_REPORTED' },
         { status: 409 }
       )
     }
   }
 
-  // Etkinlik var m??
+  // Etkinlik var mı?
   const { data: event } = await supabaseAdmin
     .from('events')
     .select('id, status')
@@ -65,11 +65,11 @@ export async function POST(request: NextRequest) {
     .single()
 
   if (!event) {
-    return NextResponse.json({ error: 'Etkinlik bulunamad?.', code: 'EVENT_NOT_FOUND' }, { status: 404 })
+    return NextResponse.json({ error: 'Etkinlik bulunamadı.', code: 'EVENT_NOT_FOUND' }, { status: 404 })
   }
 
   if (event.status !== 'published') {
-    return NextResponse.json({ error: 'Sadece yay?ndaki etkinlikler raporlanabilir.', code: 'NOT_PUBLISHED' }, { status: 400 })
+    return NextResponse.json({ error: 'Sadece yayındaki etkinlikler raporlanabilir.', code: 'NOT_PUBLISHED' }, { status: 400 })
   }
 
   // Raporu kaydet
@@ -86,12 +86,12 @@ export async function POST(request: NextRequest) {
     // Unique constraint ihlali: IP + event_id
     if (insertError.code === '23505') {
       return NextResponse.json(
-        { error: 'Bu etkinli?i zaten raporlad?n?z.', code: 'ALREADY_REPORTED' },
+        { error: 'Bu etkinliği zaten raporladınız.', code: 'ALREADY_REPORTED' },
         { status: 409 }
       )
     }
     return NextResponse.json({ error: 'Rapor kaydedilemedi.', code: 'INSERT_FAILED' }, { status: 500 })
   }
 
-  return NextResponse.json({ success: true, message: 'Raporunuz al?nd?. ?nceleyece?iz.' })
+  return NextResponse.json({ success: true, message: 'Raporunuz alındı. İnceleyeceğiz.' })
 }

@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Moderat?r Paneli ? Listur',
+  title: 'Moderatör Paneli — Listur',
 }
 
 export default async function ModeratorLayout({ children }: { children: React.ReactNode }) {
@@ -25,20 +25,20 @@ export default async function ModeratorLayout({ children }: { children: React.Re
 
   const navLinks = [
     { href: '/moderator/bekleyenler', label: 'Bekleyenler' },
-    { href: '/moderator/onayladiklarim', label: 'Onaylad?klar?m' },
+    { href: '/moderator/onayladiklarim', label: 'Onayladıklarım' },
     { href: '/moderator/raporlar', label: 'Raporlar' },
   ]
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Ba?l?k */}
+      {/* Başlık */}
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Moderat?r Paneli</h1>
+          <h1 className="text-xl font-bold text-gray-900">Moderatör Paneli</h1>
           <p className="text-sm text-gray-500">{profile.name}</p>
         </div>
         <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-xs font-semibold rounded-full">
-          {profile.role === 'admin' ? 'Admin' : 'Moderat?r'}
+          {profile.role === 'admin' ? 'Admin' : 'Moderatör'}
         </span>
       </div>
 

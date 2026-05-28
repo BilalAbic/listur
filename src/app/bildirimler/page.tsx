@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { NotificationPageList } from '@/components/notifications/NotificationPageList'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Bildirimler ? Listur' }
+export const metadata: Metadata = { title: 'Bildirimler — Listur' }
 
 export default async function BildirimlerPage() {
   const supabase = await createClient()
@@ -26,7 +26,7 @@ export default async function BildirimlerPage() {
         <h1 className="text-xl font-bold text-gray-900">Bildirimler</h1>
         {(notifications?.some((n) => !n.read_at)) && (
           <span className="px-3 py-1 bg-indigo-100 text-indigo-700 text-sm font-medium rounded-full">
-            {notifications?.filter((n) => !n.read_at).length} okunmam??
+            {notifications?.filter((n) => !n.read_at).length} okunmamış
           </span>
         )}
       </div>

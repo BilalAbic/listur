@@ -55,7 +55,7 @@ async function parseWithGPT4o(
   const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY })
 
   try {
-    // HTML'i ?ek ve temizle
+    // HTML'i çek ve temizle
     const response = await got(url, {
       timeout: { request: 15_000 },
       headers: {
@@ -101,9 +101,9 @@ async function parseWithGPT4o(
 
 /**
  * Ana parse fonksiyonu.
- * 1. metascraper ile OG/meta tag'lerden veri ?ek
- * 2. Kritik alan (title + description + start_date) eksikse GPT-4o'ya g?nder
- * 3. Sonu?lar? birle?tir
+ * 1. metascraper ile OG/meta tag'lerden veri çek
+ * 2. Kritik alan (title + description + start_date) eksikse GPT-4o'ya gönder
+ * 3. Sonuçları birleştir
  */
 export async function parseEventLink(url: string): Promise<ParsedEventData> {
   // 1. metascraper ile dene
@@ -124,17 +124,17 @@ export async function parseEventLink(url: string): Promise<ParsedEventData> {
     parse_source: 'og',
   }
 
-  // 2. Kritik alanlar tamam m? kontrol et
+  // 2. Kritik alanlar tamam mı kontrol et
   const hasAllCritical = result.title && result.description && result.start_date
   if (hasAllCritical) {
     return result
   }
 
-  // 3. GPT-4o fallback ? sadece eksik alanlar i?in
-  console.log('GPT-4o fallback ba?lat?l?yor...')
+  // 3. GPT-4o fallback → sadece eksik alanlar için
+  console.log('GPT-4o fallback başlatılıyor...')
   const gptResult = await parseWithGPT4o(url, result)
 
-  // 4. Birle?tir: mevcut de?erleri koru, sadece null/undefined olanlar? g?ncelle
+  // 4. Birleştir: mevcut değerleri koru, sadece null/undefined olanları güncelle
   return {
     title: result.title ?? gptResult.title ?? null,
     description: result.description ?? gptResult.description ?? null,

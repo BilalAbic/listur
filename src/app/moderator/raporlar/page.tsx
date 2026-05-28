@@ -2,7 +2,7 @@ import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { ReportsList } from '@/components/moderation/ReportsList'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Raporlar ? Moderat?r' }
+export const metadata: Metadata = { title: 'Raporlar — Moderatör' }
 
 export default async function ModeratorRaporlarPage() {
   const supabase = await createClient()
@@ -22,7 +22,7 @@ export default async function ModeratorRaporlarPage() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">A??k Raporlar</h2>
+        <h2 className="text-lg font-semibold text-gray-900">Açık Raporlar</h2>
         <span className="px-3 py-1 bg-red-100 text-red-700 text-sm font-semibold rounded-full">
           {reports?.length ?? 0} rapor
         </span>

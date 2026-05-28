@@ -17,7 +17,7 @@ export function ReportButton({ eventId, eventTitle }: Props) {
         onClick={() => setOpen(true)}
         className="text-xs text-gray-400 hover:text-red-500 transition-colors"
       >
-        Uygunsuz i?erik bildir
+        Uygunsuz içerik bildir
       </button>
       {open && (
         <ReportModal

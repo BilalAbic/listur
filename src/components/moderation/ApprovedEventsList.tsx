@@ -40,8 +40,8 @@ export function ApprovedEventsList({ events, logMap }: Props) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
           </svg>
         </div>
-        <h3 className="text-base font-semibold text-gray-900 mb-1">Hen?z onay yok</h3>
-        <p className="text-sm text-gray-500">Bu hesapla onaylanm?? etkinlik bulunamad?.</p>
+        <h3 className="text-base font-semibold text-gray-900 mb-1">Henüz onay yok</h3>
+        <p className="text-sm text-gray-500">Bu hesapla onaylanmış etkinlik bulunamadı.</p>
       </div>
     )
   }
@@ -54,8 +54,8 @@ export function ApprovedEventsList({ events, logMap }: Props) {
   }
 
   const statusLabel: Record<string, string> = {
-    published: 'Yay?nda',
-    removed: 'Kald?r?ld?',
+    published: 'Yayında',
+    removed: 'Kaldırıldı',
     rejected: 'Reddedildi',
     pending: 'Bekliyor',
   }
@@ -82,15 +82,15 @@ export function ApprovedEventsList({ events, logMap }: Props) {
                 </div>
                 <div className="flex flex-wrap items-center gap-3 mt-1 text-xs text-gray-500">
                   <span>{event.category}</span>
-                  {event.city && <span>? {event.city}</span>}
+                  {event.city && <span>· {event.city}</span>}
                   <span>
-                    ? {new Date(event.start_date).toLocaleDateString('tr-TR', {
+                    · {new Date(event.start_date).toLocaleDateString('tr-TR', {
                       day: 'numeric', month: 'long', year: 'numeric'
                     })}
                   </span>
                   {logMap[event.id] && (
                     <span className="text-gray-400">
-                      ? {new Date(logMap[event.id]).toLocaleDateString('tr-TR')} onayland?
+                      · {new Date(logMap[event.id]).toLocaleDateString('tr-TR')} onaylandı
                     </span>
                   )}
                 </div>
@@ -103,14 +103,14 @@ export function ApprovedEventsList({ events, logMap }: Props) {
                   rel="noopener noreferrer"
                   className="px-3 py-1.5 text-xs text-indigo-600 border border-indigo-200 rounded-lg hover:bg-indigo-50 transition-colors"
                 >
-                  G?r?nt?le
+                  Görüntüle
                 </a>
                 {event.status === 'published' && (
                   <button
                     onClick={() => setModal({ eventId: event.id, eventTitle: event.title })}
                     className="px-3 py-1.5 text-xs text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
                   >
-                    Kald?r
+                    Kaldır
                   </button>
                 )}
               </div>

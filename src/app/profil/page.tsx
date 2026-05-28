@@ -18,14 +18,14 @@ export default function ProfilPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  // Giri? yapmam?? kullan?c?y? y?nlendir
+  // Giriş yapmamış kullanıcıyı yönlendir
   useEffect(() => {
     if (!loading && !user) {
       router.push('/giris?redirect=/profil')
     }
   }, [user, loading, router])
 
-  // Profil verisini forma y?kle
+  // Profil verisini forma yükle
   useEffect(() => {
     if (profile) {
       setName(profile.name || '')
@@ -52,10 +52,10 @@ export default function ProfilPage() {
       .eq('id', user.id)
 
     if (error) {
-      setMessage({ type: 'error', text: 'Kaydedilirken hata olu?tu.' })
+      setMessage({ type: 'error', text: 'Kaydedilirken hata oluştu.' })
     } else {
       await refreshProfile()
-      setMessage({ type: 'success', text: 'Profil g?ncellendi!' })
+      setMessage({ type: 'success', text: 'Profil güncellendi!' })
     }
     setSaving(false)
   }
@@ -72,18 +72,18 @@ export default function ProfilPage() {
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold text-gray-900 mb-8">Profil Ayarlar?</h1>
+      <h1 className="text-2xl font-bold text-gray-900 mb-8">Profil Ayarları</h1>
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* Temel bilgiler */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-800 mb-4">Ki?isel Bilgiler</h2>
+          <h2 className="text-base font-semibold text-gray-800 mb-4">Kişisel Bilgiler</h2>
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
               <input
                 type="text" value={name} onChange={(e) => setName(e.target.value)}
-                placeholder="Ad?n?z Soyad?n?z"
+                placeholder="Adınız Soyadınız"
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
               />
             </div>
@@ -93,15 +93,15 @@ export default function ProfilPage() {
                 type="email" value={user.email || ''} disabled
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-sm cursor-not-allowed"
               />
-              <p className="text-xs text-gray-400 mt-1">E-posta adresi de?i?tirilemez.</p>
+              <p className="text-xs text-gray-400 mt-1">E-posta adresi değiştirilemez.</p>
             </div>
           </div>
         </section>
 
-        {/* ?lgi alanlar? */}
+        {/* İlgi alanları */}
         <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-          <h2 className="text-base font-semibold text-gray-800 mb-1">?lgi Alanlar?</h2>
-          <p className="text-sm text-gray-500 mb-4">Se?ti?in alanlardaki etkinlikler i?in bildirim al?rs?n.</p>
+          <h2 className="text-base font-semibold text-gray-800 mb-1">İlgi Alanları</h2>
+          <p className="text-sm text-gray-500 mb-4">Seçtiğin alanlardaki etkinlikler için bildirim alırsın.</p>
           <div className="grid grid-cols-2 gap-2">
             {INTEREST_CATEGORIES.map((cat) => {
               const isSelected = interests.includes(cat)
@@ -132,12 +132,12 @@ export default function ProfilPage() {
             />
             <div>
               <p className="text-sm font-medium text-gray-800">E-posta bildirimleri</p>
-              <p className="text-xs text-gray-500">?lgi alanlar?nla e?le?en yeni etkinlikler i?in e-posta al.</p>
+              <p className="text-xs text-gray-500">İlgi alanlarınla eşleşen yeni etkinlikler için e-posta al.</p>
             </div>
           </label>
         </section>
 
-        {/* G?nderim ge?mi?i */}
+        {/* Gönderim geçmişi */}
         <SubmissionHistory userId={user.id} />
 
         {/* Kaydet butonu */}
@@ -150,14 +150,14 @@ export default function ProfilPage() {
           type="submit" disabled={saving}
           className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
         >
-          {saving ? 'Kaydediliyor?' : 'De?i?iklikleri Kaydet'}
+          {saving ? 'Kaydediliyor…' : 'Değişiklikleri Kaydet'}
         </button>
       </form>
     </main>
   )
 }
 
-// G?nderim ge?mi?i bile?eni
+// Gönderim geçmişi bileşeni
 function SubmissionHistory({ userId }: { userId: string }) {
   const supabase = createClient()
   const [submissions, setSubmissions] = useState<Array<{
@@ -183,14 +183,14 @@ function SubmissionHistory({ userId }: { userId: string }) {
 
   const statusLabel: Record<string, { label: string; className: string }> = {
     pending: { label: 'Beklemede', className: 'bg-yellow-100 text-yellow-700' },
-    published: { label: 'Yay?nda', className: 'bg-green-100 text-green-700' },
+    published: { label: 'Yayında', className: 'bg-green-100 text-green-700' },
     rejected: { label: 'Reddedildi', className: 'bg-red-100 text-red-700' },
-    removed: { label: 'Kald?r?ld?', className: 'bg-gray-100 text-gray-600' },
+    removed: { label: 'Kaldırıldı', className: 'bg-gray-100 text-gray-600' },
   }
 
   return (
     <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
-      <h2 className="text-base font-semibold text-gray-800 mb-4">G?nderim Ge?mi?i</h2>
+      <h2 className="text-base font-semibold text-gray-800 mb-4">Gönderim Geçmişi</h2>
       <div className="space-y-3">
         {submissions.map((s) => {
           const st = statusLabel[s.events?.status ?? 'pending']
