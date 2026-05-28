@@ -30,7 +30,7 @@ export default async function BildirimlerPage() {
           </span>
         )}
       </div>
-      <NotificationPageList notifications={notifications ?? []} userId={user.id} />
+      <NotificationPageList notifications={notifications ?? []} />
     </div>
   )
 }

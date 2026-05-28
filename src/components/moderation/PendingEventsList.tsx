@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ModerationActionModal } from '@/components/modals/ModerationActionModal'
 import type { Database } from '@/types/database'
@@ -51,12 +52,16 @@ export function PendingEventsList({ events }: Props) {
             <div className="flex items-start gap-4">
               {/* Görsel */}
               {event.cover_image_og && (
-                <img
-                  src={event.cover_image_og}
-                  alt=""
-                  className="w-20 h-20 rounded-xl object-cover flex-shrink-0"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none' }}
-                />
+                <div className="relative w-20 h-20 rounded-xl overflow-hidden flex-shrink-0 bg-gray-50">
+                  <Image
+                    src={event.cover_image_og}
+                    alt=""
+                    fill
+                    sizes="80px"
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
               )}
 
               {/* İçerik */}

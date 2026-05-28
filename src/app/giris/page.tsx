@@ -1,4 +1,5 @@
 import { Suspense } from 'react'
+import Link from 'next/link'
 import { AuthForm } from '@/components/forms/AuthForm'
 import type { Metadata } from 'next'
 
@@ -13,7 +14,7 @@ export default function GirisPage() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <a href="/" className="text-3xl font-bold text-indigo-600">Listur</a>
+          <Link href="/" className="text-3xl font-bold text-indigo-600">Listur</Link>
           <p className="text-gray-500 mt-2 text-sm">Türkiye&apos;nin teknoloji etkinlik platformu</p>
         </div>
 
