@@ -29,7 +29,7 @@ export async function generateMetadata({ params }: { params: Params }): Promise<
     .select('title, description, cover_image, category, city, start_date')
     .eq('slug', slug)
     .eq('status', 'published')
-    .single()
+    .maybeSingle()
 
   if (!event) return { title: 'Etkinlik Bulunamadı' }
 
@@ -85,7 +85,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
     .select('*')
     .eq('slug', slug)
     .eq('status', 'published')
-    .single()
+    .maybeSingle()
 
   if (!event) notFound()
 
