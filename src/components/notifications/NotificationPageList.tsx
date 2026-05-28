@@ -20,7 +20,6 @@ interface NotificationItem {
 
 interface Props {
   notifications: NotificationItem[]
-  userId: string
 }
 
 const typeConfig: Record<string, { icon: string; label: string; color: string }> = {
@@ -30,7 +29,7 @@ const typeConfig: Record<string, { icon: string; label: string; color: string }>
   report_resolved: { icon: '🔍', label: 'Raporunuz incelendi', color: 'bg-yellow-50' },
 }
 
-export function NotificationPageList({ notifications, userId }: Props) {
+export function NotificationPageList({ notifications }: Props) {
   const router = useRouter()
   const [markingAll, setMarkingAll] = useState(false)
   const [localRead, setLocalRead] = useState<Set<string>>(
