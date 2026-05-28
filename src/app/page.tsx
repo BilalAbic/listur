@@ -1,4 +1,5 @@
-﻿import { Suspense } from 'react'
+import { Suspense } from 'react'
+import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
@@ -10,6 +11,36 @@ type SearchParams = Promise<Record<string, string | string[] | undefined>>
 function getParam(params: Record<string, string | string[] | undefined>, key: string): string {
   const val = params[key]
   return typeof val === 'string' ? val : ''
+}
+
+/**
+ * Kullanıcının ilgi alanlarını al:
+ * - Login ise: profiles.interests
+ * - Misafir ise: cookie listur_interests (useInterests hook'u localStorage ile birlikte yazar)
+ */
+async function getUserInterests(): Promise<string[]> {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+
+  if (user) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('interests')
+      .eq('id', user.id)
+      .single()
+    return (profile?.interests as string[] | null) ?? []
+  }
+
+  // Misafir → cookie
+  const cookieStore = await cookies()
+  const raw = cookieStore.get('listur_interests')?.value
+  if (!raw) return []
+  try {
+    const parsed = JSON.parse(decodeURIComponent(raw))
+    return Array.isArray(parsed) ? parsed : []
+  } catch {
+    return []
+  }
 }
 
 async function getEvents(searchParams: Record<string, string | string[] | undefined>): Promise<Event[]> {
@@ -55,15 +86,46 @@ async function getEvents(searchParams: Record<string, string | string[] | undefi
   return data ?? []
 }
 
+/**
+ * Etkinlikleri ilgi alanına göre sırala:
+ * - Önce: kategorisi interests'e dahil olanlar (start_date ASC içinde)
+ * - Sonra: diğerleri (start_date ASC)
+ */
+function rankByInterests(events: Event[], interests: string[]): { featured: Event[]; rest: Event[] } {
+  if (interests.length === 0) {
+    return { featured: [], rest: events }
+  }
+  const interestSet = new Set(interests)
+  const featured: Event[] = []
+  const rest: Event[] = []
+  for (const event of events) {
+    if (interestSet.has(event.category)) {
+      featured.push(event)
+    } else {
+      rest.push(event)
+    }
+  }
+  return { featured, rest }
+}
+
 export default async function AnaSayfa({ searchParams }: { searchParams: SearchParams }) {
   const params = await searchParams
-  const events = await getEvents(params)
+  const [events, userInterests] = await Promise.all([
+    getEvents(params),
+    getUserInterests(),
+  ])
+
   const hasFilters = !!(
     getParam(params, 'kategori') ||
     getParam(params, 'sehir') ||
     getParam(params, 'format') ||
     getParam(params, 'tarih')
   )
+
+  // Filtre aktifse interests öne çıkarmayı atla (zaten kullanıcı manuel filtreliyor)
+  const { featured, rest } = hasFilters
+    ? { featured: [], rest: events }
+    : rankByInterests(events, userInterests)
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
@@ -89,12 +151,31 @@ export default async function AnaSayfa({ searchParams }: { searchParams: SearchP
         <EmptyState hasFilters={hasFilters} />
       ) : (
         <>
-          <p className="text-sm text-gray-400 mb-4">{events.length} etkinlik bulundu</p>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {events.map((event) => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
+          {featured.length > 0 && (
+            <section className="mb-10">
+              <div className="flex items-center gap-2 mb-4">
+                <h2 className="text-lg font-semibold text-gray-900">Sizin için öne çıkanlar</h2>
+                <span className="text-xs text-gray-400">İlgi alanlarınıza uygun</span>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {featured.map((event) => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+            </section>
+          )}
+
+          <section>
+            {featured.length > 0 && (
+              <h2 className="text-lg font-semibold text-gray-900 mb-4">Tüm etkinlikler</h2>
+            )}
+            <p className="text-sm text-gray-400 mb-4">{events.length} etkinlik bulundu</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {rest.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+          </section>
         </>
       )}
     </div>
