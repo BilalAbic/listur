@@ -1,4 +1,4 @@
-import { notFound } from 'next/navigation'
+import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
@@ -87,10 +87,39 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
     .eq('status', 'published')
     .maybeSingle()
 
-  if (!event) notFound()
+  // Etkinlik bulunamazsa inline 404 UI (Next 16 + Turbopack'te notFound()
+  // server component'te bazen yakalanmıyor — bu yaklaşım garantili)
+  if (!event) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-4 text-center">
+        <div className="text-7xl font-black text-gray-100 mb-4 select-none">404</div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-2">Etkinlik Bulunamadı</h1>
+        <p className="text-gray-500 mb-8 max-w-sm">
+          Aradığınız etkinlik kaldırılmış veya hiç var olmamış olabilir.
+        </p>
+        <div className="flex gap-3 flex-wrap justify-center">
+          <Link
+            href="/"
+            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 transition-colors"
+          >
+            Ana Sayfaya Dön
+          </Link>
+          <Link
+            href="/etkinlik-gonder"
+            className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-700 font-medium text-sm hover:bg-gray-50 transition-colors"
+          >
+            Etkinlik Ekle
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   const catColor = categoryColors[event.category] ?? 'bg-gray-100 text-gray-600'
-  const eventUrl = `${process.env.NEXT_PUBLIC_APP_URL}/etkinlik/${slug}`
+  const baseUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://listur.dev')
+  const eventUrl = `${baseUrl}/etkinlik/${slug}`
 
   return (
     <article className="max-w-3xl mx-auto px-4 py-10">
