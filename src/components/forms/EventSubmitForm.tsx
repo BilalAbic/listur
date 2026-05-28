@@ -46,11 +46,11 @@ export function EventSubmitForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setParseError(data.error ?? 'Parse ba?ar?s?z. Manuel doldurabilirsiniz.')
+        setParseError(data.error ?? 'Parse başarısız. Manuel doldurabilirsiniz.')
         return
       }
 
-      // Form alanlar?n? doldur
+      // Form alanlarını doldur
       setParsedData(data)
       if (data.title) setTitle(data.title)
       if (data.description) setDescription(data.description.slice(0, 500))
@@ -59,13 +59,13 @@ export function EventSubmitForm() {
       if (data.is_online !== undefined) setIsOnline(data.is_online)
       if (data.venue_name) setVenueName(data.venue_name)
       if (data.start_date) {
-        // ISO 8601 ? datetime-local format
+        // ISO 8601 → datetime-local format
         setStartDate(data.start_date.slice(0, 16))
       }
       if (data.end_date) setEndDate(data.end_date.slice(0, 16))
       if (data.registration_url) setRegistrationUrl(data.registration_url)
     } catch {
-      setParseError('Ba?lant? hatas?. L?tfen tekrar deneyin.')
+      setParseError('Bağlantı hatası. Lütfen tekrar deneyin.')
     } finally {
       setParsing(false)
     }
@@ -98,7 +98,7 @@ export function EventSubmitForm() {
       const data = await res.json()
 
       if (!res.ok) {
-        setSubmitResult({ success: false, message: data.error ?? 'G?nderim ba?ar?s?z.' })
+        setSubmitResult({ success: false, message: data.error ?? 'Gönderim başarısız.' })
       } else {
         setSubmitResult({
           success: true,
@@ -107,13 +107,13 @@ export function EventSubmitForm() {
         })
       }
     } catch {
-      setSubmitResult({ success: false, message: 'Ba?lant? hatas?.' })
+      setSubmitResult({ success: false, message: 'Bağlantı hatası.' })
     } finally {
       setSubmitting(false)
     }
   }
 
-  // Ba?ar?l? g?nderim ekran?
+  // Başarılı gönderim ekranı
   if (submitResult?.success) {
     return (
       <div className="text-center py-12">
@@ -122,7 +122,7 @@ export function EventSubmitForm() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
         </div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-3">Etkinlik G?nderildi!</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-3">Etkinlik Gönderildi!</h2>
         <p className="text-gray-500 mb-8 max-w-sm mx-auto">{submitResult.message}</p>
         <div className="flex gap-3 justify-center">
           <button
@@ -149,7 +149,7 @@ export function EventSubmitForm() {
               onClick={() => router.push(`/etkinlik/${submitResult.slug}`)}
               className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
             >
-              Etkinli?i G?r?nt?le
+              Etkinliği Görüntüle
             </button>
           )}
         </div>
@@ -159,11 +159,11 @@ export function EventSubmitForm() {
 
   return (
     <div className="max-w-2xl mx-auto">
-      {/* Ad?m 1: Link gir */}
+      {/* Adım 1: Link gir */}
       <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-        <h2 className="text-base font-semibold text-gray-800 mb-1">Ad?m 1 ? Etkinlik Linki</h2>
+        <h2 className="text-base font-semibold text-gray-800 mb-1">Adım 1 — Etkinlik Linki</h2>
         <p className="text-sm text-gray-500 mb-4">
-          Etkinlik sayfas?n?n URL&apos;sini yap??t?r?n. Bilgileri otomatik dolduraca??z.
+          Etkinlik sayfasının URL&apos;sini yapıştırın. Bilgileri otomatik dolduracağız.
         </p>
         <div className="flex gap-2">
           <input
@@ -179,7 +179,7 @@ export function EventSubmitForm() {
             disabled={!url || parsing}
             className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors whitespace-nowrap"
           >
-            {parsing ? 'Getiriliyor?' : 'Bilgileri Getir'}
+            {parsing ? 'Getiriliyor…' : 'Bilgileri Getir'}
           </button>
         </div>
         {parseError && (
@@ -187,34 +187,34 @@ export function EventSubmitForm() {
         )}
         {parsedData && (
           <p className="mt-2 text-sm text-green-600">
-            ? Bilgiler getirildi ({parsedData.parse_source === 'gpt4o' ? 'AI yard?m?yla' : 'otomatik'}). Kontrol edip d?zenleyebilirsiniz.
+            ✓ Bilgiler getirildi ({parsedData.parse_source === 'gpt4o' ? 'AI yardımıyla' : 'otomatik'}). Kontrol edip düzenleyebilirsiniz.
           </p>
         )}
       </section>
 
-      {/* Ad?m 2: Form */}
+      {/* Adım 2: Form */}
       <form onSubmit={handleSubmit}>
         <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-gray-800">Ad?m 2 ? Etkinlik Bilgileri</h2>
+          <h2 className="text-base font-semibold text-gray-800">Adım 2 — Etkinlik Bilgileri</h2>
 
-          {/* Ba?l?k */}
+          {/* Başlık */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Ba?l?k <span className="text-red-500">*</span>
+              Başlık <span className="text-red-500">*</span>
             </label>
             <input
               type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-              required placeholder="Etkinlik ba?l???"
+              required placeholder="Etkinlik başlığı"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
           </div>
 
-          {/* A??klama */}
+          {/* Açıklama */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">A??klama</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
             <textarea
               value={description} onChange={(e) => setDescription(e.target.value)}
-              placeholder="Etkinlik hakk?nda k?sa bir a??klama (max 500 karakter)"
+              placeholder="Etkinlik hakkında kısa bir açıklama (max 500 karakter)"
               maxLength={500} rows={4}
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
             />
@@ -230,14 +230,14 @@ export function EventSubmitForm() {
               value={category} onChange={(e) => setCategory(e.target.value)} required
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
             >
-              <option value="">Se?in?</option>
+              <option value="">Seçin</option>
               {INTEREST_CATEGORIES.map((cat) => (
                 <option key={cat} value={cat}>{cat}</option>
               ))}
             </select>
           </div>
 
-          {/* Online / Y?z y?ze */}
+          {/* Online / Yüz yüze */}
           <div>
             <label className="flex items-center gap-3 cursor-pointer">
               <input
@@ -248,14 +248,14 @@ export function EventSubmitForm() {
             </label>
           </div>
 
-          {/* ?ehir + Mekan (y?z y?ze ise) */}
+          {/* Şehir + Mekan (yüz yüze ise) */}
           {!isOnline && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">?ehir</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Şehir</label>
                 <input
                   type="text" value={city} onChange={(e) => setCity(e.target.value)}
-                  placeholder="?stanbul"
+                  placeholder="İstanbul"
                   className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                 />
               </div>
@@ -274,7 +274,7 @@ export function EventSubmitForm() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Ba?lang?? <span className="text-red-500">*</span>
+                Başlangıç <span className="text-red-500">*</span>
               </label>
               <input
                 type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)}
@@ -283,7 +283,7 @@ export function EventSubmitForm() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Biti?</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Bitiş</label>
               <input
                 type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)}
                 className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
@@ -291,9 +291,9 @@ export function EventSubmitForm() {
             </div>
           </div>
 
-          {/* Kay?t linki */}
+          {/* Kayıt linki */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Kay?t / Bilet Linki</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Kayıt / Bilet Linki</label>
             <input
               type="url" value={registrationUrl} onChange={(e) => setRegistrationUrl(e.target.value)}
               placeholder="https://kayit.com/etkinlik"
@@ -301,7 +301,7 @@ export function EventSubmitForm() {
             />
           </div>
 
-          {/* G?nder */}
+          {/* Gönder */}
           {submitResult && !submitResult.success && (
             <p className="text-sm text-red-600">{submitResult.message}</p>
           )}
@@ -309,11 +309,11 @@ export function EventSubmitForm() {
             type="submit" disabled={submitting || !title || !category || !startDate || !url}
             className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {submitting ? 'G?nderiliyor?' : 'Etkinli?i G?nder'}
+            {submitting ? 'Gönderiliyor…' : 'Etkinliği Gönder'}
           </button>
 
           <p className="text-xs text-gray-400 text-center">
-            Etkinli?iniz moderat?r onay?ndan sonra yay?nlanacakt?r.
+            Etkinliğiniz moderatör onayından sonra yayınlanacaktır.
           </p>
         </section>
       </form>

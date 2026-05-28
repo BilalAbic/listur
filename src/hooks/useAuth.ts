@@ -1,3 +1,3 @@
-// useAuth hook ? AuthContext ?zerinden kolayca import edilebilmesi i?in
-// re-export. As?l implementasyon src/context/AuthContext.tsx'te.
+// useAuth hook → AuthContext üzerinden kolayca import edilebilmesi için
+// re-export. Asıl implementasyon src/context/AuthContext.tsx'te.
 export { useAuth } from '@/context/AuthContext'

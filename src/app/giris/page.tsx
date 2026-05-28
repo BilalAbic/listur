@@ -3,8 +3,8 @@ import { AuthForm } from '@/components/forms/AuthForm'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Giri? Yap ? Listur',
-  description: 'Listur hesab?n?za giri? yap?n veya yeni hesap olu?turun.',
+  title: 'Giriş Yap — Listur',
+  description: 'Listur hesabınıza giriş yapın veya yeni hesap oluşturun.',
 }
 
 export default function GirisPage() {
@@ -14,7 +14,7 @@ export default function GirisPage() {
         {/* Logo */}
         <div className="text-center mb-8">
           <a href="/" className="text-3xl font-bold text-indigo-600">Listur</a>
-          <p className="text-gray-500 mt-2 text-sm">T?rkiye&apos;nin teknoloji etkinlik platformu</p>
+          <p className="text-gray-500 mt-2 text-sm">Türkiye&apos;nin teknoloji etkinlik platformu</p>
         </div>
 
         {/* Kart */}

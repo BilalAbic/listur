@@ -12,7 +12,7 @@ export async function PATCH() {
     .eq('user_id', user.id)
     .is('read_at', null)
 
-  if (error) return NextResponse.json({ error: 'G?ncelleme ba?ar?s?z.' }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Güncelleme başarısız.' }, { status: 500 })
 
   return NextResponse.json({ success: true })
 }

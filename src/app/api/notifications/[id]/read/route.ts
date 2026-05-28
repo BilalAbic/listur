@@ -16,7 +16,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     .eq('id', id)
     .eq('user_id', user.id) // Sadece kendi bildirimi
 
-  if (error) return NextResponse.json({ error: 'G?ncelleme ba?ar?s?z.' }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Güncelleme başarısız.' }, { status: 500 })
 
   return NextResponse.json({ success: true })
 }

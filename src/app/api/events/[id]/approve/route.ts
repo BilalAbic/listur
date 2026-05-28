@@ -10,7 +10,7 @@ type Params = Promise<{ id: string }>
 export async function PATCH(request: NextRequest, { params }: { params: Params }) {
   const { id: eventId } = await params
 
-  // Auth + rol kontrol?
+  // Auth + rol kontrolü
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return NextResponse.json({ error: 'Yetkisiz.', code: 'UNAUTHORIZED' }, { status: 401 })
@@ -22,19 +22,19 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
   const supabaseAdmin = createAdminClient()
 
-  // Etkinli?i bul
+  // Etkinliği bul
   const { data: event } = await supabaseAdmin
     .from('events')
     .select('id, title, status, cover_image_og, cover_image, slug')
     .eq('id', eventId)
     .single()
 
-  if (!event) return NextResponse.json({ error: 'Etkinlik bulunamad?.', code: 'NOT_FOUND' }, { status: 404 })
+  if (!event) return NextResponse.json({ error: 'Etkinlik bulunamadı.', code: 'NOT_FOUND' }, { status: 404 })
   if (event.status !== 'pending') {
-    return NextResponse.json({ error: 'Bu etkinlik zaten i?lenmi?.', code: 'ALREADY_PROCESSED' }, { status: 409 })
+    return NextResponse.json({ error: 'Bu etkinlik zaten işlenmiş.', code: 'ALREADY_PROCESSED' }, { status: 409 })
   }
 
-  // ?ste?e ba?l? d?zenleme alanlar?
+  // İsteğe bağlı düzenleme alanları
   let body: {
     note?: string
     title?: string
@@ -47,15 +47,15 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     end_date?: string
     registration_url?: string
   } = {}
-  try { body = await request.json() } catch { /* g?vde opsiyonel */ }
+  try { body = await request.json() } catch { /* gövde opsiyonel */ }
 
-  // OG g?rselini Storage'a y?kle (varsa)
+  // OG görselini Storage'a yükle (varsa)
   let coverImage = event.cover_image
   if (!coverImage && event.cover_image_og) {
     coverImage = await uploadEventCover(event.id, event.cover_image_og)
   }
 
-  // Etkinli?i yay?nla
+  // Etkinliği yayınla
   const updateData: EventUpdate = {
     status: 'published',
     published_at: new Date().toISOString(),
@@ -77,7 +77,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     .eq('id', eventId)
 
   if (updateError) {
-    return NextResponse.json({ error: 'G?ncelleme ba?ar?s?z.', code: 'UPDATE_FAILED' }, { status: 500 })
+    return NextResponse.json({ error: 'Güncelleme başarısız.', code: 'UPDATE_FAILED' }, { status: 500 })
   }
 
   // moderation_logs'a yaz
@@ -89,7 +89,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     changes: Object.keys(body).length > 0 ? body : null,
   })
 
-  // Bildirim: g?nderici varsa "onayland?" bildirimi g?nder
+  // Bildirim: gönderici varsa "onaylandı" bildirimi gönder
   const { data: submission } = await supabaseAdmin
     .from('submissions')
     .select('submitted_by')
@@ -105,7 +105,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
       type: 'submission_approved',
     })
 
-    // Etkinli?in ilgi alan?yla e?le?en kullan?c?lara bildirim g?nder
+    // Etkinliğin ilgi alanıyla eşleşen kullanıcılara bildirim gönder
     const { data: eventData } = await supabaseAdmin
       .from('events')
       .select('category')
@@ -117,7 +117,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
         .from('profiles')
         .select('id')
         .contains('interests', [eventData.category])
-        .neq('id', submission.submitted_by) // G?nderici zaten bildirim ald?
+        .neq('id', submission.submitted_by) // Gönderici zaten bildirim aldı
 
       if (matchingUsers && matchingUsers.length > 0) {
         const notifs = matchingUsers.map((u) => ({
@@ -130,5 +130,5 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     }
   }
 
-  return NextResponse.json({ success: true, message: 'Etkinlik yay?nland?.' })
+  return NextResponse.json({ success: true, message: 'Etkinlik yayınlandı.' })
 }

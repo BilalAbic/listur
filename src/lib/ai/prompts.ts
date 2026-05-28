@@ -1,6 +1,6 @@
 /**
- * GPT-4o i?in prompt ?ablonlar?.
- * Temperature: 0 ? deterministik sonu?
+ * GPT-4o için prompt şablonları.
+ * Temperature: 0 → deterministik sonuç
  * Response format: json_object
  */
 
@@ -17,25 +17,25 @@ export interface ExistingFields {
 }
 
 export function buildParsePrompt(cleanedHtml: string, existing: ExistingFields): string {
-  return `Sen bir etkinlik bilgisi ??karma asistan?s?n.
-A?a??daki HTML sayfas?ndan etkinlik bilgilerini JSON format?nda ??kar.
-Sadece kesin bilinen alanlar? doldur, tahmin etme.
-Tarihler i?in ISO 8601 kullan (YYYY-MM-DDTHH:mm:ss).
+  return `Sen bir etkinlik bilgisi çıkarma asistanısın.
+Aşağıdaki HTML sayfasından etkinlik bilgilerini JSON formatında çıkar.
+Sadece kesin bilinen alanları doldur, tahmin etme.
+Tarihler için ISO 8601 kullan (YYYY-MM-DDTHH:mm:ss).
 
-??kar?lacak alanlar:
+Çıkarılacak alanlar:
 - title (string)
 - description (string, max 500 karakter)
 - start_date (ISO 8601 | null)
 - end_date (ISO 8601 | null)
-- city (string | null) ? T?rkiye ?ehri, online ise null
+- city (string | null) — Türkiye şehri, online ise null
 - is_online (boolean)
-- venue_name (string | null) ? mekan ad?
-- category (?u de?erlerden biri: "Blockchain / Web3" | "Yapay Zeka / ML" | "Mobil Geli?tirme" | "Backend / DevOps" | "Siber G?venlik" | "Giri?imcilik / Startup" | "Tasar?m / UX" | "Oyun Geli?tirme" | "Veri Bilimi" | "A??k Kaynak" | "Di?er")
-- registration_url (string | null) ? kay?t/bilet linki
+- venue_name (string | null) — mekan adı
+- category (şu değerlerden biri: "Blockchain / Web3" | "Yapay Zeka / ML" | "Mobil Geliştirme" | "Backend / DevOps" | "Siber Güvenlik" | "Girişimcilik / Startup" | "Tasarım / UX" | "Oyun Geliştirme" | "Veri Bilimi" | "Açık Kaynak" | "Diğer")
+- registration_url (string | null) — kayıt/bilet linki
 
-Sadece EKS?K olan alanlar? doldur. Mevcut de?erlere dokunma. null olan alanlar eksiktir.
+Sadece EKSİK olan alanları doldur. Mevcut değerlere dokunma. null olan alanlar eksiktir.
 
-Mevcut de?erler:
+Mevcut değerler:
 ${JSON.stringify(existing, null, 2)}
 
 HTML:

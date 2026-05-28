@@ -5,15 +5,15 @@ const MAX_SIZE = 5 * 1024 * 1024 // 5MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp']
 
 /**
- * OG g?rsel URL'sini Supabase Storage'a y?kler ve CDN URL d?nd?r?r.
- * Etkinlik onayland???nda ?a?r?l?r.
+ * OG görsel URL'sini Supabase Storage'a yükler ve CDN URL döndürür.
+ * Etkinlik onaylandığında çağrılır.
  */
 export async function uploadEventCover(
   eventId: string,
   imageUrl: string
 ): Promise<string | null> {
   try {
-    // G?rseli server-side fetch et
+    // Görseli server-side fetch et
     const response = await fetch(imageUrl, {
       signal: AbortSignal.timeout(10_000),
       headers: {
@@ -35,23 +35,23 @@ export async function uploadEventCover(
     // Buffer'a al
     const buffer = Buffer.from(await response.arrayBuffer())
 
-    // Boyut kontrol?
+    // Boyut kontrolü
     if (buffer.byteLength > MAX_SIZE) {
-      console.warn('uploadEventCover: g?rsel ?ok b?y?k:', buffer.byteLength)
+      console.warn('uploadEventCover: görsel çok büyük:', buffer.byteLength)
       return null
     }
 
-    // Uzant? belirle
+    // Uzantı belirle
     const ext = mimeType === 'image/png' ? 'png' : mimeType === 'image/webp' ? 'webp' : 'jpg'
     const path = `${eventId}/cover.${ext}`
 
-    // Supabase Storage'a y?kle
+    // Supabase Storage'a yükle
     const supabase = createAdminClient()
     const { error } = await supabase.storage
       .from(BUCKET)
       .upload(path, buffer, {
         contentType: mimeType,
-        upsert: true, // Yeniden y?kleme halinde ?zerine yaz
+        upsert: true, // Yeniden yükleme halinde üzerine yaz
       })
 
     if (error) {
@@ -59,7 +59,7 @@ export async function uploadEventCover(
       return null
     }
 
-    // Public CDN URL'i d?nd?r
+    // Public CDN URL'i döndür
     const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
     return data.publicUrl
   } catch (error) {

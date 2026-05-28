@@ -5,7 +5,7 @@ import type { Database } from '@/types/database'
 
 type UserRole = Database['public']['Enums']['user_role']
 
-export const metadata: Metadata = { title: 'Kullan?c?lar ? Admin' }
+export const metadata: Metadata = { title: 'Kullanıcılar — Admin' }
 
 export default async function AdminKullanicilarPage({
   searchParams,
@@ -42,8 +42,8 @@ export default async function AdminKullanicilarPage({
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-lg font-semibold text-gray-900">Kullan?c?lar</h2>
-        <span className="text-sm text-gray-500">{count ?? 0} kullan?c?</span>
+        <h2 className="text-lg font-semibold text-gray-900">Kullanıcılar</h2>
+        <span className="text-sm text-gray-500">{count ?? 0} kullanıcı</span>
       </div>
       <UsersList
         users={users ?? []}

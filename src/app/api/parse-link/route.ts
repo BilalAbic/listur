@@ -3,13 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 import { parseEventLink } from '@/lib/ai/parse-link'
 
 export async function POST(request: NextRequest) {
-  // Auth kontrol? ? sadece giri? yapm?? kullan?c?lar
+  // Auth kontrolü — sadece giriş yapmış kullanıcılar
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
   if (!user) {
     return NextResponse.json(
-      { error: 'Bu i?lem i?in giri? yapman?z gerekiyor.', code: 'UNAUTHORIZED' },
+      { error: 'Bu işlem için giriş yapmanız gerekiyor.', code: 'UNAUTHORIZED' },
       { status: 401 }
     )
   }
@@ -19,10 +19,10 @@ export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
     url = body.url
-    new URL(url) // URL ge?erlili?ini kontrol et
+    new URL(url) // URL geçerliliğini kontrol et
   } catch {
     return NextResponse.json(
-      { error: 'Ge?erli bir URL girin.', code: 'INVALID_URL' },
+      { error: 'Geçerli bir URL girin.', code: 'INVALID_URL' },
       { status: 400 }
     )
   }

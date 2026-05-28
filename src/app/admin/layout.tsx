@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Admin Paneli ? Listur',
+  title: 'Admin Paneli — Listur',
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -27,12 +27,12 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: '/admin/bekleyenler', label: 'Bekleyenler' },
     { href: '/admin/etkinlikler', label: 'Etkinlikler' },
     { href: '/admin/raporlar', label: 'Raporlar' },
-    { href: '/admin/kullanicilar', label: 'Kullan?c?lar' },
+    { href: '/admin/kullanicilar', label: 'Kullanıcılar' },
   ]
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8">
-      {/* Ba?l?k */}
+      {/* Başlık */}
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Admin Paneli</h1>
@@ -43,7 +43,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             href="/moderator"
             className="text-xs text-indigo-600 hover:underline"
           >
-            Moderat?r g?r?n?m? ?
+            Moderatör görünümü →
           </Link>
           <span className="px-3 py-1 bg-purple-100 text-purple-700 text-xs font-semibold rounded-full">
             Admin

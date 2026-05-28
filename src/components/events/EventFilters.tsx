@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useCallback } from 'react'
 import { INTEREST_CATEGORIES } from '@/types/index'
 
-const CITIES = ['?stanbul', 'Ankara', '?zmir', 'Bursa', 'Antalya', 'Eski?ehir', 'Konya', 'Adana', 'Di?er']
+const CITIES = ['İstanbul', 'Ankara', 'İzmir', 'Bursa', 'Antalya', 'Eskişehir', 'Konya', 'Adana', 'Diğer']
 
 export function EventFilters() {
   const router = useRouter()
@@ -23,7 +23,7 @@ export function EventFilters() {
       } else {
         params.delete(key)
       }
-      // Filtre de?i?ince ilk sayfaya d?n
+      // Filtre değişince ilk sayfaya dön
       params.delete('sayfa')
       router.push(`/?${params.toString()}`, { scroll: false })
     },
@@ -47,22 +47,22 @@ export function EventFilters() {
             onChange={(e) => updateFilter('kategori', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
           >
-            <option value="">T?m?</option>
+            <option value="">Tümü</option>
             {INTEREST_CATEGORIES.map((cat) => (
               <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
         </div>
 
-        {/* ?ehir */}
+        {/* Şehir */}
         <div className="flex-1 min-w-36">
-          <label className="block text-xs font-medium text-gray-500 mb-1">?ehir</label>
+          <label className="block text-xs font-medium text-gray-500 mb-1">Şehir</label>
           <select
             value={city}
             onChange={(e) => updateFilter('sehir', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
           >
-            <option value="">T?m ?ehirler</option>
+            <option value="">Tüm Şehirler</option>
             {CITIES.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
@@ -77,9 +77,9 @@ export function EventFilters() {
             onChange={(e) => updateFilter('format', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
           >
-            <option value="">T?m?</option>
+            <option value="">Tümü</option>
             <option value="online">Online</option>
-            <option value="yuzyuze">Y?z y?ze</option>
+            <option value="yuzyuze">Yüz yüze</option>
           </select>
         </div>
 
@@ -91,8 +91,8 @@ export function EventFilters() {
             onChange={(e) => updateFilter('tarih', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
           >
-            <option value="">T?m Zamanlar</option>
-            <option value="bugun">Bug?n</option>
+            <option value="">Tüm Zamanlar</option>
+            <option value="bugun">Bugün</option>
             <option value="bu-hafta">Bu Hafta</option>
             <option value="bu-ay">Bu Ay</option>
           </select>

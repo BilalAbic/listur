@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { uploadEventCover } from '@/lib/storage/upload-cover'
 
 export async function POST(request: NextRequest) {
-  // Sadece mod/admin ?a??rabilir (onay ak???ndan)
+  // Sadece mod/admin çağırabilir (onay akışından)
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   if (!cdnUrl) {
     return NextResponse.json(
-      { error: 'G?rsel y?klenemedi.', code: 'UPLOAD_FAILED' },
+      { error: 'Görsel yüklenemedi.', code: 'UPLOAD_FAILED' },
       { status: 422 }
     )
   }

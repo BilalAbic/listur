@@ -25,11 +25,11 @@ interface Props {
 }
 
 const reasonLabels: Record<string, string> = {
-  misleading: 'Yan?lt?c?',
+  misleading: 'Yanıltıcı',
   spam: 'Spam',
-  irrelevant: '?lgisiz',
+  irrelevant: 'İlgisiz',
   inappropriate: 'Uygunsuz',
-  other: 'Di?er',
+  other: 'Diğer',
 }
 
 const reasonColors: Record<string, string> = {
@@ -58,7 +58,7 @@ export function ReportsList({ reports, moderatorId }: Props) {
 
       const data = await res.json()
       if (!res.ok) {
-        setError(data.error ?? '??lem ba?ar?s?z.')
+        setError(data.error ?? 'İşlem başarısız.')
         return
       }
 
@@ -77,7 +77,7 @@ export function ReportsList({ reports, moderatorId }: Props) {
           </svg>
         </div>
         <h3 className="text-base font-semibold text-gray-900 mb-1">Bekleyen rapor yok</h3>
-        <p className="text-sm text-gray-500">T?m raporlar incelenmi?.</p>
+        <p className="text-sm text-gray-500">Tüm raporlar incelenmiş.</p>
       </div>
     )
   }
@@ -117,21 +117,21 @@ export function ReportsList({ reports, moderatorId }: Props) {
                       rel="noopener noreferrer"
                       className="text-xs text-indigo-600 hover:underline"
                     >
-                      G?r?nt?le ?
+                      Görüntüle ↗
                     </a>
                   </div>
                 ) : (
-                  <span className="text-sm text-gray-500 italic">Etkinlik bulunamad? (silinmi? olabilir)</span>
+                  <span className="text-sm text-gray-500 italic">Etkinlik bulunamadı (silinmiş olabilir)</span>
                 )}
                 {report.reported_by && (
-                  <p className="text-xs text-gray-500 mt-0.5">Raporlayan: Kay?tl? kullan?c?</p>
+                  <p className="text-xs text-gray-500 mt-0.5">Raporlayan: Kayıtlı kullanıcı</p>
                 )}
               </div>
             </div>
 
             {report.description && (
               <p className="text-sm text-gray-700 bg-gray-50 rounded-xl p-3 mb-4">
-                "{report.description}"
+                &ldquo;{report.description}&rdquo;
               </p>
             )}
 
@@ -141,7 +141,7 @@ export function ReportsList({ reports, moderatorId }: Props) {
                 disabled={resolving === report.id}
                 className="flex-1 py-2 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 disabled:opacity-50 transition-colors"
               >
-                {resolving === report.id ? '??leniyor?' : 'G?rmezden Gel'}
+                {resolving === report.id ? 'İşleniyor…' : 'Görmezden Gel'}
               </button>
               {report.events && report.events.status === 'published' && (
                 <button
@@ -149,7 +149,7 @@ export function ReportsList({ reports, moderatorId }: Props) {
                   disabled={resolving === report.id}
                   className="flex-1 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-semibold disabled:opacity-50 transition-colors"
                 >
-                  {resolving === report.id ? '??leniyor?' : 'Etkinli?i Kald?r'}
+                  {resolving === report.id ? 'İşleniyor…' : 'Etkinliği Kaldır'}
                 </button>
               )}
             </div>

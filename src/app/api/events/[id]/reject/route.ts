@@ -25,7 +25,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     .eq('id', eventId)
     .eq('status', 'pending')
 
-  if (error) return NextResponse.json({ error: 'G?ncelleme ba?ar?s?z.', code: 'UPDATE_FAILED' }, { status: 500 })
+  if (error) return NextResponse.json({ error: 'Güncelleme başarısız.', code: 'UPDATE_FAILED' }, { status: 500 })
 
   await supabaseAdmin.from('moderation_logs').insert({
     moderator_id: user.id,
@@ -34,7 +34,7 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     note: rejection_note ?? null,
   })
 
-  // G?nderici bildirim
+  // Gönderici bildirim
   const { data: submission } = await supabaseAdmin
     .from('submissions')
     .select('submitted_by')

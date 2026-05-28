@@ -14,9 +14,9 @@ export function InterestsModal() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    // Modal zaten g?sterildiyse a?ma
+    // Modal zaten gösterildiyse açma
     if (isModalShown()) return
-    // Giri? yapm?? kullan?c? zaten ilgi alan? se?mi?se a?ma
+    // Giriş yapmış kullanıcı zaten ilgi alanı seçmişse açma
     if (user && profile && profile.interests.length > 0) {
       markModalShown()
       return
@@ -35,11 +35,11 @@ export function InterestsModal() {
     markModalShown()
 
     if (user) {
-      // Kay?tl? kullan?c? ? Supabase'e kaydet
+      // Kayıtlı kullanıcı → Supabase'e kaydet
       await updateSupabaseInterests(selected)
       await refreshProfile()
     } else {
-      // Misafir ? localStorage'a kaydet
+      // Misafir → localStorage'a kaydet
       setLocalInterests(selected)
     }
 
@@ -57,13 +57,13 @@ export function InterestsModal() {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
-        {/* Ba?l?k */}
+        {/* Başlık */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-2">
             Seni hangi konular ilgilendiriyor?
           </h2>
           <p className="text-gray-500 text-sm">
-            Se?imlerine g?re etkinlikleri ?ne ??karaca??z. ?stedi?in zaman de?i?tirebilirsin.
+            Seçimlerine göre etkinlikleri öne çıkaracağız. İstediğin zaman değiştirebilirsin.
           </p>
         </div>
 
@@ -93,14 +93,14 @@ export function InterestsModal() {
             onClick={handleSkip}
             className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
           >
-            ?imdilik atla
+            Şimdilik atla
           </button>
           <button
             onClick={handleSave}
             disabled={saving || selected.length === 0}
             className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {saving ? 'Kaydediliyor?' : `Devam et (${selected.length})`}
+            {saving ? 'Kaydediliyor…' : `Devam et (${selected.length})`}
           </button>
         </div>
       </div>
