@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
-  title: 'Admin Paneli — Listur',
+  title: 'Admin Paneli',
 }
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {

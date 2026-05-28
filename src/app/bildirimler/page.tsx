@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { NotificationPageList } from '@/components/notifications/NotificationPageList'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Bildirimler — Listur' }
+export const metadata: Metadata = { title: 'Bildirimler' }
 
 export default async function BildirimlerPage() {
   const supabase = await createClient()

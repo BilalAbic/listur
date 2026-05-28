@@ -4,7 +4,7 @@ import { AuthForm } from '@/components/forms/AuthForm'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Giriş Yap — Listur',
+  title: 'Giriş Yap',
   description: 'Listur hesabınıza giriş yapın veya yeni hesap oluşturun.',
 }
 

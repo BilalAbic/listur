@@ -3,7 +3,7 @@ import type { Metadata } from 'next'
 import { EventSubmitForm } from '@/components/forms/EventSubmitForm'
 
 export const metadata: Metadata = {
-  title: 'Etkinlik Gönder — Listur',
+  title: 'Etkinlik Gönder',
   description: "Türkiye'deki teknoloji etkinliğini Listur'a ekleyin.",
 }
 
