@@ -7,6 +7,7 @@ import { ReportButton } from '@/components/events/ReportButton'
 import { ShareButtons } from '@/components/events/ShareButtons'
 import { FavoriteButton } from '@/components/engagement/FavoriteButton'
 import { RsvpButton } from '@/components/engagement/RsvpButton'
+import { getBaseUrl } from '@/lib/site'
 
 type Params = Promise<{ slug: string }>
 
@@ -124,9 +125,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
   }
 
   const catColor = categoryColors[event.category] ?? 'bg-gray-100 text-gray-600'
-  const baseUrl =
-    process.env.NEXT_PUBLIC_APP_URL ||
-    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://listur.dev')
+  const baseUrl = getBaseUrl()
   const eventUrl = `${baseUrl}/etkinlik/${slug}`
 
   return (

@@ -4,6 +4,7 @@ import './globals.css'
 import { AuthProvider } from '@/context/AuthContext'
 import { Header } from '@/components/layout/Header'
 import { InterestsModal } from '@/components/modals/InterestsModal'
+import { getBaseUrl } from '@/lib/site'
 
 const geist = Geist({
   variable: '--font-geist-sans',
@@ -17,7 +18,7 @@ export const metadata: Metadata = {
   },
   description:
     "Türkiye'deki hackathon, meetup, workshop ve konferansları tek platformda keşfet.",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? 'https://listur.dev'),
+  metadataBase: new URL(getBaseUrl()),
   openGraph: {
     type: 'website',
     locale: 'tr_TR',
