@@ -1,35 +1,48 @@
+import { cache } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Metadata } from 'next'
-import { createClient, createAdminClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/server'
 import { ReportButton } from '@/components/events/ReportButton'
 import { ShareButtons } from '@/components/events/ShareButtons'
 
 type Params = Promise<{ slug: string }>
 
-// SSG: Tüm yayındaki etkinliklerin slug'larını önceden üret
-// NOT: generateStaticParams build zamanında çalışır, cookies() kullanamaz
-// createAdminClient service_role key ile çalışır, cookie gerektirmez
-export async function generateStaticParams() {
-  const supabase = createAdminClient()
-  const { data } = await supabase
-    .from('events')
-    .select('slug')
-    .eq('status', 'published')
+// SSG / generateStaticParams kullanmıyoruz — DB değişimi var, çağrılar
+// hızlı (Supabase edge), her request runtime render daha pratik.
+// dynamic = 'force-dynamic' ile Next'in unknown slug için fallback
+// davranışını bypass ederek hatalı 500 durumlarını önlüyoruz.
+export const dynamic = 'force-dynamic'
 
-  return (data ?? []).map((e) => ({ slug: e.slug }))
-}
+/**
+ * Supabase'i güvenli sorgula — fetch/RLS hatalarını yakala, null dön.
+ * React `cache` ile sarıldığı için aynı request içinde generateMetadata
+ * ve component aynı slug'ı çağırırsa Supabase'e tek roundtrip atılır.
+ */
+const fetchEventBySlug = cache(async (slug: string) => {
+  try {
+    const supabase = await createClient()
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('slug', slug)
+      .eq('status', 'published')
+      .maybeSingle()
+    if (error) {
+      console.error('fetchEventBySlug failed:', error)
+      return null
+    }
+    return data
+  } catch (e) {
+    console.error('fetchEventBySlug failed:', e)
+    return null
+  }
+})
 
 // OG metadata üret
 export async function generateMetadata({ params }: { params: Params }): Promise<Metadata> {
   const { slug } = await params
-  const supabase = await createClient()
-  const { data: event } = await supabase
-    .from('events')
-    .select('title, description, cover_image, category, city, start_date')
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .maybeSingle()
+  const event = await fetchEventBySlug(slug)
 
   if (!event) return { title: 'Etkinlik Bulunamadı' }
 
@@ -78,14 +91,7 @@ const categoryColors: Record<string, string> = {
 
 export default async function EtkinlikDetay({ params }: { params: Params }) {
   const { slug } = await params
-  const supabase = await createClient()
-
-  const { data: event } = await supabase
-    .from('events')
-    .select('*')
-    .eq('slug', slug)
-    .eq('status', 'published')
-    .maybeSingle()
+  const event = await fetchEventBySlug(slug)
 
   // Etkinlik bulunamazsa inline 404 UI (Next 16 + Turbopack'te notFound()
   // server component'te bazen yakalanmıyor — bu yaklaşım garantili)
