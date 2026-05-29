@@ -1,4 +1,4 @@
-name: CI — Lint & Typecheck
+name: CI — Lint & Typecheck & Build
 
 on:
   pull_request:
@@ -11,7 +11,7 @@ concurrency:
 
 jobs:
   lint:
-    name: ESLint (reviewdog)
+    name: Lint & Typecheck
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,16 +32,23 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run ESLint with reviewdog
+      - name: Strict Lint Check (0 error rule)
+        run: pnpm lint
+
+      - name: Strict Typecheck Check
+        run: pnpm exec tsc --noEmit
+
+      - name: ESLint Reviewdog (Optional Inline Comments)
         uses: reviewdog/action-eslint@v1
+        if: always() # Önceki adımlar çökse bile reviewdog hataları yoruma döksün
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
           eslint_flags: 'src/'
-          fail_on_error: true
+          fail_on_error: false # Asıl testi pnpm lint ile yapıyoruz
 
-  typecheck:
-    name: TypeScript Check
+  build:
+    name: Production Build Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -58,5 +65,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Type check
-        run: pnpm exec tsc --noEmit
+      - name: Verify Build (0 error rule)
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_key' }}
