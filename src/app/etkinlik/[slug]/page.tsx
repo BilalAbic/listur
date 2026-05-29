@@ -5,6 +5,8 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { ReportButton } from '@/components/events/ReportButton'
 import { ShareButtons } from '@/components/events/ShareButtons'
+import { FavoriteButton } from '@/components/engagement/FavoriteButton'
+import { RsvpButton } from '@/components/engagement/RsvpButton'
 
 type Params = Promise<{ slug: string }>
 
@@ -195,6 +197,47 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
               <p className="text-xs text-gray-500 mt-0.5">{event.venue_name}</p>
             )}
           </div>
+        </div>
+      </div>
+
+      {/* Engagement şeridi: favori / RSVP / sayaçlar */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 flex flex-wrap items-center gap-3">
+        <FavoriteButton
+          eventId={event.id}
+          variant="full"
+          redirectTo={`/etkinlik/${event.slug}`}
+          count={event.favorite_count}
+        />
+        <RsvpButton
+          eventId={event.id}
+          redirectTo={`/etkinlik/${event.slug}`}
+          count={event.rsvp_count}
+        />
+        {/* Sosyal kanıt sayaçları */}
+        <div className="ml-auto flex items-center gap-4 text-xs text-gray-500">
+          {event.view_count > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              {event.view_count}
+            </span>
+          )}
+          {event.favorite_count > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4.318 6.318a4.5 4.5 0 016.364 0L12 7.636l1.318-1.318a4.5 4.5 0 116.364 6.364L12 20.364l-7.682-7.682a4.5 4.5 0 010-6.364z" />
+              </svg>
+              {event.favorite_count}
+            </span>
+          )}
+          {event.rsvp_count > 0 && (
+            <span className="inline-flex items-center gap-1">
+              <span>🎯</span>
+              {event.rsvp_count}
+            </span>
+          )}
         </div>
       </div>
 
