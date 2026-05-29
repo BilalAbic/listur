@@ -13,10 +13,17 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link href="/" className="font-bold text-xl text-indigo-600 tracking-tight hover:text-indigo-700 transition-colors">
-          Listur
-        </Link>
+        {/* Sol grup: logo + ana navigasyon */}
+        <div className="flex items-center gap-5">
+          <Link href="/" className="font-bold text-xl text-indigo-600 tracking-tight hover:text-indigo-700 transition-colors">
+            Listur
+          </Link>
+          <nav className="hidden sm:flex items-center gap-4 text-sm font-medium text-gray-600">
+            <Link href="/takvim" className="hover:text-gray-900 transition-colors">
+              Takvim
+            </Link>
+          </nav>
+        </div>
 
         {/* Sağ navigasyon */}
         <div className="flex items-center gap-3">

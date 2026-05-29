@@ -455,6 +455,7 @@ export type Database = {
         | "submission_approved"
         | "submission_rejected"
         | "report_resolved"
+        | "event_reminder"
       parse_source_type: "og" | "gpt4o" | "manual"
       report_reason:
         | "misleading"
@@ -599,6 +600,7 @@ export const Constants = {
         "submission_approved",
         "submission_rejected",
         "report_resolved",
+        "event_reminder",
       ],
       parse_source_type: ["og", "gpt4o", "manual"],
       report_reason: [

@@ -7,6 +7,7 @@ import { ReportButton } from '@/components/events/ReportButton'
 import { ShareButtons } from '@/components/events/ShareButtons'
 import { FavoriteButton } from '@/components/engagement/FavoriteButton'
 import { RsvpButton } from '@/components/engagement/RsvpButton'
+import { CalendarExportMenu } from '@/components/engagement/CalendarExportMenu'
 import { getBaseUrl } from '@/lib/site'
 
 type Params = Promise<{ slug: string }>
@@ -212,6 +213,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
           redirectTo={`/etkinlik/${event.slug}`}
           count={event.rsvp_count}
         />
+        <CalendarExportMenu eventId={event.id} eventSlug={event.slug} />
         {/* Sosyal kanıt sayaçları */}
         <div className="ml-auto flex items-center gap-4 text-xs text-gray-500">
           {event.view_count > 0 && (
