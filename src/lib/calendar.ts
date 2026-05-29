@@ -29,7 +29,7 @@ export interface CalendarEvent {
 export function buildIcs(event: CalendarEvent, baseUrlOverride?: string): string {
   const baseUrl = baseUrlOverride ?? getBaseUrl()
   const url = `${baseUrl}/etkinlik/${event.slug}`
-  const uid = `${event.slug}@listur.dev`
+  const uid = `${event.slug}@listur.bilalabic.com`
   const now = formatIcsTimestamp(new Date().toISOString())
   const dtStart = formatIcsTimestamp(event.start_date)
   const dtEnd = formatIcsTimestamp(event.end_date ?? defaultEndDate(event.start_date))

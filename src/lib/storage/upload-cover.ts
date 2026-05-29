@@ -17,7 +17,7 @@ export async function uploadEventCover(
     const response = await fetch(imageUrl, {
       signal: AbortSignal.timeout(10_000),
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Listur/1.0; +https://listur.dev)',
+        'User-Agent': 'Mozilla/5.0 (compatible; Listur/1.0; +https://listur.bilalabic.com)',
       },
     })
 

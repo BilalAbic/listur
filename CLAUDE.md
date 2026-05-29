@@ -148,8 +148,9 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...          # SADECE server-side kullan
 OPENAI_API_KEY=sk-...                     # SADECE server-side kullan
 
 # Uygulama
-NEXT_PUBLIC_APP_URL=https://listur.dev    # Production için
-# NEXT_PUBLIC_APP_URL=http://localhost:3000  # Development için
+NEXT_PUBLIC_APP_URL=https://listur.bilalabic.com    # Production için
+# NEXT_PUBLIC_APP_URL=https://dev.listur.bilalabic.com  # Development için
+# NEXT_PUBLIC_APP_URL=http://localhost:3000  # Lokal geliştirme için
 ```
 
 **KRİTİK:** `SUPABASE_SERVICE_ROLE_KEY` ve `OPENAI_API_KEY` asla `NEXT_PUBLIC_` öneki almaz. Client bundle'a sızmaz.

@@ -34,7 +34,7 @@ async function scrapeWithMetascraper(url: string): Promise<MetascraperResult> {
     const response = await got(url, {
       timeout: { request: 10_000 },
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Listur/1.0; +https://listur.dev)',
+        'User-Agent': 'Mozilla/5.0 (compatible; Listur/1.0; +https://listur.bilalabic.com)',
       },
       followRedirect: true,
     })
@@ -59,7 +59,7 @@ async function parseWithGPT4o(
     const response = await got(url, {
       timeout: { request: 15_000 },
       headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; Listur/1.0; +https://listur.dev)',
+        'User-Agent': 'Mozilla/5.0 (compatible; Listur/1.0; +https://listur.bilalabic.com)',
       },
     })
     const cleanedHtml = cleanHtmlForAI(response.body)
