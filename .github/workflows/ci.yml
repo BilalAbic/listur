@@ -1,0 +1,90 @@
+name: CI — Lint, Typecheck & Build
+
+on:
+  pull_request:
+    branches: [development, production]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: ESLint (reviewdog)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ESLint cache (~%50-70 hızlanma tekrar lint'lerde)
+      - name: Cache ESLint
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: eslint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', '**/.eslintrc*', 'eslint.config.*') }}
+
+      - name: Run ESLint with reviewdog
+        uses: reviewdog/action-eslint@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          eslint_flags: 'src/ --cache --cache-location .eslintcache'
+          filter_mode: added
+          fail_on_error: true
+
+  typecheck-build:
+    name: TypeScript Check & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Next.js 16 typegen — route.ts ve PageProps tipleri üretir; tsc'den önce gerekir
+      - name: Generate Next.js types
+        run: pnpm exec next typegen
+        # Bazı Next sürümlerinde typegen komutu olmayabilir; başarısızsa devam et
+        continue-on-error: true
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+
+      # Turbopack-spesifik hatalar (RSC sınır ihlali, dinamik import, route boundary)
+      # yalnızca build'te ortaya çıkar; tsc tek başına yetmez.
+      - name: Build (Turbopack)
+        env:
+          # Build için minimal env (gerçek key gerekmez)
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_APP_URL: https://listur.bilalabic.com
+        run: pnpm build

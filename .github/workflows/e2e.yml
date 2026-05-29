@@ -1,0 +1,143 @@
+name: E2E — Playwright
+
+on:
+  pull_request:
+    branches: [development]
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E Tests (Vercel Preview)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # Playwright Chromium binary cache (~150MB, her run ~30sn tasarruf)
+      - name: Cache Playwright browsers
+        id: pw-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: pw-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+
+      - name: Install Playwright Chromium
+        if: steps.pw-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install chromium --with-deps
+
+      - name: Install only Playwright system deps (cache hit)
+        if: steps.pw-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+
+      - name: Wait for Vercel Preview Deployment
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        id: vercel_preview
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          # Listur build'i AI + metascraper ile uzun sürebilir
+          max_timeout: 600
+          check_interval: 15
+
+      - name: Run E2E Tests against Preview
+        # ÖNEMLİ: continue-on-error KALDIRILDI. Testler fail olursa job da fail olur,
+        # required check sayesinde PR mergelenmez. Daha önce gizli bug vardı.
+        env:
+          BASE_URL: ${{ steps.vercel_preview.outputs.url }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          E2E_USER1_EMAIL: ${{ secrets.E2E_USER1_EMAIL }}
+          E2E_USER1_PASS: ${{ secrets.E2E_USER1_PASS }}
+          E2E_USER2_EMAIL: ${{ secrets.E2E_USER2_EMAIL }}
+          E2E_USER2_PASS: ${{ secrets.E2E_USER2_PASS }}
+          E2E_MOD_EMAIL: ${{ secrets.E2E_MOD_EMAIL }}
+          E2E_MOD_PASS: ${{ secrets.E2E_MOD_PASS }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASS: ${{ secrets.E2E_ADMIN_PASS }}
+        run: node e2e-test.js
+
+      - name: Upload E2E artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-results-${{ github.run_id }}
+          path: |
+            e2e-results.json
+            playwright-report/
+            test-results/
+          retention-days: 14
+          if-no-files-found: ignore
+
+      - name: Build Result Comment Body
+        id: report
+        if: always()
+        uses: actions/github-script@v7
+        env:
+          PREVIEW_URL: ${{ steps.vercel_preview.outputs.url }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const core = require('@actions/core');
+            let body = '## 🧪 Playwright E2E Test Sonuçları\n\n';
+
+            try {
+              if (!fs.existsSync('e2e-results.json')) {
+                body += '❌ E2E test dosyası oluşmadı veya testler başlamadan hata oluştu.';
+              } else {
+                const results = JSON.parse(fs.readFileSync('e2e-results.json', 'utf8'));
+                const { summary, results: tests } = results;
+
+                const statusIcon = summary.fail > 0 ? '❌' : '✅';
+                body += `${statusIcon} **${summary.pass} PASS** | **${summary.fail} FAIL** | **${summary.skip} SKIP**\n\n`;
+                body += `🔗 Test Edilen URL: [${process.env.PREVIEW_URL}](${process.env.PREVIEW_URL})\n\n`;
+
+                if (summary.fail > 0) {
+                  body += '### 🚨 Başarısız Adımlar\n\n';
+                  body += '| Test ID | Açıklama / Hata |\n|---|---|\n';
+                  tests
+                    .filter(t => t.status === 'FAIL')
+                    .forEach(t => {
+                      body += `| **${t.id}** | ${t.detail} |\n`;
+                    });
+                  body += '\n';
+                }
+
+                body += '<details><summary>📊 Detaylı Test Durumları</summary>\n\n';
+                body += '| Bölüm | Test ID | Durum | Detay |\n|---|---|---|---|\n';
+                tests.forEach(t => {
+                  const icon = t.status === 'PASS' ? '✅' : t.status === 'SKIP' ? '⏭️' : '❌';
+                  body += `| ${t.section} | ${t.id} | ${icon} **${t.status}** | ${t.detail} |\n`;
+                });
+                body += '\n</details>';
+              }
+            } catch (e) {
+              body += '⚠️ Test çıktısı raporlanırken hata meydana geldi: ' + e.message;
+            }
+
+            // Sticky comment action'a göndermek için output'a yaz
+            core.setOutput('body', body);
+
+      - name: Post Sticky Results to PR
+        if: always()
+        uses: marocchino/sticky-pull-request-comment@v3
+        with:
+          header: e2e-results
+          message: ${{ steps.report.outputs.body }}
