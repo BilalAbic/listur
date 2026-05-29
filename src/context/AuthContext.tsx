@@ -47,28 +47,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, fetchProfile])
 
   useEffect(() => {
-    // İlk oturum yükle
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        fetchProfile(session.user.id).finally(() => setLoading(false))
-      } else {
-        setLoading(false)
-      }
-    })
-
-    // Auth state değişikliklerini dinle
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+    // İlk oturum yükle — .catch() ile her durumda loading=false garantilenir
+    supabase.auth.getSession()
+      .then(({ data: { session } }) => {
         setSession(session)
         setUser(session?.user ?? null)
         if (session?.user) {
-          await fetchProfile(session.user.id)
+          fetchProfile(session.user.id).finally(() => setLoading(false))
         } else {
-          setProfile(null)
+          setLoading(false)
         }
+      })
+      .catch(() => {
+        // Network hatası, parse hatası vb. — yine de loading'i kapat
         setLoading(false)
+      })
+
+    // Auth state değişikliklerini dinle — try/finally ile loading garantili kapanır
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        try {
+          setSession(session)
+          setUser(session?.user ?? null)
+          if (session?.user) {
+            await fetchProfile(session.user.id)
+          } else {
+            setProfile(null)
+          }
+        } finally {
+          setLoading(false)
+        }
       }
     )
 
