@@ -48,7 +48,7 @@ SUPABASE_SERVICE_ROLE_KEY=        # Sadece server-side
 OPENAI_API_KEY=                   # GPT-4o için, sadece server-side
 
 # Uygulama
-NEXT_PUBLIC_APP_URL=              # https://listur.dev veya http://localhost:3000
+NEXT_PUBLIC_APP_URL=              # https://listur.bilalabic.com veya http://localhost:3000
 ```
 
 ### 2.4 Görsel Depolama

@@ -10,7 +10,7 @@
  *    Bkz: https://vercel.com/docs/environment-variables/system-environment-variables
  * 3. `VERCEL_URL` — Her deploy'un benzersiz URL'i.
  *    Preview deploy'larda branch alias dışındaki spesifik commit URL'i.
- * 4. `https://listur.dev` — Son fallback (build-time / lokal test için).
+ * 4. `https://listur.bilalabic.com` — Son fallback (build-time / lokal test için).
  *
  * Bu helper'ı kullan, doğrudan `process.env.NEXT_PUBLIC_APP_URL` çağırma —
  * Vercel Preview env'inde yanlış değer set edildiğinde tek noktada düzeltilir.
@@ -33,7 +33,7 @@ export function getBaseUrl(): string {
   // olabilir; bu durumda explicit'i kullan (yukarıda localhost'u skip ettik).
   if (explicit) return stripTrailingSlash(explicit)
 
-  return 'https://listur.dev'
+  return 'https://listur.bilalabic.com'
 }
 
 function stripTrailingSlash(url: string): string {

@@ -86,5 +86,5 @@ jobs:
           # Build için minimal env (gerçek key gerekmez)
           NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
           NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
-          NEXT_PUBLIC_APP_URL: https://listur.dev
+          NEXT_PUBLIC_APP_URL: https://listur.bilalabic.com
         run: pnpm build
