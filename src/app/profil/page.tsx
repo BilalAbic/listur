@@ -68,7 +68,31 @@ export default function ProfilPage() {
     )
   }
 
-  if (!user || !profile) return null
+  if (!user) return null
+
+  if (!profile) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-sm">
+          <div className="w-14 h-14 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-7 h-7 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Profil yüklenemedi</h2>
+          <p className="text-sm text-gray-500 mb-6">
+            Profil bilgileriniz alınırken bir sorun oluştu. Lütfen tekrar deneyin.
+          </p>
+          <button
+            onClick={() => refreshProfile()}
+            className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
+          >
+            Yenile
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <main className="max-w-2xl mx-auto px-4 py-10">
