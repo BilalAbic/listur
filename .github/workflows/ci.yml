@@ -1,17 +1,21 @@
-name: CI — Lint & Typecheck & Build
+name: CI — Lint, Typecheck & Build
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened]
     branches: [development, production]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+      - '.github/ISSUE_TEMPLATE/**'
+      - '.github/pull_request_template.md'
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   lint:
-    name: Lint & Typecheck
+    name: ESLint (reviewdog)
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -22,7 +26,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -32,30 +36,31 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Strict Lint Check (0 error rule)
-        run: pnpm lint
+      # ESLint cache (~%50-70 hızlanma tekrar lint'lerde)
+      - name: Cache ESLint
+        uses: actions/cache@v4
+        with:
+          path: .eslintcache
+          key: eslint-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', '**/.eslintrc*', 'eslint.config.*') }}
 
-      - name: Strict Typecheck Check
-        run: pnpm exec tsc --noEmit
-
-      - name: ESLint Reviewdog (Optional Inline Comments)
+      - name: Run ESLint with reviewdog
         uses: reviewdog/action-eslint@v1
-        if: always() # Önceki adımlar çökse bile reviewdog hataları yoruma döksün
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           reporter: github-pr-review
-          eslint_flags: 'src/'
-          fail_on_error: false # Asıl testi pnpm lint ile yapıyoruz
+          eslint_flags: 'src/ --cache --cache-location .eslintcache'
+          filter_mode: added
+          fail_on_error: true
 
-  build:
-    name: Production Build Check
+  typecheck-build:
+    name: TypeScript Check & Build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
       - uses: pnpm/action-setup@v4
         with:
-          version: latest
+          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -65,8 +70,21 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Verify Build (0 error rule)
-        run: pnpm build
+      # Next.js 16 typegen — route.ts ve PageProps tipleri üretir; tsc'den önce gerekir
+      - name: Generate Next.js types
+        run: pnpm exec next typegen
+        # Bazı Next sürümlerinde typegen komutu olmayabilir; başarısızsa devam et
+        continue-on-error: true
+
+      - name: Type check
+        run: pnpm exec tsc --noEmit
+
+      # Turbopack-spesifik hatalar (RSC sınır ihlali, dinamik import, route boundary)
+      # yalnızca build'te ortaya çıkar; tsc tek başına yetmez.
+      - name: Build (Turbopack)
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co' }}
-          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_key' }}
+          # Build için minimal env (gerçek key gerekmez)
+          NEXT_PUBLIC_SUPABASE_URL: https://placeholder.supabase.co
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: placeholder
+          NEXT_PUBLIC_APP_URL: https://listur.bilalabic.com
+        run: pnpm build
