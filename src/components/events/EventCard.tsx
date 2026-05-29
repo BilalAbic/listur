@@ -3,11 +3,14 @@
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Tables } from '@/types/database'
+import { FavoriteButton } from '@/components/engagement/FavoriteButton'
 
 type Event = Tables<'events'>
 
 interface EventCardProps {
   event: Event
+  /** Sağ-üst köşede favori ikonu göster. Default: true */
+  showFavoriteOverlay?: boolean
 }
 
 const categoryColors: Record<string, string> = {
@@ -32,7 +35,7 @@ function formatDate(dateStr: string): string {
   })
 }
 
-export function EventCard({ event }: EventCardProps) {
+export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps) {
   const catColor = categoryColors[event.category] ?? 'bg-gray-100 text-gray-600'
   const isUpcoming = new Date(event.start_date) > new Date()
 
@@ -56,7 +59,15 @@ export function EventCard({ event }: EventCardProps) {
               </svg>
             </div>
           )}
-          {/* Online etiketi */}
+          {/* Favori overlay (sol-üst) */}
+          {showFavoriteOverlay && (
+            <FavoriteButton
+              eventId={event.id}
+              variant="overlay"
+              redirectTo={`/etkinlik/${event.slug}`}
+            />
+          )}
+          {/* Online etiketi (sağ-üst) */}
           {event.is_online && (
             <span className="absolute top-3 right-3 bg-white/90 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
               Online

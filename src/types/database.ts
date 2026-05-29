@@ -17,6 +17,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      event_views: {
+        Row: {
+          event_id: string
+          id: string
+          viewed_at: string
+          viewer_id: string | null
+          viewer_ip: string | null
+        }
+        Insert: {
+          event_id: string
+          id?: string
+          viewed_at?: string
+          viewer_id?: string | null
+          viewer_ip?: string | null
+        }
+        Update: {
+          event_id?: string
+          id?: string
+          viewed_at?: string
+          viewer_id?: string | null
+          viewer_ip?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_views_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_views_viewer_id_fkey"
+            columns: ["viewer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           category: string
@@ -26,6 +65,7 @@ export type Database = {
           created_at: string
           description: string | null
           end_date: string | null
+          favorite_count: number
           id: string
           is_online: boolean
           organizer_id: string | null
@@ -33,12 +73,14 @@ export type Database = {
           registration_url: string | null
           rejection_note: string | null
           removed_at: string | null
+          rsvp_count: number
           slug: string
           source_url: string
           start_date: string
           status: Database["public"]["Enums"]["event_status"]
           title: string
           venue_name: string | null
+          view_count: number
         }
         Insert: {
           category: string
@@ -48,6 +90,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          favorite_count?: number
           id?: string
           is_online?: boolean
           organizer_id?: string | null
@@ -55,12 +98,14 @@ export type Database = {
           registration_url?: string | null
           rejection_note?: string | null
           removed_at?: string | null
+          rsvp_count?: number
           slug: string
           source_url: string
           start_date: string
           status?: Database["public"]["Enums"]["event_status"]
           title: string
           venue_name?: string | null
+          view_count?: number
         }
         Update: {
           category?: string
@@ -70,6 +115,7 @@ export type Database = {
           created_at?: string
           description?: string | null
           end_date?: string | null
+          favorite_count?: number
           id?: string
           is_online?: boolean
           organizer_id?: string | null
@@ -77,17 +123,52 @@ export type Database = {
           registration_url?: string | null
           rejection_note?: string | null
           removed_at?: string | null
+          rsvp_count?: number
           slug?: string
           source_url?: string
           start_date?: string
           status?: Database["public"]["Enums"]["event_status"]
           title?: string
           venue_name?: string | null
+          view_count?: number
         }
         Relationships: [
           {
             foreignKeyName: "events_organizer_id_fkey"
             columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      favorites: {
+        Row: {
+          created_at: string
+          event_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favorites_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favorites_user_id_fkey"
+            columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
@@ -272,6 +353,51 @@ export type Database = {
           },
         ]
       }
+      rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          reminder_1h_sent: boolean
+          reminder_24h_sent: boolean
+          status: Database["public"]["Enums"]["rsvp_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          reminder_1h_sent?: boolean
+          reminder_24h_sent?: boolean
+          status: Database["public"]["Enums"]["rsvp_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          reminder_1h_sent?: boolean
+          reminder_24h_sent?: boolean
+          status?: Database["public"]["Enums"]["rsvp_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rsvps_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       submissions: {
         Row: {
           event_id: string
@@ -337,6 +463,7 @@ export type Database = {
         | "inappropriate"
         | "other"
       report_status: "open" | "resolved"
+      rsvp_status: "going" | "interested" | "not_going"
       user_role: "user" | "verified_user" | "moderator" | "admin"
     }
     CompositeTypes: {
@@ -482,6 +609,7 @@ export const Constants = {
         "other",
       ],
       report_status: ["open", "resolved"],
+      rsvp_status: ["going", "interested", "not_going"],
       user_role: ["user", "verified_user", "moderator", "admin"],
     },
   },
