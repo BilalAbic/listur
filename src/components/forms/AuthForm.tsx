@@ -7,6 +7,24 @@ import { useInterests } from '@/hooks/useInterests'
 
 type Tab = 'login' | 'signup' | 'magic'
 
+/**
+ * Supabase Auth hata mesajlarını kullanıcı dostu Türkçe'ye çevirir.
+ * Bilinmeyen hatalar generic mesaja düşer.
+ */
+function translateAuthError(message: string): string {
+  const m = message.toLowerCase()
+  if (m.includes('rate limit')) return 'Çok sık deneme yapıldı. Lütfen birkaç dakika sonra tekrar deneyin.'
+  if (m.includes('invalid') && m.includes('email')) return 'Geçersiz e-posta adresi. Lütfen gerçek bir e-posta kullanın.'
+  if (m.includes('already registered') || m.includes('already exists')) return 'Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin.'
+  if (m.includes('password should be at least') || m.includes('password is too short')) return 'Şifre en az 8 karakter olmalı.'
+  if (m.includes('weak password')) return 'Şifre çok zayıf. Daha güçlü bir şifre seçin.'
+  if (m.includes('email not confirmed')) return 'E-postanızı henüz doğrulamadınız. Gelen kutunuzu kontrol edin.'
+  if (m.includes('invalid login credentials') || m.includes('invalid credentials')) return 'E-posta veya şifre hatalı.'
+  if (m.includes('user not found')) return 'Bu e-posta ile kayıtlı kullanıcı bulunamadı.'
+  if (m.includes('signup') && m.includes('disabled')) return 'Kayıt geçici olarak kapalı. Lütfen daha sonra deneyin.'
+  return 'Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.'
+}
+
 export function AuthForm() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -57,7 +75,7 @@ export function AuthForm() {
     })
 
     if (error) {
-      setMessage({ type: 'error', text: error.message })
+      setMessage({ type: 'error', text: translateAuthError(error.message) })
       setLoading(false)
       return
     }
@@ -88,7 +106,7 @@ export function AuthForm() {
     })
 
     if (error) {
-      setMessage({ type: 'error', text: error.message })
+      setMessage({ type: 'error', text: translateAuthError(error.message) })
       setLoading(false)
       return
     }
