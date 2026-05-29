@@ -2,9 +2,14 @@ name: Dependency Audit
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [development, production]
   schedule:
     - cron: '0 9 * * *' # Her gün sabah 09:00'da
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   audit:
@@ -41,9 +46,9 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const marker = '<!-- DEPS_AUDIT_REPORT -->';
             const outcome = '${{ steps.audit_check.outcome }}';
-            const icon = outcome === 'success' ? '✅' : '🚨';
-            let body = `## 📦 Bağımlılık Güvenlik Kontrolü (pnpm audit)\n\n`;
+            let body = `${marker}\n## 📦 Bağımlılık Güvenlik Kontrolü (pnpm audit)\n\n`;
             
             if (outcome === 'success') {
               body += `✅ **Harika!** Bağımlılık paketlerinde bilinen herhangi bir güvenlik açığı bulunamadı.\n`;
@@ -52,9 +57,25 @@ jobs:
               body += `Lütfen yerelde \`pnpm audit\` çalıştırarak paketleri güncelleyin.\n`;
             }
             
-            await github.rest.issues.createComment({
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body
             });
+            const existingComment = comments.find(c => c.body.includes(marker));
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }

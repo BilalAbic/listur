@@ -2,7 +2,12 @@ name: E2E — Playwright
 
 on:
   pull_request:
+    types: [opened, synchronize, reopened]
     branches: [development]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   e2e:
@@ -55,6 +60,14 @@ jobs:
           node e2e-test.js
         continue-on-error: true
 
+      - name: Upload Playwright Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-results
+          path: e2e-results.json
+          retention-days: 7
+
       - name: Post Results to PR
         uses: actions/github-script@v7
         if: always()
@@ -62,7 +75,8 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            let body = '## 🧪 Playwright E2E Test Sonuçları\n\n';
+            const marker = '<!-- E2E_TEST_REPORT -->';
+            let body = `${marker}\n## 🧪 Playwright E2E Test Sonuçları\n\n`;
             
             try {
               if (!fs.existsSync('e2e-results.json')) {
@@ -98,11 +112,27 @@ jobs:
               body += '⚠️ Test çıktısı raporlanırken hata meydana geldi: ' + e.message;
             }
             
-            await github.rest.issues.createComment({
+            const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: context.issue.number,
-              body
             });
+            const existingComment = comments.find(c => c.body.includes(marker));
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }
         env:
           PREVIEW_URL: ${{ steps.vercel_preview.outputs.url }}
