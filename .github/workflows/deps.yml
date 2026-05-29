@@ -1,0 +1,81 @@
+name: Dependency Audit
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [development, production]
+  schedule:
+    - cron: '0 9 * * *' # Her gün sabah 09:00'da
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    name: pnpm Audit Security
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run audit
+        id: audit_check
+        run: |
+          pnpm audit --audit-level moderate
+        continue-on-error: true
+
+      - name: Post Audit Results to PR
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const marker = '<!-- DEPS_AUDIT_REPORT -->';
+            const outcome = '${{ steps.audit_check.outcome }}';
+            let body = `${marker}\n## 📦 Bağımlılık Güvenlik Kontrolü (pnpm audit)\n\n`;
+            
+            if (outcome === 'success') {
+              body += `✅ **Harika!** Bağımlılık paketlerinde bilinen herhangi bir güvenlik açığı bulunamadı.\n`;
+            } else {
+              body += `🚨 **Dikkat!** Bağımlılık paketlerinde güvenlik açıkları tespit edildi.\n\n`;
+              body += `Lütfen yerelde \`pnpm audit\` çalıştırarak paketleri güncelleyin.\n`;
+            }
+            
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existingComment = comments.find(c => c.body.includes(marker));
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }

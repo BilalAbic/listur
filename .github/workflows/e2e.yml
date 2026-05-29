@@ -1,0 +1,140 @@
+name: E2E — Playwright
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [development]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    name: E2E Tests (Vercel Preview)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright
+        run: |
+          pnpm add -D playwright
+          pnpm exec playwright install chromium --with-deps
+
+      - name: Wait for Vercel Preview Deployment
+        uses: patrickedqvist/wait-for-vercel-preview@v1.3.2
+        id: vercel_preview
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          max_timeout: 360
+          check_interval: 15
+
+      - name: Run E2E Tests against Preview
+        env:
+          BASE_URL: ${{ steps.vercel_preview.outputs.url }}
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          E2E_USER1_EMAIL: ${{ secrets.E2E_USER1_EMAIL }}
+          E2E_USER1_PASS: ${{ secrets.E2E_USER1_PASS }}
+          E2E_USER2_EMAIL: ${{ secrets.E2E_USER2_EMAIL }}
+          E2E_USER2_PASS: ${{ secrets.E2E_USER2_PASS }}
+          E2E_MOD_EMAIL: ${{ secrets.E2E_MOD_EMAIL }}
+          E2E_MOD_PASS: ${{ secrets.E2E_MOD_PASS }}
+          E2E_ADMIN_EMAIL: ${{ secrets.E2E_ADMIN_EMAIL }}
+          E2E_ADMIN_PASS: ${{ secrets.E2E_ADMIN_PASS }}
+        run: |
+          node e2e-test.js
+        continue-on-error: true
+
+      - name: Upload Playwright Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-results
+          path: e2e-results.json
+          retention-days: 7
+
+      - name: Post Results to PR
+        uses: actions/github-script@v7
+        if: always()
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- E2E_TEST_REPORT -->';
+            let body = `${marker}\n## 🧪 Playwright E2E Test Sonuçları\n\n`;
+            
+            try {
+              if (!fs.existsSync('e2e-results.json')) {
+                body += '❌ E2E test dosyası oluşmadı veya testler başlamadan hata oluştu.';
+              } else {
+                const results = JSON.parse(fs.readFileSync('e2e-results.json', 'utf8'));
+                const { summary, results: tests } = results;
+                
+                const statusIcon = summary.fail > 0 ? '❌' : '✅';
+                body += `${statusIcon} **${summary.pass} PASS** | **${summary.fail} FAIL** | **${summary.skip} SKIP**\n\n`;
+                body += `🔗 Test Edilen URL: [${process.env.PREVIEW_URL}](${process.env.PREVIEW_URL})\n\n`;
+                
+                if (summary.fail > 0) {
+                  body += '### 🚨 Başarısız Adımlar\n\n';
+                  body += '| Test ID | Açıklama / Hata |\n|---|---|\n';
+                  tests
+                    .filter(t => t.status === 'FAIL')
+                    .forEach(t => {
+                      body += `| **${t.id}** | ${t.detail} |\n`;
+                    });
+                  body += '\n';
+                }
+                
+                body += '<details><summary>📊 Detaylı Test Durumları</summary>\n\n';
+                body += '| Bölüm | Test ID | Durum | Detay |\n|---|---|---|---|\n';
+                tests.forEach(t => {
+                  const icon = t.status === 'PASS' ? '✅' : t.status === 'SKIP' ? '⏭️' : '❌';
+                  body += `| ${t.section} | ${t.id} | ${icon} **${t.status}** | ${t.detail} |\n`;
+                });
+                body += '\n</details>';
+              }
+            } catch (e) {
+              body += '⚠️ Test çıktısı raporlanırken hata meydana geldi: ' + e.message;
+            }
+            
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existingComment = comments.find(c => c.body.includes(marker));
+            
+            if (existingComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existingComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }
+        env:
+          PREVIEW_URL: ${{ steps.vercel_preview.outputs.url }}

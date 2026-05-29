@@ -1,0 +1,72 @@
+name: CI — Lint & Typecheck & Build
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [development, production]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Lint & Typecheck
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      checks: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Strict Lint Check (0 error rule)
+        run: pnpm lint
+
+      - name: Strict Typecheck Check
+        run: pnpm exec tsc --noEmit
+
+      - name: ESLint Reviewdog (Optional Inline Comments)
+        uses: reviewdog/action-eslint@v1
+        if: always() # Önceki adımlar çökse bile reviewdog hataları yoruma döksün
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          eslint_flags: 'src/'
+          fail_on_error: false # Asıl testi pnpm lint ile yapıyoruz
+
+  build:
+    name: Production Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify Build (0 error rule)
+        run: pnpm build
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co' }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'dummy_key' }}
