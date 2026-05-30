@@ -127,7 +127,11 @@ async function testB() {
   try {
     const formNow = await page.locator('form').count()
     if (formNow > 0) {
-      await page.locator('button[type="submit"]').first().click()
+      // Submit butonunun enabled olmasını bekle
+      const submitBtn = page.locator('button[type="submit"]').first()
+      await submitBtn.waitFor({ state: 'visible', timeout: 10000 })
+      await page.waitForTimeout(500) // Profil verisi yüklensin
+      await submitBtn.click()
       await page.waitForTimeout(3000)
       const toast = await page.locator('[class*="toast"],[role="alert"],[class*="success"]').count()
       const successText = await page.locator('text=/güncellendi|başarı|kaydedildi/i').count()

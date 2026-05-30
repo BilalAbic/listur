@@ -1,0 +1,334 @@
+{
+  "timestamp": "2026-05-30T14:57:57.876Z",
+  "baseUrl": "https://dev.listur.bilalabic.com",
+  "screenshotsDir": "docs\\e2e-test\\2026-05-30",
+  "results": [
+    {
+      "section": "A",
+      "id": "A1",
+      "status": "PASS",
+      "detail": "Title: \"Listur — Türkiye Teknoloji Etkinlikleri\", kart: 11",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\A1-anasayfa.png"
+    },
+    {
+      "section": "A",
+      "id": "A2",
+      "status": "FAIL",
+      "detail": "Modal görünür: false",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\A2-interests-modal.png"
+    },
+    {
+      "section": "A",
+      "id": "A3",
+      "status": "PASS",
+      "detail": "shown: true, interests: [\"Yapay Zeka / ML\"]",
+      "screenshot": null
+    },
+    {
+      "section": "A",
+      "id": "A4",
+      "status": "PASS",
+      "detail": "Modal görünür: false",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\A4-refresh-no-modal.png"
+    },
+    {
+      "section": "A",
+      "id": "A5",
+      "status": "PASS",
+      "detail": "Filter element sayısı: 4",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\A5-filtreler.png"
+    },
+    {
+      "section": "A",
+      "id": "A6",
+      "status": "PASS",
+      "detail": "Paylaş btn: 2, Bildir btn: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\A6-etkinlik-detay.png"
+    },
+    {
+      "section": "A",
+      "id": "A7",
+      "status": "PASS",
+      "detail": "Rapor butonu görünür: true",
+      "screenshot": null
+    },
+    {
+      "section": "A",
+      "id": "A8",
+      "status": "PASS",
+      "detail": "404 metni görünür: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\A8-404-sayfa.png"
+    },
+    {
+      "section": "A",
+      "id": "A9",
+      "status": "PASS",
+      "detail": "404 metni: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\A9-404-etkinlik.png"
+    },
+    {
+      "section": "A",
+      "id": "A10",
+      "status": "PASS",
+      "detail": "/admin → /giris?redirect=%2Fadmin",
+      "screenshot": null
+    },
+    {
+      "section": "B",
+      "id": "B1",
+      "status": "PASS",
+      "detail": "Etkinlik Ekle: VAR, çan: VAR",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\B1-login-header.png"
+    },
+    {
+      "section": "B",
+      "id": "B2",
+      "status": "PASS",
+      "detail": "Profil link: 1, Organizatör link: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\B2-header-menu.png"
+    },
+    {
+      "section": "B",
+      "id": "B3",
+      "status": "PASS",
+      "detail": "Form: 1, Hata ekranı: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\B3-profil-form.png"
+    },
+    {
+      "section": "B",
+      "id": "B4",
+      "status": "FAIL",
+      "detail": "locator.click: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('button[type=\"submit\"]').first()\u001b[22m\n",
+      "screenshot": null
+    },
+    {
+      "section": "B",
+      "id": "B5",
+      "status": "PASS",
+      "detail": "Link input: 2, Etiket label: 2",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\B5-etkinlik-gonder-tags.png"
+    },
+    {
+      "section": "C",
+      "id": "C1",
+      "status": "SKIP",
+      "detail": "Etkinlik yok",
+      "screenshot": null
+    },
+    {
+      "section": "C",
+      "id": "C2",
+      "status": "SKIP",
+      "detail": "Etkinlik yok",
+      "screenshot": null
+    },
+    {
+      "section": "C",
+      "id": "C3",
+      "status": "SKIP",
+      "detail": "Etkinlik yok",
+      "screenshot": null
+    },
+    {
+      "section": "H",
+      "id": "H1",
+      "status": "PASS",
+      "detail": "Misafir favori → /giris?redirect=%2Fetkinlik%2Fonline-react-native-",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\H1-misafir-favori-redirect.png"
+    },
+    {
+      "section": "H",
+      "id": "H2",
+      "status": "SKIP",
+      "detail": "Favori butonu yok",
+      "screenshot": null
+    },
+    {
+      "section": "H",
+      "id": "H3",
+      "status": "FAIL",
+      "detail": "locator.getAttribute: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href^=\"/etkinlik/\"]').first()\u001b[",
+      "screenshot": null
+    },
+    {
+      "section": "H",
+      "id": "H5",
+      "status": "FAIL",
+      "detail": "locator.getAttribute: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href^=\"/etkinlik/\"]').first()\u001b[",
+      "screenshot": null
+    },
+    {
+      "section": "H",
+      "id": "H6",
+      "status": "FAIL",
+      "detail": "locator.getAttribute: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href^=\"/etkinlik/\"]').first()\u001b[",
+      "screenshot": null
+    },
+    {
+      "section": "I",
+      "id": "I1",
+      "status": "PASS",
+      "detail": "Ay başlığı görünür: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\I1-takvim-sayfa.png"
+    },
+    {
+      "section": "I",
+      "id": "I2",
+      "status": "PASS",
+      "detail": "Header Takvim link: 1",
+      "screenshot": null
+    },
+    {
+      "section": "I",
+      "id": "I3",
+      "status": "FAIL",
+      "detail": "locator.getAttribute: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href^=\"/etkinlik/\"]').first()\u001b[",
+      "screenshot": null
+    },
+    {
+      "section": "I",
+      "id": "I4",
+      "status": "FAIL",
+      "detail": "locator.getAttribute: Timeout 30000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('a[href^=\"/etkinlik/\"]').first()\u001b[",
+      "screenshot": null
+    },
+    {
+      "section": "J",
+      "id": "J1",
+      "status": "PASS",
+      "detail": "404 metni: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\J1-404-organizator.png"
+    },
+    {
+      "section": "J",
+      "id": "J2",
+      "status": "SKIP",
+      "detail": "K bölümünden sonra K7 ile doğrulanır",
+      "screenshot": null
+    },
+    {
+      "section": "K",
+      "id": "K1",
+      "status": "PASS",
+      "detail": "Form: 2, Handle input: 4, Zaten organizatör/açık: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\K1-basvuru-form.png"
+    },
+    {
+      "section": "K",
+      "id": "K8",
+      "status": "PASS",
+      "detail": "Fallback: 1, Dashboard: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\K8-organizer-dashboard.png"
+    },
+    {
+      "section": "K",
+      "id": "K9",
+      "status": "PASS",
+      "detail": "İçerik uzunluk OK: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\K9-admin-basvurular.png"
+    },
+    {
+      "section": "L",
+      "id": "L1",
+      "status": "PASS",
+      "detail": "Search input: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\L1-header-search.png"
+    },
+    {
+      "section": "L",
+      "id": "L2",
+      "status": "PASS",
+      "detail": "Heading: 1, Sonuç: 1, Empty: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\L2-ara-hackathon.png"
+    },
+    {
+      "section": "L",
+      "id": "L3",
+      "status": "PASS",
+      "detail": "Sonuç: 4, Empty: 0 (FTS unaccent çalışıyor mu)",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\L3-ara-istanbul.png"
+    },
+    {
+      "section": "L",
+      "id": "L5",
+      "status": "PASS",
+      "detail": "Hint: true",
+      "screenshot": null
+    },
+    {
+      "section": "D",
+      "id": "D1",
+      "status": "PASS",
+      "detail": "Moderatör Paneli link: true",
+      "screenshot": null
+    },
+    {
+      "section": "D",
+      "id": "D2",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\D2-bekleyenler.png"
+    },
+    {
+      "section": "D",
+      "id": "D7",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\D7-mod-raporlar.png"
+    },
+    {
+      "section": "E",
+      "id": "E1",
+      "status": "PASS",
+      "detail": "Admin: 1, Moderatör: 1",
+      "screenshot": null
+    },
+    {
+      "section": "E",
+      "id": "E2",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\E2-admin-etkinlikler.png"
+    },
+    {
+      "section": "E",
+      "id": "E3",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\E3-admin-kullanicilar.png"
+    },
+    {
+      "section": "F",
+      "id": "F1",
+      "status": "PASS",
+      "detail": "Çan: true",
+      "screenshot": null
+    },
+    {
+      "section": "F",
+      "id": "F2",
+      "status": "PASS",
+      "detail": "Items: 0, Empty: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-30\\F2-bildirimler.png"
+    },
+    {
+      "section": "G",
+      "id": "G1",
+      "status": "PASS",
+      "detail": "<loc>: true, /etkinlik/: true, localhost: false",
+      "screenshot": null
+    },
+    {
+      "section": "G",
+      "id": "G2",
+      "status": "PASS",
+      "detail": "Sitemap: true, Disallow: true",
+      "screenshot": null
+    }
+  ],
+  "summary": {
+    "pass": 34,
+    "fail": 7,
+    "skip": 5
+  }
+}
