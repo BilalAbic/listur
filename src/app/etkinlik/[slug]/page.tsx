@@ -9,6 +9,7 @@ import { FavoriteButton } from '@/components/engagement/FavoriteButton'
 import { RsvpButton } from '@/components/engagement/RsvpButton'
 import { CalendarExportMenu } from '@/components/engagement/CalendarExportMenu'
 import { OrganizerCard } from '@/components/organizers/OrganizerCard'
+import { TagChip } from '@/components/discovery/TagChip'
 import { getBaseUrl } from '@/lib/site'
 
 type Params = Promise<{ slug: string }>
@@ -262,8 +263,17 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
 
       {/* Açıklama */}
       {event.description && (
-        <div className="prose prose-gray max-w-none mb-8">
+        <div className="prose prose-gray max-w-none mb-6">
           <p className="text-gray-700 leading-relaxed whitespace-pre-line">{event.description}</p>
+        </div>
+      )}
+
+      {/* Etiketler */}
+      {event.tags && event.tags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          {event.tags.map((tag: string) => (
+            <TagChip key={tag} tag={tag} size="md" />
+          ))}
         </div>
       )}
 

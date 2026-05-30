@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { INTEREST_CATEGORIES } from '@/types/index'
 import type { ParsedEventData } from '@/types/index'
+import { TagInput } from '@/components/discovery/TagInput'
 
 export function EventSubmitForm() {
   const router = useRouter()
@@ -22,6 +23,7 @@ export function EventSubmitForm() {
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [registrationUrl, setRegistrationUrl] = useState('')
+  const [tags, setTags] = useState<string[]>([])
 
   const [submitting, setSubmitting] = useState(false)
   const [submitResult, setSubmitResult] = useState<{
@@ -92,6 +94,7 @@ export function EventSubmitForm() {
           source_url: url,
           cover_image_og: parsedData?.cover_image ?? undefined,
           parse_source: parsedData?.parse_source ?? 'manual',
+          tags: tags.length > 0 ? tags : undefined,
         }),
       })
 
@@ -139,6 +142,7 @@ export function EventSubmitForm() {
               setStartDate('')
               setEndDate('')
               setRegistrationUrl('')
+              setTags([])
             }}
             className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
           >
@@ -298,6 +302,19 @@ export function EventSubmitForm() {
               type="url" value={registrationUrl} onChange={(e) => setRegistrationUrl(e.target.value)}
               placeholder="https://kayit.com/etkinlik"
               className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            />
+          </div>
+
+          {/* Etiketler (tags) */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Etiketler
+            </label>
+            <TagInput
+              value={tags}
+              onChange={setTags}
+              max={8}
+              placeholder="react, ai, hackathon…"
             />
           </div>
 

@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useNotifications } from '@/hooks/useNotifications'
+import { SearchBar } from '@/components/discovery/SearchBar'
 
 export function Header() {
   const { user, profile, signOut } = useAuth()
@@ -23,6 +24,11 @@ export function Header() {
               Takvim
             </Link>
           </nav>
+        </div>
+
+        {/* Orta: arama (md+) */}
+        <div className="hidden md:block flex-1 max-w-md mx-6">
+          <SearchBar variant="compact" />
         </div>
 
         {/* Sağ navigasyon */}

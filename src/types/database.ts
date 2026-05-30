@@ -72,10 +72,12 @@ export type Database = {
           rejection_note: string | null
           removed_at: string | null
           rsvp_count: number
+          search_vector: unknown
           slug: string
           source_url: string
           start_date: string
           status: Database["public"]["Enums"]["event_status"]
+          tags: string[]
           title: string
           venue_name: string | null
           view_count: number
@@ -97,10 +99,12 @@ export type Database = {
           rejection_note?: string | null
           removed_at?: string | null
           rsvp_count?: number
+          search_vector?: unknown
           slug: string
           source_url: string
           start_date: string
           status?: Database["public"]["Enums"]["event_status"]
+          tags?: string[]
           title: string
           venue_name?: string | null
           view_count?: number
@@ -122,10 +126,12 @@ export type Database = {
           rejection_note?: string | null
           removed_at?: string | null
           rsvp_count?: number
+          search_vector?: unknown
           slug?: string
           source_url?: string
           start_date?: string
           status?: Database["public"]["Enums"]["event_status"]
+          tags?: string[]
           title?: string
           venue_name?: string | null
           view_count?: number
@@ -563,7 +569,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       event_status: "pending" | "published" | "rejected" | "removed"
