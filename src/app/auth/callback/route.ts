@@ -1,9 +1,8 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import { createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
 import type { Database } from '@/types/database'
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
   const next = searchParams.get('next') ?? '/'
@@ -12,7 +11,10 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/giris?error=no_code`)
   }
 
-  const cookieStore = await cookies()
+  // Response objesi ÖNCE oluşturulur — setAll bu response'a cookie yazar.
+  // Eski yöntemde cookieStore.set() implicit response'a yazıyor,
+  // NextResponse.redirect() ise ayrı bir response döndürüyordu: cookies kayboluyordu.
+  const successResponse = NextResponse.redirect(`${origin}${next}`)
 
   const supabase = createServerClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -20,11 +22,12 @@ export async function GET(request: Request) {
     {
       cookies: {
         getAll() {
-          return cookieStore.getAll()
+          return request.cookies.getAll()
         },
         setAll(cookiesToSet) {
+          // Cookie'leri doğrudan döndüreceğimiz response'a yaz
           cookiesToSet.forEach(({ name, value, options }) =>
-            cookieStore.set(name, value, options)
+            successResponse.cookies.set(name, value, options)
           )
         },
       },
@@ -35,11 +38,9 @@ export async function GET(request: Request) {
 
   if (error) {
     console.error('[auth/callback] exchangeCodeForSession error:', error.message)
-    // Code exchange başarısız → temiz login sayfasına yönlendir
-    // Hata mesajını URL'ye koyma (güvenlik), sadece generic error code
     return NextResponse.redirect(`${origin}/giris?error=session_exchange_failed`)
   }
 
-  // Başarılı: session cookie'leri set edildi, hedef sayfaya git
-  return NextResponse.redirect(`${origin}${next}`)
+  // successResponse zaten auth cookie'lerini taşıyor
+  return successResponse
 }

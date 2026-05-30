@@ -148,8 +148,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase, fetchProfile])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
-    // Tam sayfa yenileme — server session state'ini sıfırla, middleware cookie'lerini temizle
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      // signOut network hatası verse de sayfayı yenile — middleware session'ı temizler
+    }
     window.location.href = '/'
   }
 
