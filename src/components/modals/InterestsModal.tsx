@@ -15,14 +15,17 @@ export function InterestsModal() {
 
   useEffect(() => {
     // Modal zaten gösterildiyse açma
-    if (isModalShown()) return
+    if (isModalShown()) {
+      return
+    }
     // Giriş yapmış kullanıcı zaten ilgi alanı seçmişse açma
-    if (user && profile && profile.interests.length > 0) {
+    if (user && profile && profile.interests && profile.interests.length > 0) {
       markModalShown()
       return
     }
+    // Modal'ı aç
     setOpen(true)
-  }, [user, profile, isModalShown, markModalShown])
+  }, [user, profile]) // isModalShown ve markModalShown'ı dependency'den çıkardık
 
   const toggle = (cat: InterestCategory) => {
     setSelected((prev) =>
