@@ -7,7 +7,7 @@ import { useNotifications } from '@/hooks/useNotifications'
 import { SearchBar } from '@/components/discovery/SearchBar'
 
 export function Header() {
-  const { user, profile, signOut } = useAuth()
+  const { user, profile, signOut, organizerAppStatus } = useAuth()
   const { unreadCount } = useNotifications()
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -73,33 +73,55 @@ export function Header() {
                 {menuOpen && (
                   <>
                     <div className="fixed inset-0" onClick={() => setMenuOpen(false)} />
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
-                      <div className="px-4 py-2 border-b border-gray-50">
-                        <p className="text-sm font-medium text-gray-900 truncate">{profile?.name || 'Kullanıcı'}</p>
-                        <p className="text-xs text-gray-500 truncate">{user.email}</p>
+                    <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
+                      {/* Kullanıcı bilgisi */}
+                      <div className="px-4 py-2.5 border-b border-gray-100">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{profile?.name || 'Kullanıcı'}</p>
+                        <p className="text-xs text-gray-400 truncate">{user.email}</p>
+                        {profile?.role && profile.role !== 'user' && (
+                          <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-indigo-50 text-indigo-600 capitalize">
+                            {profile.role === 'admin' ? 'Admin' : profile.role === 'moderator' ? 'Moderatör' : 'Doğrulanmış'}
+                          </span>
+                        )}
                       </div>
+
+                      {/* Hesap */}
                       <Link href="/profil" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                        Profil
+                        Profil Ayarları
                       </Link>
+
+                      {/* Organizatör durumu */}
                       {profile?.is_organizer ? (
                         <Link href="/profil/organizator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           Organizatör Paneli
                         </Link>
+                      ) : organizerAppStatus === 'open' ? (
+                        <span className="block px-4 py-2 text-sm text-amber-600 cursor-default select-none">
+                          Başvuru inceleniyor…
+                        </span>
                       ) : (
                         <Link href="/profil/organizator-basvuru" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           Organizatör Ol
                         </Link>
                       )}
+
+                      {/* Moderatör / Admin paneli */}
                       {(profile?.role === 'moderator' || profile?.role === 'admin') && (
-                        <Link href="/moderator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
-                          Moderatör Paneli
-                        </Link>
+                        <>
+                          <div className="my-1 border-t border-gray-100" />
+                          <Link href="/moderator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-indigo-700 font-medium hover:bg-indigo-50">
+                            Moderatör Paneli
+                          </Link>
+                        </>
                       )}
                       {profile?.role === 'admin' && (
-                        <Link href="/admin" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                        <Link href="/admin" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-indigo-700 font-medium hover:bg-indigo-50">
                           Admin Paneli
                         </Link>
                       )}
+
+                      {/* Çıkış */}
+                      <div className="my-1 border-t border-gray-100" />
                       <button
                         onClick={() => { signOut(); setMenuOpen(false) }}
                         className="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"

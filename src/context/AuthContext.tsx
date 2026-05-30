@@ -12,6 +12,8 @@ interface AuthContextValue {
   profile: Profile | null
   session: Session | null
   loading: boolean
+  /** null = sorgulanmadı/yok, 'open' = beklemede, 'resolved' = sonuçlandı */
+  organizerAppStatus: 'open' | 'resolved' | null
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -21,6 +23,7 @@ const AuthContext = createContext<AuthContextValue>({
   profile: null,
   session: null,
   loading: true,
+  organizerAppStatus: null,
   signOut: async () => {},
   refreshProfile: async () => {},
 })
@@ -30,15 +33,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [organizerAppStatus, setOrganizerAppStatus] = useState<'open' | 'resolved' | null>(null)
 
   const supabase = createClient()
 
-  const fetchProfile = useCallback(async (userId: string) => {
+  const fetchProfile = useCallback(async (supabaseUser: User) => {
     try {
-      const { data, error } = await supabase
+      let { data: profileData, error } = await supabase
         .from('profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('id', supabaseUser.id)
         .maybeSingle()
 
       if (error) {
@@ -47,7 +51,40 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return
       }
 
-      setProfile(data)
+      // Profile satırı yok — trigger başarısız olmuş olabilir, otomatik oluştur.
+      if (!profileData) {
+        const { data: created, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: supabaseUser.id,
+            email: supabaseUser.email ?? '',
+            name: (supabaseUser.user_metadata?.name as string | undefined)
+              ?? (supabaseUser.user_metadata?.full_name as string | undefined)
+              ?? '',
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('[Auth] createProfile error:', createError.message)
+          setProfile(null)
+          return
+        }
+        profileData = created
+      }
+
+      setProfile(profileData)
+
+      // Organizatör başvuru durumunu çek (en son başvuru yeterli)
+      const { data: appData } = await supabase
+        .from('organizer_applications')
+        .select('status')
+        .eq('user_id', supabaseUser.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      setOrganizerAppStatus((appData?.status ?? null) as 'open' | 'resolved' | null)
     } catch (err) {
       console.error('[Auth] fetchProfile unexpected error:', err)
       setProfile(null)
@@ -55,36 +92,41 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase])
 
   const refreshProfile = useCallback(async () => {
-    if (user) await fetchProfile(user.id)
+    if (user) await fetchProfile(user)
   }, [user, fetchProfile])
 
   useEffect(() => {
     let isMounted = true
 
-    // INITIAL_SESSION gelmezse loading=true'da takılmayalım (güvenlik timeout)
+    // Fallback: INITIAL_SESSION 3sn içinde gelmezse loading'i kapat.
+    // Bu timeout, INITIAL_SESSION alındığında AWAIT'TEN ÖNCE temizlenir —
+    // aksi hâlde fetchProfile sırasında erken tetiklenip profile=null iken
+    // loading=false olur ve "Profil yüklenemedi" hatası görünür.
     const timeout = setTimeout(() => {
       if (isMounted) setLoading(false)
     }, 3000)
 
-    // onAuthStateChange'i primary kaynak olarak kullan.
-    // INITIAL_SESSION eventi getSession'ın eşdeğeri — hem SSR cookie'sini
-    // hem de client storage'ı kontrol eder.
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         if (!isMounted) return
+
+        // CRITICAL: clearTimeout AWAIT'TEN ÖNCE — race condition önlenir.
+        // fetchProfile yavaş olsa bile timeout artık loading'i erken kapatamaz.
+        if (event === 'INITIAL_SESSION') {
+          clearTimeout(timeout)
+        }
 
         setSession(newSession)
         setUser(newSession?.user ?? null)
 
         if (newSession?.user) {
-          await fetchProfile(newSession.user.id)
+          await fetchProfile(newSession.user)
         } else {
           setProfile(null)
+          setOrganizerAppStatus(null)
         }
 
-        // INITIAL_SESSION geldiğinde loading biter (timeout'tan önce)
         if (event === 'INITIAL_SESSION') {
-          clearTimeout(timeout)
           if (isMounted) setLoading(false)
         }
       }
@@ -104,7 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, organizerAppStatus, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )
