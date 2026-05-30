@@ -8,6 +8,18 @@ import { useInterests } from '@/hooks/useInterests'
 type Tab = 'login' | 'signup' | 'magic'
 
 /**
+ * Supabase emailRedirectTo için güvenli base URL döndürür.
+ * NEXT_PUBLIC_APP_URL localhost değilse onu kullan (Vercel preview/prod).
+ * Yoksa window.location.origin'i kullan (local dev / fallback).
+ */
+function getRedirectBase(): string {
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL
+  if (appUrl && !appUrl.includes('localhost')) return appUrl.replace(/\/$/, '')
+  if (typeof window !== 'undefined') return window.location.origin
+  return ''
+}
+
+/**
  * Supabase Auth hata mesajlarını kullanıcı dostu Türkçe'ye çevirir.
  * Bilinmeyen hatalar generic mesaja düşer.
  */
@@ -47,17 +59,22 @@ export function AuthForm() {
     setLoading(true)
     setMessage(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
 
-    if (error) {
-      setMessage({ type: 'error', text: 'E-posta veya şifre hatalı.' })
+      if (error) {
+        setMessage({ type: 'error', text: 'E-posta veya şifre hatalı.' })
+        return
+      }
+
+      await syncInterestsToSupabase()
+      // Tam sayfa yönlendirme — server session'ı middleware'den okusun
+      window.location.href = redirectTo
+    } catch {
+      setMessage({ type: 'error', text: 'Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.' })
+    } finally {
       setLoading(false)
-      return
     }
-
-    await syncInterestsToSupabase()
-    router.push(redirectTo)
-    router.refresh()
   }
 
   const handleSignup = async (e: React.FormEvent) => {
@@ -65,32 +82,35 @@ export function AuthForm() {
     setLoading(true)
     setMessage(null)
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { name },
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+          emailRedirectTo: `${getRedirectBase()}/auth/callback`,
+        },
+      })
 
-    if (error) {
-      setMessage({ type: 'error', text: translateAuthError(error.message) })
+      if (error) {
+        setMessage({ type: 'error', text: translateAuthError(error.message) })
+        return
+      }
+
+      await syncInterestsToSupabase()
+      setMessage({
+        type: 'success',
+        text: 'Hesabınız oluşturuldu! E-postanızı kontrol edin (gerekiyorsa).',
+      })
+      // Başarılı kayıt → tam sayfa yönlendirme
+      setTimeout(() => {
+        window.location.href = redirectTo
+      }, 1500)
+    } catch {
+      setMessage({ type: 'error', text: 'Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.' })
+    } finally {
       setLoading(false)
-      return
     }
-
-    await syncInterestsToSupabase()
-    setMessage({
-      type: 'success',
-      text: 'Hesabınız oluşturuldu! E-postanızı kontrol edin (gerekiyorsa).',
-    })
-    setLoading(false)
-    // Başarılı kayıt → yönlendir
-    setTimeout(() => {
-      router.push(redirectTo)
-      router.refresh()
-    }, 1500)
   }
 
   const handleMagicLink = async (e: React.FormEvent) => {
@@ -98,21 +118,25 @@ export function AuthForm() {
     setLoading(true)
     setMessage(null)
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${window.location.origin}/auth/callback`,
-      },
-    })
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: `${getRedirectBase()}/auth/callback`,
+        },
+      })
 
-    if (error) {
-      setMessage({ type: 'error', text: translateAuthError(error.message) })
+      if (error) {
+        setMessage({ type: 'error', text: translateAuthError(error.message) })
+        return
+      }
+
+      setMagicSent(true)
+    } catch {
+      setMessage({ type: 'error', text: 'Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.' })
+    } finally {
       setLoading(false)
-      return
     }
-
-    setMagicSent(true)
-    setLoading(false)
   }
 
   const tabs: { id: Tab; label: string }[] = [

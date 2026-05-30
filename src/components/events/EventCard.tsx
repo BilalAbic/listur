@@ -2,6 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Tables } from '@/types/database'
 import { FavoriteButtonWrapper } from '@/components/engagement/FavoriteButtonWrapper'
+import { RegistrationLink } from './RegistrationLink'
 
 type Event = Tables<'events'>
 
@@ -109,15 +110,7 @@ export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps)
 
           {/* Kayıt butonu */}
           {event.registration_url && (
-            <a
-              href={event.registration_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="mt-2 w-full text-center py-2 rounded-xl bg-indigo-50 text-indigo-700 text-sm font-semibold hover:bg-indigo-100 transition-colors"
-            >
-              Kayıt Ol →
-            </a>
+            <RegistrationLink url={event.registration_url} />
           )}
         </div>
       </article>
