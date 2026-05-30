@@ -8,6 +8,7 @@ import { ShareButtons } from '@/components/events/ShareButtons'
 import { FavoriteButton } from '@/components/engagement/FavoriteButton'
 import { RsvpButton } from '@/components/engagement/RsvpButton'
 import { CalendarExportMenu } from '@/components/engagement/CalendarExportMenu'
+import { OrganizerCard } from '@/components/organizers/OrganizerCard'
 import { getBaseUrl } from '@/lib/site'
 
 type Params = Promise<{ slug: string }>
@@ -26,9 +27,12 @@ export const dynamic = 'force-dynamic'
 const fetchEventBySlug = cache(async (slug: string) => {
   try {
     const supabase = await createClient()
+    // Organizer profil mini bilgisini left join ile çek (organizer_id NULL olabilir).
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select(
+        '*, organizer:profiles!events_organizer_id_fkey(id, handle, name, verified_at, is_organizer)'
+      )
       .eq('slug', slug)
       .eq('status', 'published')
       .maybeSingle()
@@ -158,9 +162,23 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
       </div>
 
       {/* Başlık */}
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-6 leading-tight">
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">
         {event.title}
       </h1>
+
+      {/* Organizatör (handle'ı varsa) */}
+      {event.organizer && event.organizer.is_organizer && event.organizer.handle && (
+        <div className="mb-6">
+          <OrganizerCard
+            organizer={{
+              handle: event.organizer.handle,
+              name: event.organizer.name,
+              verified_at: event.organizer.verified_at,
+            }}
+            size="chip"
+          />
+        </div>
+      )}
 
       {/* Meta bilgiler */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">

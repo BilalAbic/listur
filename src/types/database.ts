@@ -10,8 +10,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
@@ -262,33 +260,153 @@ export type Database = {
           },
         ]
       }
-      profiles: {
+      organizer_applications: {
+        Row: {
+          bio: string | null
+          created_at: string
+          github: string | null
+          id: string
+          reason: string | null
+          rejection_note: string | null
+          requested_handle: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["report_status"]
+          twitter: string | null
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
+          github?: string | null
+          id?: string
+          reason?: string | null
+          rejection_note?: string | null
+          requested_handle: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          twitter?: string | null
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          github?: string | null
+          id?: string
+          reason?: string | null
+          rejection_note?: string | null
+          requested_handle?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["report_status"]
+          twitter?: string | null
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizer_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizer_follows: {
         Row: {
           created_at: string
-          email: string
-          id: string
-          interests: string[]
-          name: string
-          notify_email: boolean
-          role: Database["public"]["Enums"]["user_role"]
+          follower_id: string
+          organizer_id: string
         }
         Insert: {
           created_at?: string
-          email?: string
-          id: string
-          interests?: string[]
-          name?: string
-          notify_email?: boolean
-          role?: Database["public"]["Enums"]["user_role"]
+          follower_id: string
+          organizer_id: string
         }
         Update: {
           created_at?: string
+          follower_id?: string
+          organizer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organizer_follows_follower_id_fkey"
+            columns: ["follower_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "organizer_follows_organizer_id_fkey"
+            columns: ["organizer_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          bio: string | null
+          created_at: string
+          email: string
+          follower_count: number
+          github: string | null
+          handle: string | null
+          id: string
+          interests: string[]
+          is_organizer: boolean
+          name: string
+          notify_email: boolean
+          role: Database["public"]["Enums"]["user_role"]
+          twitter: string | null
+          verified_at: string | null
+          website: string | null
+        }
+        Insert: {
+          bio?: string | null
+          created_at?: string
           email?: string
-          id?: string
+          follower_count?: number
+          github?: string | null
+          handle?: string | null
+          id: string
           interests?: string[]
+          is_organizer?: boolean
           name?: string
           notify_email?: boolean
           role?: Database["public"]["Enums"]["user_role"]
+          twitter?: string | null
+          verified_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          bio?: string | null
+          created_at?: string
+          email?: string
+          follower_count?: number
+          github?: string | null
+          handle?: string | null
+          id?: string
+          interests?: string[]
+          is_organizer?: boolean
+          name?: string
+          notify_email?: boolean
+          role?: Database["public"]["Enums"]["user_role"]
+          twitter?: string | null
+          verified_at?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -449,13 +567,15 @@ export type Database = {
     }
     Enums: {
       event_status: "pending" | "published" | "rejected" | "removed"
-      mod_action: "approved" | "rejected" | "removed" | "edited"
+      mod_action: "approved" | "rejected" | "removed" | "edited" | "verified"
       notif_type:
         | "new_event"
         | "submission_approved"
         | "submission_rejected"
         | "report_resolved"
         | "event_reminder"
+        | "organizer_new_event"
+        | "organizer_verified"
       parse_source_type: "og" | "gpt4o" | "manual"
       report_reason:
         | "misleading"
@@ -594,13 +714,15 @@ export const Constants = {
   public: {
     Enums: {
       event_status: ["pending", "published", "rejected", "removed"],
-      mod_action: ["approved", "rejected", "removed", "edited"],
+      mod_action: ["approved", "rejected", "removed", "edited", "verified"],
       notif_type: [
         "new_event",
         "submission_approved",
         "submission_rejected",
         "report_resolved",
         "event_reminder",
+        "organizer_new_event",
+        "organizer_verified",
       ],
       parse_source_type: ["og", "gpt4o", "manual"],
       report_reason: [
