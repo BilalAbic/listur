@@ -25,6 +25,15 @@ export default function ProfilPage() {
     }
   }, [user, loading, router])
 
+  // Otomatik retry: loading bitti, user var ama profile hâlâ null → 1 kere otomatik dene
+  const [autoRetried, setAutoRetried] = useState(false)
+  useEffect(() => {
+    if (!loading && user && !profile && !autoRetried) {
+      setAutoRetried(true)
+      refreshProfile()
+    }
+  }, [loading, user, profile, autoRetried, refreshProfile])
+
   // Profil verisini forma yükle
   useEffect(() => {
     if (profile) {
