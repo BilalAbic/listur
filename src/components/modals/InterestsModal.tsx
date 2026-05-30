@@ -14,16 +14,19 @@ export function InterestsModal() {
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    // Auth yüklenmeden karar verme — profil null iken açılıp kapanma (flicker) olmasın
+    // 1. Initial auth check bitmeden karar verme
     if (authLoading) return
-    // Modal zaten gösterildiyse açma
+    // 2. Kullanıcı giriş yapmış ama profil henüz fetch edilmemiş (user set, profile null = loading)
+    //    Bu durumda modal açma — sonraki render'da profil gelince tekrar çalışır
+    if (user !== null && profile === null) return
+    // 3. Modal daha önce gösterildiyse açma
     if (isModalShown()) return
-    // Giriş yapmış kullanıcı zaten ilgi alanı seçmişse açma
+    // 4. Profili olan kullanıcı → zaten seçim yapmış, modal gereksiz
     if (user && profile && (profile.interests as string[] | null)?.length) {
       markModalShown()
       return
     }
-    // Modal'ı aç
+    // 5. Misafir (user=null) veya ilgi alanı seçmemiş kullanıcı → aç
     setOpen(true)
   }, [user, profile, authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
