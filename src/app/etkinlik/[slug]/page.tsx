@@ -5,7 +5,7 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { ReportButton } from '@/components/events/ReportButton'
 import { ShareButtons } from '@/components/events/ShareButtons'
-import { FavoriteButton } from '@/components/engagement/FavoriteButton'
+import { FavoriteButtonWrapper } from '@/components/engagement/FavoriteButtonWrapper'
 import { RsvpButton } from '@/components/engagement/RsvpButton'
 import { CalendarExportMenu } from '@/components/engagement/CalendarExportMenu'
 import { OrganizerCard } from '@/components/organizers/OrganizerCard'
@@ -221,7 +221,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
 
       {/* Engagement şeridi: favori / RSVP / sayaçlar */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 flex flex-wrap items-center gap-3">
-        <FavoriteButton
+        <FavoriteButtonWrapper
           eventId={event.id}
           variant="full"
           redirectTo={`/etkinlik/${event.slug}`}

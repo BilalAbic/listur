@@ -1,9 +1,7 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Tables } from '@/types/database'
-import { FavoriteButton } from '@/components/engagement/FavoriteButton'
+import { FavoriteButtonWrapper } from '@/components/engagement/FavoriteButtonWrapper'
 
 type Event = Tables<'events'>
 
@@ -61,7 +59,7 @@ export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps)
           )}
           {/* Favori overlay (sol-üst) */}
           {showFavoriteOverlay && (
-            <FavoriteButton
+            <FavoriteButtonWrapper
               eventId={event.id}
               variant="overlay"
               redirectTo={`/etkinlik/${event.slug}`}
