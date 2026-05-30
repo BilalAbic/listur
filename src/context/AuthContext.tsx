@@ -34,12 +34,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
 
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    setProfile(data)
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single()
+      
+      if (error) {
+        console.error('[Auth] fetchProfile error:', error)
+        setProfile(null)
+        return
+      }
+      
+      setProfile(data)
+    } catch (err) {
+      console.error('[Auth] fetchProfile unexpected error:', err)
+      setProfile(null)
+    }
   }, [supabase])
 
   const refreshProfile = useCallback(async () => {
@@ -47,40 +59,56 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, fetchProfile])
 
   useEffect(() => {
-    // İlk oturum yükle — .catch() ile her durumda loading=false garantilenir
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          fetchProfile(session.user.id).finally(() => setLoading(false))
-        } else {
+    let isMounted = true
+
+    // İlk oturum yükle
+    const initSession = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+        
+        if (!isMounted) return
+        
+        setSession(currentSession)
+        setUser(currentSession?.user ?? null)
+        
+        if (currentSession?.user) {
+          await fetchProfile(currentSession.user.id)
+        }
+      } catch (err) {
+        console.error('[Auth] getSession error:', err)
+      } finally {
+        if (isMounted) {
           setLoading(false)
         }
-      })
-      .catch(() => {
-        // Network hatası, parse hatası vb. — yine de loading'i kapat
-        setLoading(false)
-      })
+      }
+    }
 
-    // Auth state değişikliklerini dinle — try/finally ile loading garantili kapanır
+    initSession()
+
+    // Auth state değişikliklerini dinle
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        try {
-          setSession(session)
-          setUser(session?.user ?? null)
-          if (session?.user) {
-            await fetchProfile(session.user.id)
-          } else {
-            setProfile(null)
-          }
-        } finally {
+      async (event, newSession) => {
+        if (!isMounted) return
+        
+        setSession(newSession)
+        setUser(newSession?.user ?? null)
+        
+        if (newSession?.user) {
+          await fetchProfile(newSession.user.id)
+        } else {
+          setProfile(null)
+        }
+        
+        if (isMounted) {
           setLoading(false)
         }
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
   }, [supabase, fetchProfile])
 
   const signOut = async () => {
