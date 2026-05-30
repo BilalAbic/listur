@@ -74,6 +74,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           } else {
             setProfile(null)
           }
+        } catch (err) {
+          // fetchProfile hatası — profile'ı temizle
+          console.error('[Auth] fetchProfile error in onAuthStateChange:', err)
+          setProfile(null)
         } finally {
           setLoading(false)
         }

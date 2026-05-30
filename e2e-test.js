@@ -6,7 +6,7 @@
 const { chromium } = require('playwright')
 const fs = require('fs')
 
-const BASE = process.env.BASE_URL || 'http://localhost:3000'
+const BASE = process.env.BASE_URL || 'https://dev.listur.bilalabic.com'
 const USERS = {
   user1:     { 
     email: process.env.E2E_USER1_EMAIL || 'bilalabic78+listur-user1@gmail.com',  
@@ -115,25 +115,35 @@ async function testB() {
     await openUserMenu()
     await page.locator('a[href="/profil"]').click({ timeout: 5000 })
     await page.waitForURL('**/profil', { timeout: 10000 })
-    await page.waitForTimeout(800)
+    
+    // Spinner'ın kaybolmasını bekle (max 5 saniye)
+    await page.waitForSelector('.animate-spin', { state: 'hidden', timeout: 5000 }).catch(() => {})
+    await page.waitForTimeout(500)
+    
     const spinner = await page.locator('.animate-spin').count()
     const form = await page.locator('form').count()
     const errorScreen = await page.locator('text=/Profil yüklenemedi/i').count()
+    const shot = await snap('B5', 'profil-form')
     log('B', 'B5', (form > 0 && spinner === 0 && errorScreen === 0) ? 'PASS' : 'FAIL',
-      `Form: ${form}, Spinner: ${spinner}, Hata ekranı: ${errorScreen}`)
+      `Form: ${form}, Spinner: ${spinner}, Hata ekranı: ${errorScreen}`, shot)
   } catch (e) { log('B', 'B5', 'FAIL', e.message.slice(0, 120)) }
 
   // B6 — Profil kaydet (B5'ten kalan /profil sayfasında)
   try {
     const formNow = await page.locator('form').count()
     if (formNow > 0) {
-      await page.locator('button[type="submit"]').first().click()
+      // Submit butonunun enabled olmasını bekle
+      const submitBtn = page.locator('button[type="submit"]').first()
+      await submitBtn.waitFor({ state: 'visible', timeout: 10000 })
+      await page.waitForTimeout(500)
+      await submitBtn.click()
       await page.waitForTimeout(3000)
       const toast = await page.locator('[class*="toast"],[role="alert"],[class*="success"]').count()
       const successText = await page.locator('text=/güncellendi|başarı|kaydedildi/i').count()
       const greenMsg = await page.locator('p.text-green-600').count()
+      const shot = await snap('B6', 'profil-kaydet')
       log('B', 'B6', (toast + successText + greenMsg) > 0 ? 'PASS' : 'FAIL',
-        `Toast: ${toast}, Başarı: ${successText}, Yeşil: ${greenMsg}`)
+        `Toast: ${toast}, Başarı: ${successText}, Yeşil: ${greenMsg}`, shot)
     } else {
       log('B', 'B6', 'FAIL', 'Form hâlâ yok')
     }
