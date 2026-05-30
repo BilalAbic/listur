@@ -2,6 +2,7 @@
 import { Geist } from 'next/font/google'
 import './globals.css'
 import { AuthProvider } from '@/context/AuthContext'
+import { FavoritesProvider } from '@/context/FavoritesContext'
 import { Header } from '@/components/layout/Header'
 import { InterestsModal } from '@/components/modals/InterestsModal'
 import { getBaseUrl } from '@/lib/site'
@@ -36,11 +37,13 @@ export default function RootLayout({
     <html lang="tr" className={`${geist.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-gray-50">
         <AuthProvider>
-          {/* Header giriş/çıkış sayfalarında gizlenecek — o sayfalar kendi layout'unu yönetir */}
-          <Header />
-          <main className="flex-1">{children}</main>
-          {/* İlgi alanı seçim modalı — ilk ziyarette açılır */}
-          <InterestsModal />
+          <FavoritesProvider>
+            {/* Header giriş/çıkış sayfalarında gizlenecek — o sayfalar kendi layout'unu yönetir */}
+            <Header />
+            <main className="flex-1">{children}</main>
+            {/* İlgi alanı seçim modalı — ilk ziyarette açılır */}
+            <InterestsModal />
+          </FavoritesProvider>
         </AuthProvider>
       </body>
     </html>
