@@ -28,6 +28,8 @@ const typeConfig: Record<string, { icon: string; label: string; color: string }>
   submission_rejected: { icon: '❌', label: 'Etkinliğiniz reddedildi', color: 'bg-red-50' },
   report_resolved: { icon: '🔍', label: 'Raporunuz incelendi', color: 'bg-yellow-50' },
   event_reminder: { icon: '⏰', label: 'Etkinlik yaklaşıyor', color: 'bg-amber-50' },
+  organizer_new_event: { icon: '👤', label: 'Takip ettiğin organizatörden', color: 'bg-purple-50' },
+  organizer_verified: { icon: '✨', label: 'Doğrulanmış organizatör oldun!', color: 'bg-emerald-50' },
 }
 
 export function NotificationPageList({ notifications }: Props) {

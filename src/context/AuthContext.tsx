@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import type { Tables } from '@/types/database'
@@ -33,22 +33,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createClient()
 
+  // initializedRef: getSession + onAuthStateChange race condition'ını önler.
+  // İlk başarılı init'ten sonra onAuthStateChange INITIAL_SESSION event'i atlanır.
+  const initializedRef = useRef(false)
+
   const fetchProfile = useCallback(async (userId: string) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .single()
-      
+        .maybeSingle()
+
       if (error) {
-        console.error('[Auth] fetchProfile error:', error)
+        console.error('[Auth] fetchProfile error:', error.message)
         setProfile(null)
         return
       }
-      
+
       setProfile(data)
     } catch (err) {
+      // Network hatası vb. — sessizce başarısız olma, profile'ı temizle
       console.error('[Auth] fetchProfile unexpected error:', err)
       setProfile(null)
     }
@@ -65,12 +70,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const initSession = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession()
-        
+
         if (!isMounted) return
-        
+
         setSession(currentSession)
         setUser(currentSession?.user ?? null)
-        
+
         if (currentSession?.user) {
           await fetchProfile(currentSession.user.id)
         }
@@ -78,6 +83,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.error('[Auth] getSession error:', err)
       } finally {
         if (isMounted) {
+          initializedRef.current = true
           setLoading(false)
         }
       }
@@ -89,18 +95,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, newSession) => {
         if (!isMounted) return
-        
-        setSession(newSession)
-        setUser(newSession?.user ?? null)
-        
-        if (newSession?.user) {
-          await fetchProfile(newSession.user.id)
-        } else {
-          setProfile(null)
+
+        // INITIAL_SESSION event'ini atla — getSession zaten handle etti
+        if (event === 'INITIAL_SESSION' && !initializedRef.current) {
+          // getSession henüz bitmemiş, INITIAL_SESSION'ı da atla
+          // çünkü getSession promise'i zaten handle edecek
+          return
         }
-        
-        if (isMounted) {
-          setLoading(false)
+        if (event === 'INITIAL_SESSION' && initializedRef.current) {
+          // getSession zaten tamamlandı, tekrar profile çekmeye gerek yok
+          return
+        }
+
+        // SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED vb. gerçek event'ler
+        try {
+          setSession(newSession)
+          setUser(newSession?.user ?? null)
+
+          if (newSession?.user) {
+            await fetchProfile(newSession.user.id)
+          } else {
+            setProfile(null)
+          }
+        } catch (err) {
+          console.error('[Auth] onAuthStateChange error:', err)
+        } finally {
+          if (isMounted) {
+            setLoading(false)
+          }
         }
       }
     )

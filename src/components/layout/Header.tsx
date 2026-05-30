@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { useNotifications } from '@/hooks/useNotifications'
+import { SearchBar } from '@/components/discovery/SearchBar'
 
 export function Header() {
   const { user, profile, signOut } = useAuth()
@@ -23,6 +24,11 @@ export function Header() {
               Takvim
             </Link>
           </nav>
+        </div>
+
+        {/* Orta: arama (md+) */}
+        <div className="hidden md:block flex-1 max-w-md mx-6">
+          <SearchBar variant="compact" />
         </div>
 
         {/* Sağ navigasyon */}
@@ -75,6 +81,15 @@ export function Header() {
                       <Link href="/profil" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         Profil
                       </Link>
+                      {profile?.is_organizer ? (
+                        <Link href="/profil/organizator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          Organizatör Paneli
+                        </Link>
+                      ) : (
+                        <Link href="/profil/organizator-basvuru" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          Organizatör Ol
+                        </Link>
+                      )}
                       {(profile?.role === 'moderator' || profile?.role === 'admin') && (
                         <Link href="/moderator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           Moderatör Paneli
