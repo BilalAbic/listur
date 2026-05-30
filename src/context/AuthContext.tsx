@@ -61,6 +61,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     let isMounted = true
 
+    // INITIAL_SESSION gelmezse loading=true'da takılmayalım (güvenlik timeout)
+    const timeout = setTimeout(() => {
+      if (isMounted) setLoading(false)
+    }, 3000)
+
     // onAuthStateChange'i primary kaynak olarak kullan.
     // INITIAL_SESSION eventi getSession'ın eşdeğeri — hem SSR cookie'sini
     // hem de client storage'ı kontrol eder.
@@ -77,21 +82,25 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           setProfile(null)
         }
 
-        // INITIAL_SESSION geldiğinde loading biter
+        // INITIAL_SESSION geldiğinde loading biter (timeout'tan önce)
         if (event === 'INITIAL_SESSION') {
-          setLoading(false)
+          clearTimeout(timeout)
+          if (isMounted) setLoading(false)
         }
       }
     )
 
     return () => {
       isMounted = false
+      clearTimeout(timeout)
       subscription.unsubscribe()
     }
   }, [supabase, fetchProfile])
 
   const signOut = async () => {
     await supabase.auth.signOut()
+    // Tam sayfa yenileme — server session state'ini sıfırla, middleware cookie'lerini temizle
+    window.location.href = '/'
   }
 
   return (

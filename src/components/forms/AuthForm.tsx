@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useInterests } from '@/hooks/useInterests'
 
@@ -37,18 +37,26 @@ function translateAuthError(message: string): string {
   return 'Beklenmedik bir hata oluştu. Lütfen tekrar deneyin.'
 }
 
+const CALLBACK_ERRORS: Record<string, string> = {
+  session_exchange_failed: 'Giriş bağlantısı geçersiz veya süresi dolmuş. Lütfen yeni bağlantı isteyin.',
+  no_code: 'Giriş bağlantısı eksik. Lütfen tekrar deneyin.',
+}
+
 export function AuthForm() {
-  const router = useRouter()
   const searchParams = useSearchParams()
   const initialTab = (searchParams.get('tab') as Tab) || 'login'
   const redirectTo = searchParams.get('redirect') || '/'
+  const callbackError = searchParams.get('error')
 
   const [tab, setTab] = useState<Tab>(initialTab)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
-  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  // Auth callback'ten gelen hata varsa başlangıç mesajı olarak göster
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(
+    callbackError ? { type: 'error', text: CALLBACK_ERRORS[callbackError] ?? 'Giriş başarısız. Lütfen tekrar deneyin.' } : null
+  )
   const [magicSent, setMagicSent] = useState(false)
 
   const supabase = createClient()

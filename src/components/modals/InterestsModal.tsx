@@ -7,25 +7,25 @@ import { INTEREST_CATEGORIES } from '@/types/index'
 import type { InterestCategory } from '@/types/index'
 
 export function InterestsModal() {
-  const { user, profile, refreshProfile } = useAuth()
+  const { user, profile, loading: authLoading, refreshProfile } = useAuth()
   const { isModalShown, markModalShown, setLocalInterests, updateSupabaseInterests } = useInterests()
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<InterestCategory[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
+    // Auth yüklenmeden karar verme — profil null iken açılıp kapanma (flicker) olmasın
+    if (authLoading) return
     // Modal zaten gösterildiyse açma
-    if (isModalShown()) {
-      return
-    }
+    if (isModalShown()) return
     // Giriş yapmış kullanıcı zaten ilgi alanı seçmişse açma
-    if (user && profile && profile.interests && profile.interests.length > 0) {
+    if (user && profile && (profile.interests as string[] | null)?.length) {
       markModalShown()
       return
     }
     // Modal'ı aç
     setOpen(true)
-  }, [user, profile]) // isModalShown ve markModalShown'ı dependency'den çıkardık
+  }, [user, profile, authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggle = (cat: InterestCategory) => {
     setSelected((prev) =>
