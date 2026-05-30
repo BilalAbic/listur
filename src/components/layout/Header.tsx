@@ -75,6 +75,15 @@ export function Header() {
                       <Link href="/profil" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                         Profil
                       </Link>
+                      {profile?.is_organizer ? (
+                        <Link href="/profil/organizator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          Organizatör Paneli
+                        </Link>
+                      ) : (
+                        <Link href="/profil/organizator-basvuru" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
+                          Organizatör Ol
+                        </Link>
+                      )}
                       {(profile?.role === 'moderator' || profile?.role === 'admin') && (
                         <Link href="/moderator" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50">
                           Moderatör Paneli

@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { createClient } from '@/lib/supabase/client'
 import type { Tables } from '@/types/database'
@@ -33,13 +33,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const supabase = createClient()
 
+  // initializedRef: getSession + onAuthStateChange race condition'ını önler.
+  // İlk başarılı init'ten sonra onAuthStateChange INITIAL_SESSION event'i atlanır.
+  const initializedRef = useRef(false)
+
   const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    setProfile(data)
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (error) {
+        console.error('[Auth] fetchProfile error:', error.message)
+        setProfile(null)
+        return
+      }
+
+      setProfile(data)
+    } catch (err) {
+      // Network hatası vb. — sessizce başarısız olma, profile'ı temizle
+      console.error('[Auth] fetchProfile unexpected error:', err)
+      setProfile(null)
+    }
   }, [supabase])
 
   const refreshProfile = useCallback(async () => {
@@ -47,40 +64,73 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [user, fetchProfile])
 
   useEffect(() => {
-    // İlk oturum yükle — .catch() ile her durumda loading=false garantilenir
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          fetchProfile(session.user.id).finally(() => setLoading(false))
-        } else {
+    let isMounted = true
+
+    // İlk oturum yükle
+    const initSession = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+
+        if (!isMounted) return
+
+        setSession(currentSession)
+        setUser(currentSession?.user ?? null)
+
+        if (currentSession?.user) {
+          await fetchProfile(currentSession.user.id)
+        }
+      } catch (err) {
+        console.error('[Auth] getSession error:', err)
+      } finally {
+        if (isMounted) {
+          initializedRef.current = true
           setLoading(false)
         }
-      })
-      .catch(() => {
-        // Network hatası, parse hatası vb. — yine de loading'i kapat
-        setLoading(false)
-      })
+      }
+    }
 
-    // Auth state değişikliklerini dinle — try/finally ile loading garantili kapanır
+    initSession()
+
+    // Auth state değişikliklerini dinle
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event, newSession) => {
+        if (!isMounted) return
+
+        // INITIAL_SESSION event'ini atla — getSession zaten handle etti
+        if (event === 'INITIAL_SESSION' && !initializedRef.current) {
+          // getSession henüz bitmemiş, INITIAL_SESSION'ı da atla
+          // çünkü getSession promise'i zaten handle edecek
+          return
+        }
+        if (event === 'INITIAL_SESSION' && initializedRef.current) {
+          // getSession zaten tamamlandı, tekrar profile çekmeye gerek yok
+          return
+        }
+
+        // SIGNED_IN, SIGNED_OUT, TOKEN_REFRESHED vb. gerçek event'ler
         try {
-          setSession(session)
-          setUser(session?.user ?? null)
-          if (session?.user) {
-            await fetchProfile(session.user.id)
+          setSession(newSession)
+          setUser(newSession?.user ?? null)
+
+          if (newSession?.user) {
+            await fetchProfile(newSession.user.id)
           } else {
             setProfile(null)
           }
+        } catch (err) {
+          console.error('[Auth] onAuthStateChange error:', err)
         } finally {
-          setLoading(false)
+          if (isMounted) {
+            setLoading(false)
+          }
         }
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+    }
   }, [supabase, fetchProfile])
 
   const signOut = async () => {
