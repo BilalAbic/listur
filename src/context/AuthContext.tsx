@@ -38,6 +38,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const supabase = createClient()
 
   const fetchProfile = useCallback(async (supabaseUser: User) => {
+    // ── 1. Profil çek ──────────────────────────────────────────────────────────
+    // Ayrı try-catch: organizatör sorgusu hata verse bile profile=null olmaz.
     try {
       let { data: profileData, error } = await supabase
         .from('profiles')
@@ -74,8 +76,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       setProfile(profileData)
+    } catch (err) {
+      console.error('[Auth] fetchProfile unexpected error:', err)
+      setProfile(null)
+      return
+    }
 
-      // Organizatör başvuru durumunu çek (en son başvuru yeterli)
+    // ── 2. Organizatör başvuru durumu ──────────────────────────────────────────
+    // Ayrı try-catch: bu sorgu başarısız olursa profileya dokunmaz.
+    try {
       const { data: appData } = await supabase
         .from('organizer_applications')
         .select('status')
@@ -85,9 +94,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .maybeSingle()
 
       setOrganizerAppStatus((appData?.status ?? null) as 'open' | 'resolved' | null)
-    } catch (err) {
-      console.error('[Auth] fetchProfile unexpected error:', err)
-      setProfile(null)
+    } catch {
+      setOrganizerAppStatus(null)
     }
   }, [supabase])
 
