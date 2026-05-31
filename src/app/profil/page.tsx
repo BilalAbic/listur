@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
@@ -25,10 +25,10 @@ export default function ProfilPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  // Profili doğrudan Supabase'den çek (8sn timeout — takılmasın)
-  // React Compiler memoization preservation uyarısı veriyor — issue #97 ile sistemli ele alınacak.
-  // eslint-disable-next-line
-  const fetchPageProfile = useCallback(async (userId: string) => {
+  // Profili doğrudan Supabase'den çek (8sn timeout — takılmasın).
+  // React Compiler 19 otomatik memoize eder — useCallback gerekmez.
+  // useEffect'in dependency array'inde fetchPageProfile YOK; user/authLoading tetikler.
+  const fetchPageProfile = async (userId: string) => {
     setProfileLoading(true)
 
     // Timeout guard: 8sn içinde sorgu dönmezse loading'i kapat ve hata göster.
@@ -79,7 +79,7 @@ export default function ProfilPage() {
       clearTimeout(timeoutId)
       setProfileLoading(false)
     }
-  }, [supabase, user?.email])
+  }
 
   // Giriş yapmamış kullanıcıyı yönlendir
   useEffect(() => {
@@ -88,12 +88,15 @@ export default function ProfilPage() {
     }
   }, [user, authLoading, router])
 
-  // Kullanıcı hazır olunca profili çek
+  // Kullanıcı hazır olunca profili çek.
+  // fetchPageProfile inline (React Compiler memoize eder) — dependency'ye eklenmez,
+  // aksi halde her render'da yeni referans → sonsuz çağrı riski.
   useEffect(() => {
     if (user && !authLoading) {
       fetchPageProfile(user.id)
     }
-  }, [user, authLoading, fetchPageProfile])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, authLoading])
 
   // Profil verisini forma yükle
   useEffect(() => {

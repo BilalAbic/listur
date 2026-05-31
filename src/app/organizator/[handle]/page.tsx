@@ -9,6 +9,26 @@ type Params = Promise<{ handle: string }>
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * Etkinlikleri yaklaşan / geçmiş olarak ayır.
+ *
+ * NOT: Module-level helper — `Date.now()` çağrısı render scope'unun dışında
+ * kalır, böylece React Compiler "impure function during render" uyarısı vermez.
+ * Server component her request'te bu fonksiyonu yeniden çağırır, normal davranış.
+ */
+function partitionByDate<T extends { start_date: string }>(
+  events: T[]
+): { upcoming: T[]; past: T[] } {
+  const now = Date.now()
+  const upcoming: T[] = []
+  const past: T[] = []
+  for (const e of events) {
+    if (new Date(e.start_date).getTime() >= now) upcoming.push(e)
+    else past.push(e)
+  }
+  return { upcoming, past }
+}
+
 interface OrganizerProfile {
   id: string
   handle: string | null
@@ -105,13 +125,9 @@ export default async function OrganizatorSayfa({ params }: { params: Params }) {
     .eq('status', 'published')
     .order('start_date', { ascending: false })
 
-  const eventList = events ?? []
-  // Server component — her request'te yeni Date.now() değeri normal davranış.
-  // React Compiler false-positive: bu satır izinli (issue #97 ile sistemli ele alınacak).
-  // eslint-disable-next-line
-  const now = Date.now()
-  const upcoming = eventList.filter((e) => new Date(e.start_date).getTime() >= now)
-  const past = eventList.filter((e) => new Date(e.start_date).getTime() < now)
+  // Date.now() module-level helper'a sarıldı — React Compiler render içi impure
+  // function uyarısını önler.
+  const { upcoming, past } = partitionByDate(events ?? [])
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-10">
