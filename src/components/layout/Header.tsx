@@ -86,7 +86,15 @@ export function Header() {
 
                 {menuOpen && (
                   <>
-                    <div className="fixed inset-0" onClick={() => setMenuOpen(false)} />
+                    {/* Backdrop — sadece dış tıklamayı yakalar. Klavye için zaten
+                        Escape ile kapatılır + menü trigger button focus ile yönetilir.
+                        aria-hidden + tabIndex=-1 — screen reader'a görünmez. */}
+                    <div
+                      className="fixed inset-0"
+                      onClick={() => setMenuOpen(false)}
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    />
                     <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1 z-50">
                       {/* Kullanıcı bilgisi */}
                       <div className="px-4 py-2.5 border-b border-gray-100">
