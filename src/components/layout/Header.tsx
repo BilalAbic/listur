@@ -20,6 +20,17 @@ export function Header() {
             Listur
           </Link>
           <nav className="hidden sm:flex items-center gap-4 text-sm font-medium text-gray-600">
+            <Link href="/kesfet/trending" className="hover:text-gray-900 transition-colors flex items-center gap-1">
+              <svg className="w-3.5 h-3.5 text-orange-500" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M13.5 0a8.5 8.5 0 0 0-8 11.5 4 4 0 0 0-2.5 3.7C3 19 6 22 9.5 22h7c4.4 0 7.5-3.6 7.5-8 0-2.7-1.5-5-3.7-6.3A8.5 8.5 0 0 0 13.5 0z"/>
+              </svg>
+              Gündem
+            </Link>
+            {user && (
+              <Link href="/kesfet/sana-ozel" className="hover:text-gray-900 transition-colors">
+                Sana Özel
+              </Link>
+            )}
             <Link href="/takvim" className="hover:text-gray-900 transition-colors">
               Takvim
             </Link>

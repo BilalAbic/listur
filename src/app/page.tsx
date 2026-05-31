@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
+import { TrendingStrip } from '@/components/discovery/TrendingStrip'
 import type { Tables } from '@/types/database'
 
 type Event = Tables<'events'>
@@ -141,6 +142,13 @@ export default async function AnaSayfa({ searchParams }: { searchParams: SearchP
           Hackathon, meetup, workshop ve konferansları keşfet. Toplulukla buluş.
         </p>
       </div>
+
+      {/* Trending şerit — sadece filtre yokken göster */}
+      {!hasFilters && (
+        <Suspense fallback={null}>
+          <TrendingStrip />
+        </Suspense>
+      )}
 
       {/* Filtreler */}
       <div className="mb-8">
