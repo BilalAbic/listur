@@ -67,7 +67,7 @@ export default async function TrendingPage() {
           href="/kesfet/sana-ozel"
           className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
         >
-          Sana Özel'i Aç
+          Sana Özel&apos;i Aç
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>

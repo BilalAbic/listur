@@ -57,7 +57,7 @@ export default async function OrganizerDashboard() {
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Henüz doğrulanmış organizatör değilsin</h1>
           <p className="text-gray-600 mb-6 max-w-md mx-auto text-sm">
             Doğrulanmış organizatör olunca <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">/organizator/handle</code>{' '}
-            adresinde public profil sayfan ve etkinlik analytics'in olur.
+            adresinde public profil sayfan ve etkinlik analytics&apos;in olur.
           </p>
           <Link
             href="/profil/organizator-basvuru"

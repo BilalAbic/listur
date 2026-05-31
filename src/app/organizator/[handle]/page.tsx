@@ -106,6 +106,9 @@ export default async function OrganizatorSayfa({ params }: { params: Params }) {
     .order('start_date', { ascending: false })
 
   const eventList = events ?? []
+  // Server component — her request'te yeni Date.now() değeri normal davranış.
+  // React Compiler false-positive: bu satır izinli (issue #97 ile sistemli ele alınacak).
+  // eslint-disable-next-line
   const now = Date.now()
   const upcoming = eventList.filter((e) => new Date(e.start_date).getTime() >= now)
   const past = eventList.filter((e) => new Date(e.start_date).getTime() < now)
