@@ -1,0 +1,404 @@
+{
+  "timestamp": "2026-05-31T13:48:05.470Z",
+  "baseUrl": "https://dev.listur.bilalabic.com",
+  "screenshotsDir": "docs\\e2e-test\\2026-05-31",
+  "results": [
+    {
+      "section": "A",
+      "id": "A1",
+      "status": "PASS",
+      "detail": "Title: \"Listur — Türkiye Teknoloji Etkinlikleri\", kart: 17",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\A1-anasayfa.png"
+    },
+    {
+      "section": "A",
+      "id": "A2",
+      "status": "FAIL",
+      "detail": "Modal görünür: false",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\A2-interests-modal.png"
+    },
+    {
+      "section": "A",
+      "id": "A3",
+      "status": "PASS",
+      "detail": "shown: true, interests: [\"Yapay Zeka / ML\"]",
+      "screenshot": null
+    },
+    {
+      "section": "A",
+      "id": "A4",
+      "status": "PASS",
+      "detail": "Modal görünür: false",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\A4-refresh-no-modal.png"
+    },
+    {
+      "section": "A",
+      "id": "A5",
+      "status": "PASS",
+      "detail": "Filter element sayısı: 4",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\A5-filtreler.png"
+    },
+    {
+      "section": "A",
+      "id": "A6",
+      "status": "PASS",
+      "detail": "Paylaş btn: 2, Bildir btn: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\A6-etkinlik-detay.png"
+    },
+    {
+      "section": "A",
+      "id": "A7",
+      "status": "PASS",
+      "detail": "Rapor butonu görünür: true",
+      "screenshot": null
+    },
+    {
+      "section": "A",
+      "id": "A8",
+      "status": "PASS",
+      "detail": "404 metni görünür: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\A8-404-sayfa.png"
+    },
+    {
+      "section": "A",
+      "id": "A9",
+      "status": "PASS",
+      "detail": "404 metni: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\A9-404-etkinlik.png"
+    },
+    {
+      "section": "A",
+      "id": "A10",
+      "status": "PASS",
+      "detail": "/admin → /giris?redirect=%2Fadmin",
+      "screenshot": null
+    },
+    {
+      "section": "B",
+      "id": "B1",
+      "status": "PASS",
+      "detail": "Etkinlik Ekle: VAR, çan: VAR",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\B1-login-header.png"
+    },
+    {
+      "section": "B",
+      "id": "B2",
+      "status": "PASS",
+      "detail": "Profil link: 1, Organizatör link: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\B2-header-menu.png"
+    },
+    {
+      "section": "B",
+      "id": "B3",
+      "status": "PASS",
+      "detail": "Form: 2, Hata ekranı: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\B3-profil-form.png"
+    },
+    {
+      "section": "B",
+      "id": "B4",
+      "status": "PASS",
+      "detail": "Success indicator: 2",
+      "screenshot": null
+    },
+    {
+      "section": "B",
+      "id": "B5",
+      "status": "PASS",
+      "detail": "Link input: 2, Etiket label: 2",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\B5-etkinlik-gonder-tags.png"
+    },
+    {
+      "section": "C",
+      "id": "C1",
+      "status": "PASS",
+      "detail": "Bildir butonu: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\C1-rapor-button.png"
+    },
+    {
+      "section": "C",
+      "id": "C2",
+      "status": "PASS",
+      "detail": "Başarı ekranı",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\C2-rapor-modal.png"
+    },
+    {
+      "section": "C",
+      "id": "C3",
+      "status": "PASS",
+      "detail": "Duplicate hata: VAR",
+      "screenshot": null
+    },
+    {
+      "section": "H",
+      "id": "H1",
+      "status": "PASS",
+      "detail": "Misafir favori → /giris?redirect=%2Fetkinlik%2Ftechcareernet-ofis-g",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\H1-misafir-favori-redirect.png"
+    },
+    {
+      "section": "H",
+      "id": "H2",
+      "status": "PASS",
+      "detail": "aria-pressed: false → true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\H2-favori-toggle.png"
+    },
+    {
+      "section": "H",
+      "id": "H3",
+      "status": "PASS",
+      "detail": "Favori button text: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\H3-detay-favori-button.png"
+    },
+    {
+      "section": "H",
+      "id": "H5",
+      "status": "PASS",
+      "detail": "Dropdown seçenek sayısı: 3",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\H5-rsvp-dropdown.png"
+    },
+    {
+      "section": "H",
+      "id": "H6",
+      "status": "PASS",
+      "detail": "Katılıyorum seçildi",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\H6-rsvp-going-after.png"
+    },
+    {
+      "section": "I",
+      "id": "I1",
+      "status": "PASS",
+      "detail": "Ay başlığı görünür: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\I1-takvim-sayfa.png"
+    },
+    {
+      "section": "I",
+      "id": "I2",
+      "status": "PASS",
+      "detail": "Header Takvim link: 1",
+      "screenshot": null
+    },
+    {
+      "section": "I",
+      "id": "I3",
+      "status": "PASS",
+      "detail": "Takvime ekle butonu: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\I3-detay-takvim-button.png"
+    },
+    {
+      "section": "I",
+      "id": "I4",
+      "status": "PASS",
+      "detail": "Content-Type: text/calendar; charset=utf-8, BEGIN:VCALENDAR: true",
+      "screenshot": null
+    },
+    {
+      "section": "J",
+      "id": "J1",
+      "status": "PASS",
+      "detail": "404 metni: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\J1-404-organizator.png"
+    },
+    {
+      "section": "J",
+      "id": "J2",
+      "status": "SKIP",
+      "detail": "K bölümünden sonra K7 ile doğrulanır",
+      "screenshot": null
+    },
+    {
+      "section": "K",
+      "id": "K1",
+      "status": "PASS",
+      "detail": "Form: 2, Handle input: 4, Zaten organizatör/açık: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\K1-basvuru-form.png"
+    },
+    {
+      "section": "K",
+      "id": "K8",
+      "status": "PASS",
+      "detail": "Fallback: 1, Dashboard: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\K8-organizer-dashboard.png"
+    },
+    {
+      "section": "K",
+      "id": "K9",
+      "status": "PASS",
+      "detail": "İçerik uzunluk OK: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\K9-admin-basvurular.png"
+    },
+    {
+      "section": "L",
+      "id": "L1",
+      "status": "PASS",
+      "detail": "Search input: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\L1-header-search.png"
+    },
+    {
+      "section": "L",
+      "id": "L2",
+      "status": "PASS",
+      "detail": "Heading: 1, Sonuç: 1, Empty: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\L2-ara-hackathon.png"
+    },
+    {
+      "section": "L",
+      "id": "L3",
+      "status": "PASS",
+      "detail": "Sonuç: 6, Empty: 0 (FTS unaccent çalışıyor mu)",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\L3-ara-istanbul.png"
+    },
+    {
+      "section": "L",
+      "id": "L5",
+      "status": "PASS",
+      "detail": "Hint: true",
+      "screenshot": null
+    },
+    {
+      "section": "M",
+      "id": "M1",
+      "status": "PASS",
+      "detail": "Heading: 1, Etkinlik: 10, Empty: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\M1-kesfet-trending-misafir.png"
+    },
+    {
+      "section": "M",
+      "id": "M2",
+      "status": "PASS",
+      "detail": "URL: /giris?redirect=%2Fkesfet%2Fsana-ozel, redirect param: true",
+      "screenshot": null
+    },
+    {
+      "section": "M",
+      "id": "M3",
+      "status": "FAIL",
+      "detail": "Status: 200, results: 5, cache: public",
+      "screenshot": null
+    },
+    {
+      "section": "M",
+      "id": "M4",
+      "status": "PASS",
+      "detail": "Status: 401, code: AUTH_REQUIRED",
+      "screenshot": null
+    },
+    {
+      "section": "M",
+      "id": "M5",
+      "status": "PASS",
+      "detail": "Gündem: 1, Sana Özel: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\M5-header-misafir-gundem.png"
+    },
+    {
+      "section": "M",
+      "id": "M6",
+      "status": "PASS",
+      "detail": "Strip heading: 1, Tümünü link: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\M6-anasayfa-trending-strip.png"
+    },
+    {
+      "section": "M",
+      "id": "M7",
+      "status": "PASS",
+      "detail": "Heading: \"Test Özel\", events: 10, empty: 0",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\M7-kesfet-sanaozel-login.png"
+    },
+    {
+      "section": "M",
+      "id": "M8",
+      "status": "PASS",
+      "detail": "Status: 200, results: 10, cache: private, max-age=60",
+      "screenshot": null
+    },
+    {
+      "section": "M",
+      "id": "M9",
+      "status": "PASS",
+      "detail": "Sana Özel link: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\M9-header-login-sanaozel.png"
+    },
+    {
+      "section": "M",
+      "id": "M10",
+      "status": "PASS",
+      "detail": "Settled: form (form/error/timeout)",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\M10-profil-loaded.png"
+    },
+    {
+      "section": "D",
+      "id": "D1",
+      "status": "PASS",
+      "detail": "Moderatör Paneli link: true",
+      "screenshot": null
+    },
+    {
+      "section": "D",
+      "id": "D2",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\D2-bekleyenler.png"
+    },
+    {
+      "section": "D",
+      "id": "D7",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\D7-mod-raporlar.png"
+    },
+    {
+      "section": "E",
+      "id": "E1",
+      "status": "PASS",
+      "detail": "Admin: 1, Moderatör: 1",
+      "screenshot": null
+    },
+    {
+      "section": "E",
+      "id": "E2",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\E2-admin-etkinlikler.png"
+    },
+    {
+      "section": "E",
+      "id": "E3",
+      "status": "PASS",
+      "detail": "İçerik: true",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\E3-admin-kullanicilar.png"
+    },
+    {
+      "section": "F",
+      "id": "F1",
+      "status": "PASS",
+      "detail": "Çan: true",
+      "screenshot": null
+    },
+    {
+      "section": "F",
+      "id": "F2",
+      "status": "PASS",
+      "detail": "Items: 0, Empty: 1",
+      "screenshot": "docs\\e2e-test\\2026-05-31\\F2-bildirimler.png"
+    },
+    {
+      "section": "G",
+      "id": "G1",
+      "status": "PASS",
+      "detail": "<loc>: true, /etkinlik/: true, localhost: false",
+      "screenshot": null
+    },
+    {
+      "section": "G",
+      "id": "G2",
+      "status": "PASS",
+      "detail": "Sitemap: true, Disallow: true",
+      "screenshot": null
+    }
+  ],
+  "summary": {
+    "pass": 53,
+    "fail": 2,
+    "skip": 1
+  }
+}

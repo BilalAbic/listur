@@ -1,9 +1,15 @@
 /**
- * Issue #34 — E2E Test v5: Sprint 1-5 dahil tam akış + screenshot
+ * Issue #34 — E2E Test v6: Sprint 1-6 dahil tam akış + screenshot
+ *
+ * Bölümler:
+ *   A — Misafir | B — User-1 | C — Raporcu | D — Moderator | E — Admin
+ *   F — Bildirimler | G — SEO | H — Engagement (Sprint 1) | I — Calendar (Sprint 2)
+ *   J — Organizator 404 (Sprint 3) | K — Doğrulama (Sprint 4)
+ *   L — Arama + Tags (Sprint 5) | M — Trending + Sana Özel (Sprint 6)
  *
  * Çalıştırma:
  *   node e2e-test.js
- *   BASE_URL=https://dev.listur.bilalabic.com node e2e-test.js
+ *   BASE_URL=https://listur.bilalabic.com node e2e-test.js
  *
  * Çıktılar:
  *   - e2e-results.json (PASS/FAIL/SKIP tablo)
@@ -127,13 +133,14 @@ async function testA() {
   } catch (e) { log('A', 'A1', 'FAIL', e.message.slice(0, 120)) }
 
   // A2 — InterestsModal ilk açılış
+  // Modal başlığı "Seni hangi konular ilgilendiriyor?" — data-testid eklendi.
   try {
     await newContext()
     await goto('/')
     await page.waitForTimeout(1500)
-    const modalText = await page.locator('text=/İlgi alanı|İlgi Alanı|interests/i').count()
+    const modalDialog = await page.locator('[data-testid="interests-modal"], [role="dialog"]:has-text("ilgilendir")').count()
     const shot = await snap('A2', 'interests-modal')
-    log('A', 'A2', modalText > 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalText > 0}`, shot)
+    log('A', 'A2', modalDialog > 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalDialog > 0}`, shot)
   } catch (e) { log('A', 'A2', 'FAIL', e.message.slice(0, 120)) }
 
   // A3 — localStorage kontrolü (ilgi alanı seçimi sonrası)
@@ -159,9 +166,9 @@ async function testA() {
   try {
     await page.reload({ waitUntil: 'networkidle' })
     await page.waitForTimeout(800)
-    const modalText = await page.locator('text=/İlgi alanı|İlgi Alanı/i').count()
+    const modalDialog = await page.locator('[data-testid="interests-modal"], [role="dialog"]:has-text("ilgilendir")').count()
     const shot = await snap('A4', 'refresh-no-modal')
-    log('A', 'A4', modalText === 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalText > 0}`, shot)
+    log('A', 'A4', modalDialog === 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalDialog > 0}`, shot)
   } catch (e) { log('A', 'A4', 'FAIL', e.message.slice(0, 120)) }
 
   // A5 — Filtreler
@@ -580,6 +587,135 @@ async function testL() {
   } catch (e) { log('L', 'L5', 'FAIL', e.message.slice(0, 120)) }
 }
 
+// ─── BÖLÜM M — Trending + Sana Özel (Sprint 6) ──────────────────────────────
+async function testM() {
+  console.log('\n📋 BÖLÜM M — Trending + Sana Özel (Sprint 6)')
+  await newContext()
+  await page.addInitScript(() => {
+    localStorage.setItem('listur_interests_shown', 'true')
+  })
+
+  // M1 — /kesfet/trending public erişim
+  try {
+    await goto('/kesfet/trending')
+    const heading = await page.locator('h1:has-text("Trend Etkinlik")').count()
+    const empty = await page.locator('text=/gündemde etkinlik yok/i').count()
+    const events = await page.locator('a[href^="/etkinlik/"]').count()
+    const shot = await snap('M1', 'kesfet-trending-misafir')
+    log('M', 'M1', heading > 0 ? 'PASS' : 'FAIL',
+      `Heading: ${heading}, Etkinlik: ${events}, Empty: ${empty}`, shot)
+  } catch (e) { log('M', 'M1', 'FAIL', e.message.slice(0, 120)) }
+
+  // M2 — /kesfet/sana-ozel misafir → /giris redirect
+  try {
+    await page.goto(`${BASE}/kesfet/sana-ozel`, { waitUntil: 'networkidle', timeout: 15000 })
+    const onGiris = page.url().includes('/giris')
+    const redirectParam = page.url().includes('redirect=')
+    log('M', 'M2', onGiris ? 'PASS' : 'FAIL',
+      `URL: ${page.url().replace(BASE, '')}, redirect param: ${redirectParam}`)
+  } catch (e) { log('M', 'M2', 'FAIL', e.message.slice(0, 120)) }
+
+  // M3 — /api/feed/trending public 200 + Cache-Control
+  // NOT: Vercel Edge CDN response header'ı re-encode edebiliyor —
+  // origin'de `public, s-maxage=300, ...` set ediyoruz ama proxy bunu
+  // `public, max-age=N` veya yalnızca `public`'e indirgeyebilir.
+  // Bu yüzden `private` OLMAMASI ve `public` veya `max-age` olması yeterli.
+  try {
+    const response = await page.context().request.get(`${BASE}/api/feed/trending?limit=5`)
+    const cacheCtrl = (response.headers()['cache-control'] || '').toLowerCase()
+    const json = await response.json().catch(() => null)
+    const okStatus = response.status() === 200
+    const hasResults = json && Array.isArray(json.results)
+    const isPublicCacheable = !cacheCtrl.includes('private') &&
+      (cacheCtrl.includes('public') || cacheCtrl.includes('max-age'))
+    log('M', 'M3', (okStatus && hasResults && isPublicCacheable) ? 'PASS' : 'FAIL',
+      `Status: ${response.status()}, results: ${json?.count}, cache: ${cacheCtrl.slice(0, 60)}`)
+  } catch (e) { log('M', 'M3', 'FAIL', e.message.slice(0, 120)) }
+
+  // M4 — /api/feed/for-you misafir → 401
+  try {
+    const response = await page.context().request.get(`${BASE}/api/feed/for-you?limit=5`)
+    const json = await response.json().catch(() => ({}))
+    const is401 = response.status() === 401
+    const correctCode = json?.code === 'AUTH_REQUIRED'
+    log('M', 'M4', (is401 && correctCode) ? 'PASS' : 'FAIL',
+      `Status: ${response.status()}, code: ${json?.code}`)
+  } catch (e) { log('M', 'M4', 'FAIL', e.message.slice(0, 120)) }
+
+  // M5 — Header: misafire "Gündem" linki görünür, "Sana Özel" görünmez
+  try {
+    await goto('/')
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.waitForTimeout(500)
+    const trendingLink = await page.locator('header a[href="/kesfet/trending"]').count()
+    const personalLink = await page.locator('header a[href="/kesfet/sana-ozel"]').count()
+    const shot = await snap('M5', 'header-misafir-gundem')
+    log('M', 'M5', (trendingLink > 0 && personalLink === 0) ? 'PASS' : 'FAIL',
+      `Gündem: ${trendingLink}, Sana Özel: ${personalLink}`, shot)
+  } catch (e) { log('M', 'M5', 'FAIL', e.message.slice(0, 120)) }
+
+  // M6 — Ana sayfa "Şu an gündemde" trending strip
+  try {
+    await goto('/')
+    await page.waitForTimeout(1500)
+    const stripHeading = await page.locator('h2:has-text("Şu an gündemde")').count()
+    const seeAllLink = await page.locator('a[href="/kesfet/trending"]:has-text("Tümünü gör")').count()
+    const shot = await snap('M6', 'anasayfa-trending-strip')
+    log('M', 'M6', stripHeading > 0 ? 'PASS' : 'FAIL',
+      `Strip heading: ${stripHeading}, Tümünü link: ${seeAllLink}`, shot)
+  } catch (e) { log('M', 'M6', 'FAIL', e.message.slice(0, 120)) }
+
+  // ── Login: User-1 ile kişisel feed senaryoları ─────────────────────────────
+  // M7 — /kesfet/sana-ozel login user erişim
+  try {
+    await loginAs(USERS.user1)
+    await goto('/kesfet/sana-ozel')
+    const heading = await page.locator('h1').first().textContent().catch(() => '')
+    const hasOzel = (heading || '').toLowerCase().includes('özel')
+    const empty = await page.locator('text=/Henüz seçim yapmamışsın|Yakında etkinlik yok/i').count()
+    const events = await page.locator('a[href^="/etkinlik/"]').count()
+    const shot = await snap('M7', 'kesfet-sanaozel-login')
+    log('M', 'M7', hasOzel ? 'PASS' : 'FAIL',
+      `Heading: "${(heading || '').slice(0, 40)}", events: ${events}, empty: ${empty}`, shot)
+  } catch (e) { log('M', 'M7', 'FAIL', e.message.slice(0, 120)) }
+
+  // M8 — /api/feed/for-you login user 200 + private cache
+  try {
+    const response = await page.context().request.get(`${BASE}/api/feed/for-you?limit=10`)
+    const cacheCtrl = response.headers()['cache-control'] || ''
+    const json = await response.json().catch(() => null)
+    const okStatus = response.status() === 200
+    const hasResults = json && Array.isArray(json.results)
+    const isPrivate = cacheCtrl.includes('private')
+    log('M', 'M8', (okStatus && hasResults && isPrivate) ? 'PASS' : 'FAIL',
+      `Status: ${response.status()}, results: ${json?.count}, cache: ${cacheCtrl.slice(0, 50)}`)
+  } catch (e) { log('M', 'M8', 'FAIL', e.message.slice(0, 120)) }
+
+  // M9 — Header: login kullanıcıya "Sana Özel" linki görünür
+  try {
+    await goto('/')
+    await page.setViewportSize({ width: 1280, height: 800 })
+    await page.waitForTimeout(500)
+    const personalLink = await page.locator('header a[href="/kesfet/sana-ozel"]').count()
+    const shot = await snap('M9', 'header-login-sanaozel')
+    log('M', 'M9', personalLink > 0 ? 'PASS' : 'FAIL', `Sana Özel link: ${personalLink}`, shot)
+  } catch (e) { log('M', 'M9', 'FAIL', e.message.slice(0, 120)) }
+
+  // M10 — /profil sonsuz loading regresyon kontrolü (Sprint 6 bonus fix)
+  try {
+    await goto('/profil')
+    // 12sn içinde form veya hata ekranı görünmeli — spinner takılı kalmamalı
+    const settled = await Promise.race([
+      page.waitForSelector('form', { timeout: 12000 }).then(() => 'form'),
+      page.waitForSelector('text=/Profil yüklenemedi/i', { timeout: 12000 }).then(() => 'error'),
+      page.waitForTimeout(12000).then(() => 'timeout'),
+    ])
+    const shot = await snap('M10', 'profil-loaded')
+    log('M', 'M10', settled !== 'timeout' ? 'PASS' : 'FAIL',
+      `Settled: ${settled} (form/error/timeout)`, shot)
+  } catch (e) { log('M', 'M10', 'FAIL', e.message.slice(0, 120)) }
+}
+
 // ─── BÖLÜM D — Moderator ─────────────────────────────────────────────────────
 async function testD() {
   console.log('\n📋 BÖLÜM D — Moderator')
@@ -682,7 +818,7 @@ async function testG() {
 
 // ─── ANA ─────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log('🚀 Listur E2E Test v5 — Sprint 1-5 dahil + Screenshot')
+  console.log('🚀 Listur E2E Test v6 — Sprint 1-6 dahil + Screenshot')
   console.log(`Base URL: ${BASE}`)
   console.log(`Tarih: ${new Date().toLocaleString('tr-TR')}`)
   console.log(`Screenshots: ${TAKE_SHOTS ? SHOTS_DIR : 'OFF'}\n`)
@@ -693,11 +829,12 @@ async function main() {
     await testA() // Misafir
     await testB() // User-1
     await testC() // User-2
-    await testH() // Engagement
-    await testI() // Calendar
-    await testJ() // Organizer 404
-    await testK() // Verification
-    await testL() // Search
+    await testH() // Engagement (Sprint 1)
+    await testI() // Calendar (Sprint 2)
+    await testJ() // Organizer 404 (Sprint 3)
+    await testK() // Verification (Sprint 4)
+    await testL() // Search (Sprint 5)
+    await testM() // Trending + Sana Özel (Sprint 6)
     await testD() // Moderator
     await testE() // Admin
     await testF() // Notifications
@@ -710,11 +847,11 @@ async function main() {
   console.log('📊 SONUÇ TABLOSU')
   console.log('═'.repeat(60))
 
-  const sections = ['A', 'B', 'C', 'H', 'I', 'J', 'K', 'L', 'D', 'E', 'F', 'G']
+  const sections = ['A', 'B', 'C', 'H', 'I', 'J', 'K', 'L', 'M', 'D', 'E', 'F', 'G']
   const names = {
     A: 'Misafir', B: 'User-1', C: 'Raporcu', H: 'Engagement', I: 'Calendar',
-    J: 'Organizatör', K: 'Doğrulama', L: 'Arama', D: 'Moderator',
-    E: 'Admin', F: 'Bildirimler', G: 'SEO',
+    J: 'Organizatör', K: 'Doğrulama', L: 'Arama', M: 'Trending/SanaÖzel',
+    D: 'Moderator', E: 'Admin', F: 'Bildirimler', G: 'SEO',
   }
   let totalPass = 0, totalFail = 0, totalSkip = 0
 

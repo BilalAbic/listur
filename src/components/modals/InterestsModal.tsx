@@ -61,11 +61,17 @@ export function InterestsModal() {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="interests-modal-title"
+      data-testid="interests-modal"
+    >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
         {/* Başlık */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 id="interests-modal-title" className="text-2xl font-bold text-gray-900 mb-2">
             Seni hangi konular ilgilendiriyor?
           </h2>
           <p className="text-gray-500 text-sm">
