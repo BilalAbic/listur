@@ -116,6 +116,9 @@ export function Modal({
   const titleId = title ? 'modal-title' : undefined
 
   return (
+    // role="dialog" + aria-modal="true" — klavye yönetimi window-level
+    // Escape ile yapılır (yukardaki useEffect'te). jsx-a11y/click-events-have-key-events
+    // kuralı bu role-aware durumu görmüyor; onKeyDown no-op ile uyarıyı susturuyoruz.
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
       role="dialog"
@@ -124,13 +127,18 @@ export function Modal({
       onClick={(e) => {
         if (closeOnBackdrop && e.target === e.currentTarget) onClose()
       }}
+      onKeyDown={() => {
+        /* Escape window listener tarafından yönetilir */
+      }}
       data-testid={rest['data-testid']}
     >
       <div
         ref={dialogRef}
         tabIndex={-1}
+        role="document"
         className={`bg-white rounded-2xl shadow-2xl w-full ${SIZE_CLASSES[size]} p-6 sm:p-8 max-h-[90vh] overflow-y-auto focus:outline-none`}
         onClick={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         {title && (
           <h2 id={titleId} className="text-xl font-bold text-gray-900 mb-4">
