@@ -7,6 +7,9 @@ import { createClient } from '@/lib/supabase/client'
 import { INTEREST_CATEGORIES } from '@/types/index'
 import type { InterestCategory } from '@/types/index'
 import type { Tables } from '@/types/database'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Card } from '@/components/ui/Card'
 
 type Profile = Tables<'profiles'>
 
@@ -184,30 +187,28 @@ export default function ProfilPage() {
 
       <form onSubmit={handleSave} className="space-y-8">
         {/* Temel bilgiler */}
-        <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <Card>
           <h2 className="text-base font-semibold text-gray-800 mb-4">Kişisel Bilgiler</h2>
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
-              <input
-                type="text" value={name} onChange={(e) => setName(e.target.value)}
-                placeholder="Adınız Soyadınız"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-              <input
-                type="email" value={user.email || ''} disabled
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-100 bg-gray-50 text-gray-400 text-sm cursor-not-allowed"
-              />
-              <p className="text-xs text-gray-400 mt-1">E-posta adresi değiştirilemez.</p>
-            </div>
+            <Input
+              label="Ad Soyad"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Adınız Soyadınız"
+            />
+            <Input
+              label="E-posta"
+              type="email"
+              value={user.email || ''}
+              disabled
+              hint="E-posta adresi değiştirilemez."
+            />
           </div>
-        </section>
+        </Card>
 
         {/* İlgi alanları */}
-        <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <Card>
           <h2 className="text-base font-semibold text-gray-800 mb-1">İlgi Alanları</h2>
           <p className="text-sm text-gray-500 mb-4">Seçtiğin alanlardaki etkinlikler için bildirim alırsın.</p>
           <div className="grid grid-cols-2 gap-2">
@@ -228,22 +229,23 @@ export default function ProfilPage() {
               )
             })}
           </div>
-        </section>
+        </Card>
 
         {/* Bildirim tercihleri */}
-        <section className="bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+        <Card>
           <h2 className="text-base font-semibold text-gray-800 mb-4">Bildirim Tercihleri</h2>
           <label className="flex items-center gap-3 cursor-pointer">
             <input
               type="checkbox" checked={notifyEmail} onChange={(e) => setNotifyEmail(e.target.checked)}
               className="w-4 h-4 text-indigo-600 rounded"
+              aria-label="E-posta bildirimlerini aç/kapat"
             />
             <div>
               <p className="text-sm font-medium text-gray-800">E-posta bildirimleri</p>
               <p className="text-xs text-gray-500">İlgi alanlarınla eşleşen yeni etkinlikler için e-posta al.</p>
             </div>
           </label>
-        </section>
+        </Card>
 
         {/* Gönderim geçmişi */}
         <SubmissionHistory userId={user.id} />
@@ -254,12 +256,9 @@ export default function ProfilPage() {
             {message.text}
           </p>
         )}
-        <button
-          type="submit" disabled={saving}
-          className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-        >
+        <Button type="submit" size="lg" fullWidth disabled={saving}>
           {saving ? 'Kaydediliyor…' : 'Değişiklikleri Kaydet'}
-        </button>
+        </Button>
       </form>
     </main>
   )
