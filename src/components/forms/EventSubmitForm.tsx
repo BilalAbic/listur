@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation'
 import { INTEREST_CATEGORIES } from '@/types/index'
 import type { ParsedEventData } from '@/types/index'
 import { TagInput } from '@/components/discovery/TagInput'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Card } from '@/components/ui/Card'
 
 export function EventSubmitForm() {
   const router = useRouter()
@@ -128,7 +131,8 @@ export function EventSubmitForm() {
         <h2 className="text-2xl font-bold text-gray-900 mb-3">Etkinlik Gönderildi!</h2>
         <p className="text-gray-500 mb-8 max-w-sm mx-auto">{submitResult.message}</p>
         <div className="flex gap-3 justify-center">
-          <button
+          <Button
+            variant="secondary"
             onClick={() => {
               setSubmitResult(null)
               setUrl('')
@@ -144,17 +148,13 @@ export function EventSubmitForm() {
               setRegistrationUrl('')
               setTags([])
             }}
-            className="px-6 py-2.5 rounded-xl border border-gray-200 text-gray-700 text-sm font-medium hover:bg-gray-50 transition-colors"
           >
             Yeni Etkinlik Ekle
-          </button>
+          </Button>
           {submitResult.slug && (
-            <button
-              onClick={() => router.push(`/etkinlik/${submitResult.slug}`)}
-              className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
-            >
+            <Button onClick={() => router.push(`/etkinlik/${submitResult.slug}`)}>
               Etkinliği Görüntüle
-            </button>
+            </Button>
           )}
         </div>
       </div>
@@ -164,27 +164,25 @@ export function EventSubmitForm() {
   return (
     <div className="max-w-2xl mx-auto">
       {/* Adım 1: Link gir */}
-      <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+      <Card className="mb-6">
         <h2 className="text-base font-semibold text-gray-800 mb-1">Adım 1 — Etkinlik Linki</h2>
         <p className="text-sm text-gray-500 mb-4">
           Etkinlik sayfasının URL&apos;sini yapıştırın. Bilgileri otomatik dolduracağız.
         </p>
-        <div className="flex gap-2">
-          <input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="https://etkinlik.com/hackathon-2026"
-            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-            onKeyDown={(e) => e.key === 'Enter' && handleParseLink()}
-          />
-          <button
-            onClick={handleParseLink}
-            disabled={!url || parsing}
-            className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 transition-colors whitespace-nowrap"
-          >
+        <div className="flex gap-2 items-start">
+          <div className="flex-1">
+            <Input
+              type="url"
+              value={url}
+              onChange={(e) => setUrl(e.target.value)}
+              placeholder="https://etkinlik.com/hackathon-2026"
+              aria-label="Etkinlik linki"
+              onKeyDown={(e) => e.key === 'Enter' && handleParseLink()}
+            />
+          </div>
+          <Button onClick={handleParseLink} disabled={!url || parsing} className="whitespace-nowrap">
             {parsing ? 'Getiriliyor…' : 'Bilgileri Getir'}
-          </button>
+          </Button>
         </div>
         {parseError && (
           <p className="mt-2 text-sm text-amber-600">{parseError} Manuel doldurabilirsiniz.</p>
@@ -194,145 +192,142 @@ export function EventSubmitForm() {
             ✓ Bilgiler getirildi ({parsedData.parse_source === 'gpt4o' ? 'AI yardımıyla' : 'otomatik'}). Kontrol edip düzenleyebilirsiniz.
           </p>
         )}
-      </section>
+      </Card>
 
       {/* Adım 2: Form */}
       <form onSubmit={handleSubmit}>
-        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 space-y-5">
-          <h2 className="text-base font-semibold text-gray-800">Adım 2 — Etkinlik Bilgileri</h2>
+        <Card>
+          <div className="space-y-5">
+            <h2 className="text-base font-semibold text-gray-800">Adım 2 — Etkinlik Bilgileri</h2>
 
-          {/* Başlık */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Başlık <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text" value={title} onChange={(e) => setTitle(e.target.value)}
-              required placeholder="Etkinlik başlığı"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            {/* Başlık */}
+            <Input
+              label="Başlık *"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              required
+              placeholder="Etkinlik başlığı"
             />
-          </div>
 
-          {/* Açıklama */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Açıklama</label>
-            <textarea
-              value={description} onChange={(e) => setDescription(e.target.value)}
-              placeholder="Etkinlik hakkında kısa bir açıklama (max 500 karakter)"
-              maxLength={500} rows={4}
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
-            />
-            <p className="text-xs text-gray-400 mt-1">{description.length}/500</p>
-          </div>
+            {/* Açıklama */}
+            <div>
+              <label htmlFor="event-description" className="block text-sm font-medium text-gray-700 mb-1">
+                Açıklama
+              </label>
+              <textarea
+                id="event-description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Etkinlik hakkında kısa bir açıklama (max 500 karakter)"
+                maxLength={500}
+                rows={4}
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
+              />
+              <p className="text-xs text-gray-400 mt-1">{description.length}/500</p>
+            </div>
 
-          {/* Kategori */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Kategori <span className="text-red-500">*</span>
-            </label>
-            <select
-              value={category} onChange={(e) => setCategory(e.target.value)} required
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
-            >
-              <option value="">Seçin</option>
-              {INTEREST_CATEGORIES.map((cat) => (
-                <option key={cat} value={cat}>{cat}</option>
-              ))}
-            </select>
-          </div>
+            {/* Kategori */}
+            <div>
+              <label htmlFor="event-category" className="block text-sm font-medium text-gray-700 mb-1">
+                Kategori *
+              </label>
+              <select
+                id="event-category"
+                value={category}
+                onChange={(e) => setCategory(e.target.value)}
+                required
+                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm bg-white"
+              >
+                <option value="">Seçin</option>
+                {INTEREST_CATEGORIES.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
 
-          {/* Online / Yüz yüze */}
-          <div>
+            {/* Online / Yüz yüze */}
             <label className="flex items-center gap-3 cursor-pointer">
               <input
-                type="checkbox" checked={isOnline} onChange={(e) => setIsOnline(e.target.checked)}
+                type="checkbox"
+                checked={isOnline}
+                onChange={(e) => setIsOnline(e.target.checked)}
                 className="w-4 h-4 text-indigo-600 rounded"
+                aria-label="Online etkinlik mi"
               />
               <span className="text-sm font-medium text-gray-700">Online etkinlik</span>
             </label>
-          </div>
 
-          {/* Şehir + Mekan (yüz yüze ise) */}
-          {!isOnline && (
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Şehir</label>
-                <input
-                  type="text" value={city} onChange={(e) => setCity(e.target.value)}
+            {/* Şehir + Mekan (yüz yüze ise) */}
+            {!isOnline && (
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Şehir"
+                  type="text"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
                   placeholder="İstanbul"
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                 />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mekan</label>
-                <input
-                  type="text" value={venueName} onChange={(e) => setVenueName(e.target.value)}
+                <Input
+                  label="Mekan"
+                  type="text"
+                  value={venueName}
+                  onChange={(e) => setVenueName(e.target.value)}
                   placeholder="ATO Congresium"
-                  className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
                 />
               </div>
-            </div>
-          )}
+            )}
 
-          {/* Tarihler */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Başlangıç <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="datetime-local" value={startDate} onChange={(e) => setStartDate(e.target.value)}
+            {/* Tarihler */}
+            <div className="grid grid-cols-2 gap-4">
+              <Input
+                label="Başlangıç *"
+                type="datetime-local"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 required
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+              />
+              <Input
+                label="Bitiş"
+                type="datetime-local"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bitiş</label>
-              <input
-                type="datetime-local" value={endDate} onChange={(e) => setEndDate(e.target.value)}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-          </div>
 
-          {/* Kayıt linki */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Kayıt / Bilet Linki</label>
-            <input
-              type="url" value={registrationUrl} onChange={(e) => setRegistrationUrl(e.target.value)}
+            {/* Kayıt linki */}
+            <Input
+              label="Kayıt / Bilet Linki"
+              type="url"
+              value={registrationUrl}
+              onChange={(e) => setRegistrationUrl(e.target.value)}
               placeholder="https://kayit.com/etkinlik"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
             />
+
+            {/* Etiketler (tags) */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Etiketler</label>
+              <TagInput value={tags} onChange={setTags} max={8} placeholder="react, ai, hackathon…" />
+            </div>
+
+            {/* Gönder */}
+            {submitResult && !submitResult.success && (
+              <p className="text-sm text-red-600">{submitResult.message}</p>
+            )}
+            <Button
+              type="submit"
+              size="lg"
+              fullWidth
+              disabled={submitting || !title || !category || !startDate || !url}
+            >
+              {submitting ? 'Gönderiliyor…' : 'Etkinliği Gönder'}
+            </Button>
+
+            <p className="text-xs text-gray-400 text-center">
+              Etkinliğiniz moderatör onayından sonra yayınlanacaktır.
+            </p>
           </div>
-
-          {/* Etiketler (tags) */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Etiketler
-            </label>
-            <TagInput
-              value={tags}
-              onChange={setTags}
-              max={8}
-              placeholder="react, ai, hackathon…"
-            />
-          </div>
-
-          {/* Gönder */}
-          {submitResult && !submitResult.success && (
-            <p className="text-sm text-red-600">{submitResult.message}</p>
-          )}
-          <button
-            type="submit" disabled={submitting || !title || !category || !startDate || !url}
-            className="w-full py-3 rounded-xl bg-indigo-600 text-white font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {submitting ? 'Gönderiliyor…' : 'Etkinliği Gönder'}
-          </button>
-
-          <p className="text-xs text-gray-400 text-center">
-            Etkinliğiniz moderatör onayından sonra yayınlanacaktır.
-          </p>
-        </section>
+        </Card>
       </form>
     </div>
   )
