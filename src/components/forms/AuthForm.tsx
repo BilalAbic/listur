@@ -4,6 +4,8 @@ import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useInterests } from '@/hooks/useInterests'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 
 type Tab = 'login' | 'signup' | 'magic'
 type OAuthProvider = 'google' | 'github'
@@ -84,24 +86,14 @@ function OAuthButtons({ onOAuth, loading }: OAuthButtonsProps) {
       </div>
 
       <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => onOAuth('google')}
-          disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-        >
+        <Button variant="secondary" onClick={() => onOAuth('google')} disabled={loading}>
           <GoogleIcon />
           Google
-        </button>
-        <button
-          type="button"
-          onClick={() => onOAuth('github')}
-          disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-        >
+        </Button>
+        <Button variant="secondary" onClick={() => onOAuth('github')} disabled={loading}>
           <GitHubIcon />
           GitHub
-        </button>
+        </Button>
       </div>
     </div>
   )
@@ -281,33 +273,30 @@ export function AuthForm() {
       {tab === 'login' && (
         <>
           <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-              <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                required placeholder="ornek@email.com"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-              <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                required placeholder="••••••••"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
+            <Input
+              label="E-posta"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="ornek@email.com"
+            />
+            <Input
+              label="Şifre"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
             {message && (
               <p className={`text-sm ${message.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                 {message.text}
               </p>
             )}
-            <button
-              type="submit" disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
+            <Button type="submit" fullWidth disabled={loading}>
               {loading ? 'Giriş yapılıyor…' : 'Giriş Yap'}
-            </button>
+            </Button>
           </form>
           <OAuthButtons onOAuth={handleOAuth} loading={loading} />
         </>
@@ -317,41 +306,39 @@ export function AuthForm() {
       {tab === 'signup' && (
         <>
           <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
-              <input
-                type="text" value={name} onChange={(e) => setName(e.target.value)}
-                required placeholder="Adınız Soyadınız"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-              <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                required placeholder="ornek@email.com"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-              <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                required placeholder="En az 8 karakter" minLength={8}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
+            <Input
+              label="Ad Soyad"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="Adınız Soyadınız"
+            />
+            <Input
+              label="E-posta"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="ornek@email.com"
+            />
+            <Input
+              label="Şifre"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="En az 8 karakter"
+              minLength={8}
+            />
             {message && (
               <p className={`text-sm ${message.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                 {message.text}
               </p>
             )}
-            <button
-              type="submit" disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
+            <Button type="submit" fullWidth disabled={loading}>
               {loading ? 'Hesap oluşturuluyor…' : 'Kayıt Ol'}
-            </button>
+            </Button>
           </form>
           <OAuthButtons onOAuth={handleOAuth} loading={loading} />
         </>
@@ -363,25 +350,22 @@ export function AuthForm() {
           <p className="text-sm text-gray-500">
             E-posta adresinize şifresiz giriş bağlantısı göndereceğiz.
           </p>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-            <input
-              type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              required placeholder="ornek@email.com"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-            />
-          </div>
+          <Input
+            label="E-posta"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="ornek@email.com"
+          />
           {message && (
             <p className={`text-sm ${message.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
               {message.text}
             </p>
           )}
-          <button
-            type="submit" disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-          >
+          <Button type="submit" fullWidth disabled={loading}>
             {loading ? 'Gönderiliyor…' : 'Bağlantı Gönder'}
-          </button>
+          </Button>
         </form>
       )}
     </div>
