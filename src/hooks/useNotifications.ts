@@ -62,9 +62,13 @@ export function useNotifications() {
     setUnreadCount(0)
   }, [user, supabase])
 
+  // Logout sırasında notification state'i temizleme + Realtime subscription
+  // restore pattern. React Compiler tavsiyesi bilinçli kabul.
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setNotifications([])
+       
       setUnreadCount(0)
       return
     }

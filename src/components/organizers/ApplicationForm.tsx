@@ -71,12 +71,13 @@ export function ApplicationForm({ initial }: Props) {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Handle */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="app-handle" className="block text-sm font-medium text-gray-700 mb-1">
           Handle <span className="text-red-500">*</span>
         </label>
         <div className="flex items-center rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-500 overflow-hidden">
           <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-500 border-r border-gray-200">@</span>
           <input
+            id="app-handle"
             type="text"
             value={handle}
             onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
@@ -94,8 +95,9 @@ export function ApplicationForm({ initial }: Props) {
 
       {/* Bio */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+        <label htmlFor="app-bio" className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
         <textarea
+          id="app-bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={3}
@@ -133,8 +135,9 @@ export function ApplicationForm({ initial }: Props) {
 
       {/* Reason */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Neden başvuruyorsun?</label>
+        <label htmlFor="app-reason" className="block text-sm font-medium text-gray-700 mb-1">Neden başvuruyorsun?</label>
         <textarea
+          id="app-reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           rows={3}

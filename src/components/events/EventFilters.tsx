@@ -41,8 +41,9 @@ export function EventFilters() {
       <div className="flex flex-wrap gap-3 items-end">
         {/* Kategori */}
         <div className="flex-1 min-w-40">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
+          <label htmlFor="ef-kategori" className="block text-xs font-medium text-gray-500 mb-1">Kategori</label>
           <select
+            id="ef-kategori"
             value={category}
             onChange={(e) => updateFilter('kategori', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
@@ -56,8 +57,9 @@ export function EventFilters() {
 
         {/* Şehir */}
         <div className="flex-1 min-w-36">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Şehir</label>
+          <label htmlFor="ef-sehir" className="block text-xs font-medium text-gray-500 mb-1">Şehir</label>
           <select
+            id="ef-sehir"
             value={city}
             onChange={(e) => updateFilter('sehir', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
@@ -71,8 +73,9 @@ export function EventFilters() {
 
         {/* Format */}
         <div className="flex-1 min-w-32">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Format</label>
+          <label htmlFor="ef-format" className="block text-xs font-medium text-gray-500 mb-1">Format</label>
           <select
+            id="ef-format"
             value={format}
             onChange={(e) => updateFilter('format', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
@@ -85,8 +88,9 @@ export function EventFilters() {
 
         {/* Tarih */}
         <div className="flex-1 min-w-32">
-          <label className="block text-xs font-medium text-gray-500 mb-1">Tarih</label>
+          <label htmlFor="ef-tarih" className="block text-xs font-medium text-gray-500 mb-1">Tarih</label>
           <select
+            id="ef-tarih"
             value={dateFilter}
             onChange={(e) => updateFilter('tarih', e.target.value)}
             className="w-full px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"

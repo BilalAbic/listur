@@ -170,10 +170,11 @@ export function ApplicationsList({ applications, actionable }: Props) {
           {/* Reject modal inline */}
           {rejectingId === app.id && (
             <div className="mt-4 p-4 rounded-xl bg-red-50 border border-red-200">
-              <label className="block text-xs font-semibold text-red-800 mb-2">
+              <label htmlFor={`reject-note-${app.id}`} className="block text-xs font-semibold text-red-800 mb-2">
                 Red gerekçesi (kullanıcıya bildirilir, isteğe bağlı)
               </label>
               <textarea
+                id={`reject-note-${app.id}`}
                 value={rejectNote}
                 onChange={(e) => setRejectNote(e.target.value)}
                 maxLength={500}

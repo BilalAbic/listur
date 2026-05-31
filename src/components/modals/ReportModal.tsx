@@ -116,10 +116,11 @@ export function ReportModal({ eventId, eventTitle, onClose }: Props) {
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="report-description" className="block text-sm font-medium text-gray-700 mb-1">
               Ek açıklama <span className="text-gray-400 font-normal">(opsiyonel)</span>
             </label>
             <textarea
+              id="report-description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}

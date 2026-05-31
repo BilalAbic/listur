@@ -34,10 +34,17 @@ const eslintConfig = defineConfig([
         { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
       ],
 
-      // jsx-a11y bazı kuralları sıkı warning (Issue #95'te toplu düzeltilir)
+      // jsx-a11y bazı kuralları sıkı warning
       'jsx-a11y/click-events-have-key-events': 'warn',
       'jsx-a11y/no-static-element-interactions': 'warn',
-      'jsx-a11y/label-has-associated-control': 'warn',
+      // Form etiketleri için: nested control veya htmlFor/id eşleşmesi izinli.
+      // - controlComponents: <Input> bileşeni kendi label'ını yönetir → false-positive azalır
+      // - depth: 3 — <label><div><input/></div></label> nesting'i tanır
+      // - assert: 'either' (default) — htmlFor + id eşleşmesi de geçer
+      'jsx-a11y/label-has-associated-control': [
+        'warn',
+        { controlComponents: ['Input'], depth: 3 },
+      ],
 
     },
   },

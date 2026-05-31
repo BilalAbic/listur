@@ -29,6 +29,7 @@ export function InterestsModal() {
       return
     }
     // 5. Misafir (user=null) veya ilgi alanı seçmemiş kullanıcı → aç
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(true)
   }, [user, profile, authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
