@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { uploadEventCover } from '@/lib/storage/upload-cover'
 import type { Database } from '@/types/database'

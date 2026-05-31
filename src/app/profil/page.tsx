@@ -26,6 +26,8 @@ export default function ProfilPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Profili doğrudan Supabase'den çek (8sn timeout — takılmasın)
+  // React Compiler memoization preservation uyarısı veriyor — issue #97 ile sistemli ele alınacak.
+  // eslint-disable-next-line
   const fetchPageProfile = useCallback(async (userId: string) => {
     setProfileLoading(true)
 

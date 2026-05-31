@@ -41,17 +41,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // ── 1. Profil çek ──────────────────────────────────────────────────────────
     // Ayrı try-catch: organizatör sorgusu hata verse bile profile=null olmaz.
     try {
-      let { data: profileData, error } = await supabase
+      const result = await supabase
         .from('profiles')
         .select('*')
         .eq('id', supabaseUser.id)
         .maybeSingle()
 
-      if (error) {
-        console.error('[Auth] fetchProfile error:', error.message)
+      if (result.error) {
+        console.error('[Auth] fetchProfile error:', result.error.message)
         setProfile(null)
         return
       }
+
+      // `let` çünkü satır oluşturma branch'inde yeniden atanıyor (insert sonrası).
+      let profileData = result.data
 
       // Profile satırı yok — trigger başarısız olmuş olabilir, otomatik oluştur.
       if (!profileData) {

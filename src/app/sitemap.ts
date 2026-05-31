@@ -1,4 +1,4 @@
-import { MetadataRoute } from 'next'
+import { type MetadataRoute } from 'next'
 import { createAdminClient } from '@/lib/supabase/server'
 import { getBaseUrl } from '@/lib/site'
 
