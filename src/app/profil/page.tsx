@@ -94,18 +94,25 @@ export default function ProfilPage() {
   // Kullanıcı hazır olunca profili çek.
   // fetchPageProfile inline (React Compiler memoize eder) — dependency'ye eklenmez,
   // aksi halde her render'da yeni referans → sonsuz çağrı riski.
+  // İçeride setState çağrıları var (profile, loading) — async data fetch
+  // pattern'i, Compiler tavsiyesini bilinçli olarak kabul ediyoruz.
   useEffect(() => {
     if (user && !authLoading) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchPageProfile(user.id)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, authLoading])
 
-  // Profil verisini forma yükle
+  // Profil verisini forma yükle — external (AuthContext) state'ten form'a sync.
+  // React Compiler tavsiye: bu pattern idiomatik (derived initial form values).
   useEffect(() => {
     if (profile) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setName(profile.name || '')
+       
       setInterests((profile.interests as InterestCategory[]) || [])
+       
       setNotifyEmail(profile.notify_email)
     }
   }, [profile])

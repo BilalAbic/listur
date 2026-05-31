@@ -53,8 +53,12 @@ export function FavoritesProvider({ children }: { children: React.ReactNode }) {
     setLoading(false)
   }, [supabase])
 
+  // Realtime channel subscription + user değişiminde state reset pattern.
+  // Logout sırasında favorite listesini temizlemek idiomatik; Compiler tavsiyesi
+  // bilinçli olarak kabul ediliyor.
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFavoriteIds(new Set())
       return
     }

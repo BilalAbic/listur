@@ -306,6 +306,8 @@ export function EventSubmitForm() {
 
             {/* Etiketler (tags) */}
             <div>
+              {/* TagInput custom pattern — kendi içinde input + chip yönetir */}
+              {/* eslint-disable-next-line jsx-a11y/label-has-associated-control */}
               <label className="block text-sm font-medium text-gray-700 mb-1">Etiketler</label>
               <TagInput value={tags} onChange={setTags} max={8} placeholder="react, ai, hackathon…" />
             </div>

@@ -133,8 +133,11 @@ export function useRsvps() {
     [user, rsvpsByEvent, router]
   )
 
+  // Logout sırasında rsvps state'i temizleme + Realtime subscription restore
+  // pattern. React Compiler tavsiyesi bilinçli kabul.
   useEffect(() => {
     if (!user) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setRsvpsByEvent(new Map())
       return
     }

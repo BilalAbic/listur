@@ -91,7 +91,10 @@ export function useFollows() {
     [user, followingIds, router]
   )
 
+  // Initial fetch — useCallback'le memoize fetchFollows içinde setState var.
+  // Idiomatik on-mount data fetch pattern; Compiler tavsiyesi bilinçli kabul.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchFollows()
   }, [fetchFollows])
 
