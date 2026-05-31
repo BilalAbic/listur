@@ -1,11 +1,11 @@
 # Listur — Yazılım Gereksinimleri Dokümanı (SRS)
 
 > **Proje Adı:** Listur  
-> **Sürüm:** 1.2  
-> **Tarih:** Mayıs 2026  
-> **Stack:** Next.js 15 · Supabase · OpenAI GPT-4o · metascraper  
+> **Sürüm:** 1.4  
+> **Tarih:** 31 Mayıs 2026  
+> **Stack:** Next.js 16 (App Router + Turbopack) · React 19 · Supabase · OpenAI GPT-4o · metascraper · Tailwind CSS v4  
 > **Kapsam:** Türkiye odaklı, web tabanlı etkinlik agregasyon platformu  
-> **Ortamlar:** `development` branch → dev Supabase projesi | `production` branch → prod Supabase projesi
+> **Ortamlar:** `development` branch → dev Supabase (`listur-dev`) · `production` branch → prod Supabase (`listur-prod`)
 
 ---
 
@@ -305,8 +305,10 @@ Sadece `role = admin` erişebilir.
 ### 5.9 Kimlik Doğrulama
 
 - Supabase Auth kullanılır.
-- E-posta + şifre ve magic link desteklenir.
-- OAuth → v2'ye bırakılır.
+- **E-posta + şifre**, **Magic Link** (OTP) ve **OAuth (Google, GitHub)** desteklenir.
+- OAuth callback `/auth/callback` Server Route üzerinden işlenir; cookie kaybı önlenir (try-catch wrap).
+- Middleware `getSession()` kullanır (Edge Runtime ağ çağrısı yapmamak için).
+- Yeni kullanıcılarda `profiles` satırı trigger ile otomatik oluşur; trigger başarısız olursa client-side fallback ile oluşturulur.
 
 ---
 
@@ -314,6 +316,131 @@ Sadece `role = admin` erişebilir.
 
 - Ad soyad, bio, ilgi alanları, e-posta bildirim tercihi düzenlenebilir.
 - Gönderim geçmişi: etkinlik adı ve durumu (yayında / beklemede / reddedildi).
+- Profil sorgu zinciri AuthContext'ten bağımsız (kendi maybeSingle + 8sn timeout escape) — sonsuz loading riski yok.
+- Misafirken seçilmiş ilgi alanları kayıt olunca cookie üzerinden Supabase'e taşınır.
+
+---
+
+### 5.11 Favoriler ve RSVP (v1.3 — Sprint 1)
+
+> Modül: **Engagement** — kullanıcı bağlılığı.
+
+**Favoriler:**
+- Etkinlik kartı + detay sayfasından kalp ikonuyla tek tıkla favorilere eklenir.
+- Misafir kullanıcı tıklarsa `/giris?redirect=...`'a yönlendirilir.
+- Optimistic UI: tıklamada anında görünüm değişir, sunucu hatasında geri alınır.
+
+**RSVP (Going / Interested / Not Going):**
+- Detay sayfasında dropdown ile durum belirtilir.
+- `going` + `interested` aktif sayım için sayılır, `not_going` sayılmaz.
+- Durum değişiminde hatırlatıcı flag'leri (`reminder_24h_sent`, `reminder_1h_sent`) sıfırlanır.
+
+**Denormalize sayaçlar:**
+- `events.favorite_count`, `rsvp_count`, `view_count` trigger ile güncel.
+- JOIN'siz hızlı okuma; trending feed için `idx_events_engagement_score` partial index.
+
+**Realtime:**
+- `FavoritesContext` üzerinden tek bir `postgres_changes` subscription paylaşılır (duplicate subscribe önlenir).
+
+---
+
+### 5.12 Takvim ve Hatırlatıcılar (v1.3 — Sprint 2)
+
+> Modül: **Calendar** — etkinlik takip kolaylığı.
+
+**Aylık görünüm (`/takvim`):**
+- Pzt-Paz başlığı + ay grid'i; ay navigasyon butonları.
+- Server component, Supabase'den ay aralığındaki yayında etkinlikler çekilir.
+
+**Takvime ekle:**
+- Etkinlik detayında "Takvime ekle" menüsü (Apple iCal + Google Calendar).
+- `GET /api/events/[id]/ical` → `text/calendar; charset=utf-8` (RFC 5545 uyumlu).
+- UID formatı: `<slug>@listur.bilalabic.com`; line folding ve kaçış uygulanır.
+- `GET /api/events/[id]/google-calendar` → Google Takvim ekleme URL'sine 302 redirect.
+
+**Hatırlatıcı cron:**
+- `GET /api/cron/reminders` (Vercel Cron, günlük 00:00 UTC tetik).
+- 24h ve 1h pencerelerinde RSVP yapanlara in-app + e-posta bildirim.
+- Authorization: `Bearer ${CRON_SECRET}` (Vercel env değişkeninden okunur).
+- Çift gönderim önleme: `reminder_24h_sent`, `reminder_1h_sent` flag'leri.
+
+---
+
+### 5.13 Organizatör Hub (v1.3 — Sprint 3 + 4)
+
+> Modül: **Organizer** — topluluk değeri yaratma.
+
+**Organizatör profili (`/organizator/[handle]`):**
+- Public sayfa: bio, sosyal linkler, verified rozeti, takipçi sayısı.
+- Aktif etkinlikleri ve geçmiş etkinlikleri sekmeli görünüm.
+
+**Takip sistemi:**
+- `organizer_follows` tablosu (follower_id, organizer_id).
+- Login user "Takip Et" ile organizatörü takip eder; yeni etkinlik açtığında bildirim alır.
+- `profiles.follower_count` trigger ile güncel.
+
+**Doğrulama başvurusu (`/profil/organizator-basvuru`):**
+- Handle (regex: `/^[a-z0-9](?:[a-z0-9_-]{1,28}[a-z0-9])?$/`), bio, sosyal linkler.
+- Reserved handle listesi (admin, mod, profil, vb.) reddedilir.
+- Başvuru → `organizer_applications` tablosu, durum: `open`.
+
+**Admin onay paneli (`/admin/organizator-basvurulari`):**
+- Bekleyen başvuruları listeler; onay/red.
+- Onay → atomik update (`is_organizer = true`, `verified_at = now()`, handle profil'e işlenir) + rollback hatada.
+- Onaylanan kullanıcı `verified` bildirim alır.
+
+**Organizatör dashboard (`/profil/organizator`):**
+- Toplam etkinlik / görüntülenme / favori / RSVP sayıları.
+- `GET /api/organizers/[handle]/analytics` — sadece kendisi veya admin (403 başkasına).
+
+---
+
+### 5.14 Arama ve Etiketler (v1.3 — Sprint 5)
+
+> Modül: **Discovery I** — bulunabilirlik.
+
+**Türkçe Full-Text Search:**
+- PostgreSQL `unaccent` extension + custom `turkish_unaccent` text search configuration.
+- "İSTANBUL", "istanbul", "İstanbul" eşleşir; başlık+açıklama+tags+city aranır.
+- `events.search_vector` tsvector kolonu BEFORE INSERT/UPDATE trigger ile populated.
+  - NOT: GENERATED STORED kullanılamaz çünkü `unaccent()` STABLE değil IMMUTABLE; trigger pattern zorunlu.
+- GIN index ile hızlı arama.
+
+**Endpoint ve sayfa:**
+- `GET /api/search?q=...&kategori=...&sehir=...&online=true|false` — public, `websearch_to_tsquery` parser.
+- `/ara?q=...` — server component, `q` < 2 karakterde "en az 2" hint.
+- Header'da arama kutusu (md+ ekranlarda).
+
+**Tags:**
+- `events.tags text[]` — etkinlik gönderirken organizatör girer (TagInput bileşeni).
+- Tag arama sonuçlarına ağırlık katar (search_vector setweight C).
+
+---
+
+### 5.15 Keşif: Trending ve Sana Özel (v1.3 — Sprint 6)
+
+> Modül: **Discovery II** — keşif ve kişiselleştirme.
+
+**Engagement skoru:**
+```
+score = view_count * 1 + favorite_count * 3 + rsvp_count * 5
+```
+Denormalize sayaçlar üzerinden hesaplanır; index ön taramayı hızlandırır.
+
+**Trending feed:**
+- `GET /api/feed/trending?limit=20` — public, CDN cache `public, s-maxage=300, stale-while-revalidate=60`.
+- Yaklaşan etkinlikler (`start_date >= now`), skor DESC, eşit skorda erken başlayan üstte.
+- `/kesfet/trending` — public sayfa, ISR 5dk; ilk 3 etkinlikte altın/gümüş/bronz sıra rozeti.
+
+**Sana Özel feed:**
+- `GET /api/feed/for-you?limit=30` — login required (401 misafir, `AUTH_REQUIRED` code), private cache.
+- Skor bileşenleri: ilgi alanı eşleşmesi +5, takip edilen organizatör +10, engagement boost ×0.1.
+- `/kesfet/sana-ozel` — login required (middleware), kişiselleştirme yoksa CTA + boş durum.
+- Ana sayfada filtre yoksa "Şu an gündemde" yatay şerit (4 etkinlik, #1 Trend rozeti).
+
+**Header navigasyon:**
+- "Gündem" — herkese görünür (alev ikonu).
+- "Sana Özel" — sadece login kullanıcıya.
 
 ---
 
@@ -356,6 +483,93 @@ slug            text UNIQUE NOT NULL
 created_at      timestamptz DEFAULT now()
 published_at    timestamptz
 removed_at      timestamptz
+
+-- v1.3 — Sprint 1 (Engagement)
+favorite_count  int NOT NULL DEFAULT 0  -- trigger ile güncel
+rsvp_count      int NOT NULL DEFAULT 0  -- trigger ile güncel ('going' + 'interested')
+view_count      int NOT NULL DEFAULT 0  -- trigger ile güncel
+
+-- v1.3 — Sprint 5 (Search + Tags)
+tags            text[] NOT NULL DEFAULT '{}'
+search_vector   tsvector              -- BEFORE INSERT/UPDATE trigger ile populated
+```
+
+### `profiles` (v1.3 — Sprint 3+4 ek alanlar)
+
+```sql
+-- Mevcut sütunlara ek:
+handle          text UNIQUE             -- /organizator/[handle] için
+bio             text
+website         text
+twitter         text
+linkedin        text
+github          text
+is_organizer    boolean NOT NULL DEFAULT false
+verified_at     timestamptz             -- Admin onayında set
+follower_count  int NOT NULL DEFAULT 0  -- trigger ile güncel
+```
+
+### `favorites` (v1.3 — Sprint 1)
+
+```sql
+user_id     uuid REFERENCES profiles ON DELETE CASCADE
+event_id    uuid REFERENCES events ON DELETE CASCADE
+created_at  timestamptz DEFAULT now()
+PRIMARY KEY (user_id, event_id)
+```
+
+### `rsvps` (v1.3 — Sprint 1)
+
+```sql
+user_id              uuid REFERENCES profiles ON DELETE CASCADE
+event_id             uuid REFERENCES events ON DELETE CASCADE
+status               rsvp_status NOT NULL
+                       -- ENUM: going | interested | not_going
+reminder_24h_sent    boolean NOT NULL DEFAULT false
+reminder_1h_sent     boolean NOT NULL DEFAULT false
+created_at           timestamptz DEFAULT now()
+updated_at           timestamptz DEFAULT now()  -- trigger
+PRIMARY KEY (user_id, event_id)
+```
+
+### `event_views` (v1.3 — Sprint 1)
+
+```sql
+id          uuid PRIMARY KEY DEFAULT gen_random_uuid()
+event_id    uuid REFERENCES events ON DELETE CASCADE
+viewer_id   uuid REFERENCES profiles ON DELETE SET NULL  -- NULL: misafir
+viewer_ip   text                                          -- misafir için
+viewed_at   timestamptz DEFAULT now()
+-- Unique (event, viewer, gün) ve (event, ip, gün): günlük tek view
+-- DELETE/UPDATE yok — immutable
+```
+
+### `organizer_follows` (v1.3 — Sprint 3)
+
+```sql
+follower_id    uuid REFERENCES profiles ON DELETE CASCADE
+organizer_id   uuid REFERENCES profiles ON DELETE CASCADE
+created_at     timestamptz DEFAULT now()
+PRIMARY KEY (follower_id, organizer_id)
+```
+
+### `organizer_applications` (v1.3 — Sprint 4)
+
+```sql
+id            uuid PRIMARY KEY DEFAULT gen_random_uuid()
+user_id       uuid REFERENCES profiles NOT NULL
+handle        text NOT NULL              -- onayda profiles.handle'a yazılır
+bio           text
+website       text
+twitter       text
+linkedin      text
+github        text
+status        application_status NOT NULL DEFAULT 'open'
+                -- ENUM: open | resolved
+resolved_by   uuid REFERENCES profiles
+resolved_at   timestamptz
+rejection_note text
+created_at    timestamptz DEFAULT now()
 ```
 
 ### `notifications`
@@ -436,6 +650,14 @@ created_at      timestamptz DEFAULT now()
 | `/admin/etkinlikler`          | Tüm etkinlik yönetimi           | Admin        |
 | `/admin/raporlar`             | Tüm raporlar                    | Admin        |
 | `/admin/kullanicilar`         | Kullanıcı yönetimi              | Admin        |
+| `/admin/organizator-basvurulari` | Doğrulama başvuruları (Sprint 4) | Admin        |
+| `/takvim`                     | Aylık etkinlik takvimi (Sprint 2) | Herkese açık |
+| `/ara`                        | Arama sonuçları (Sprint 5)      | Herkese açık |
+| `/organizator/[handle]`       | Organizatör profil (Sprint 3)   | Herkese açık |
+| `/profil/organizator-basvuru` | Doğrulama başvuru formu (Sprint 4) | Kayıtlı   |
+| `/profil/organizator`         | Organizatör dashboard (Sprint 4) | Kayıtlı (organizer) |
+| `/kesfet/trending`            | Trending feed (Sprint 6)        | Herkese açık |
+| `/kesfet/sana-ozel`           | Kişiselleştirilmiş feed (Sprint 6) | Kayıtlı   |
 
 ---
 
@@ -454,6 +676,19 @@ created_at      timestamptz DEFAULT now()
 | PATCH  | `/api/users/[id]/role`          | Kullanıcı rolü güncelle            | Admin        |
 | PATCH  | `/api/notifications/[id]/read`  | Bildirimi okundu işaretle          | Kayıtlı      |
 | PATCH  | `/api/notifications/read-all`   | Tümünü okundu işaretle             | Kayıtlı      |
+| POST   | `/api/events/[id]/favorite`     | Favoriye ekle/çıkar (Sprint 1)     | Kayıtlı      |
+| POST   | `/api/events/[id]/rsvp`         | RSVP durum belirt (Sprint 1)       | Kayıtlı      |
+| GET    | `/api/events/[id]/ical`         | iCal export (Sprint 2)             | Herkese açık |
+| GET    | `/api/events/[id]/google-calendar` | Google Calendar 302 (Sprint 2)  | Herkese açık |
+| GET    | `/api/cron/reminders`           | Hatırlatıcı cron (Sprint 2)        | Bearer CRON_SECRET |
+| POST   | `/api/organizers/[handle]/follow` | Takip et / bırak (Sprint 3)      | Kayıtlı      |
+| POST   | `/api/organizers/apply`         | Doğrulama başvurusu (Sprint 4)     | Kayıtlı      |
+| PATCH  | `/api/organizers/applications/[id]/approve` | Başvuru onayı (Sprint 4) | Admin    |
+| PATCH  | `/api/organizers/applications/[id]/reject`  | Başvuru reddi (Sprint 4) | Admin    |
+| GET    | `/api/organizers/[handle]/analytics` | Organizatör istatistik (Sprint 4) | Self veya Admin |
+| GET    | `/api/search`                   | Türkçe FTS (Sprint 5)              | Herkese açık |
+| GET    | `/api/feed/trending`            | Trending feed (Sprint 6)           | Herkese açık |
+| GET    | `/api/feed/for-you`             | Sana özel feed (Sprint 6)          | Kayıtlı (401 misafir) |
 
 ---
 
@@ -489,6 +724,11 @@ Türkçe karakterler temizlenir (`ğ→g`, `ü→u`, `ş→s`, `ı→i`, `ö→o
 | `moderation_logs`  | mod/admin                                  | service_role        | —                             | **YOK**      |
 | `notifications`    | `user_id = auth.uid()`                     | service_role        | `user_id = auth.uid()`        | —            |
 | `submissions`      | authenticated                              | authenticated       | —                             | —            |
+| `favorites` (S1)   | `auth.uid() = user_id`                     | `auth.uid() = user_id` | —                          | `auth.uid() = user_id` |
+| `rsvps` (S1)       | `auth.uid() = user_id`                     | `auth.uid() = user_id` | `auth.uid() = user_id`     | `auth.uid() = user_id` |
+| `event_views` (S1) | event sahibi organizatör veya mod/admin    | Herkese açık (anonim view) | —                       | **YOK**      |
+| `organizer_follows` (S3) | `auth.uid() = follower_id` veya `organizer_id` | `auth.uid() = follower_id` | —              | `auth.uid() = follower_id` |
+| `organizer_applications` (S4) | `auth.uid() = user_id` veya admin | `auth.uid() = user_id` | admin                  | —            |
 
 ---
 
@@ -504,32 +744,34 @@ Türkçe karakterler temizlenir (`ğ→g`, `ü→u`, `ş→s`, `ı→i`, `ö→o
 
 ---
 
-## 12. Kapsam Dışı (v1)
+## 12. Kapsam Dışı (v1.4)
 
 | Özellik                | Neden                              |
 |------------------------|------------------------------------|
 | Mobil uygulama         | Web önce                           |
-| OAuth (Google vb.)     | Magic link yeterli                 |
 | Yorum sistemi          | Odaktan uzaklaştırır               |
-| Takvim görünümü        | v2                                 |
 | Otomatik scraping      | Yasal risk, veri kalitesi          |
 | Ücretli listeleme      | Monetizasyon henüz değil           |
 | Çoklu dil desteği      | Sadece Türkçe                      |
 | Harita görünümü        | v2                                 |
-| Public API             | v2                                 |
+| Public API (genel)     | v2 — sadece feed/search public     |
 | Global etkinlikler     | Odak Türkiye                       |
+
+> **Not:** "OAuth (Google vb.)" ve "Takvim görünümü" v1.3'te (Sprint 1-6) kapsam içine alındı — kapsam dışı listesinden çıkarıldı.
 
 ---
 
 ## 13. Değişiklik Geçmişi
 
-| Sürüm | Tarih      | Değişiklik                                                                           |
-|-------|------------|--------------------------------------------------------------------------------------|
-| 1.0   | Mayıs 2026 | İlk sürüm                                                                            |
-| 1.1   | Mayıs 2026 | Moderatör rolü, içerik raporlama eklendi                                             |
-| 1.2   | Mayıs 2026 | Ortam yapısı, Supabase Storage, AI kullanım detayları, API endpoint haritası eklendi |
-| 1.2+  | Mayıs 2026 | Proje özeti (hedef kitle), özellikler detaylandırıldı, güvenlik, kapsam dışı bölümleri eklendi |
+| Sürüm | Tarih       | Değişiklik                                                                           |
+|-------|-------------|--------------------------------------------------------------------------------------|
+| 1.0   | Mayıs 2026  | İlk sürüm                                                                            |
+| 1.1   | Mayıs 2026  | Moderatör rolü, içerik raporlama eklendi                                             |
+| 1.2   | Mayıs 2026  | Ortam yapısı, Supabase Storage, AI kullanım detayları, API endpoint haritası eklendi |
+| 1.2+  | Mayıs 2026  | Proje özeti (hedef kitle), özellikler detaylandırıldı, güvenlik, kapsam dışı bölümleri eklendi |
+| 1.3   | Mayıs 2026  | v1.3 modülleri: Engagement (S1), Calendar (S2), Organizer Hub (S3+4), Search/Tags (S5) |
+| 1.4   | 31 Mayıs 2026 | Sprint 6 (Trending + Sana Özel), OAuth (Google/GitHub), profil bug fix, build env fallback; Next.js 16 + React 19'a güncel; "OAuth" ve "Takvim görünümü" kapsam dışından kaldırıldı |
 
 ---
 
-*Bu doküman Listur v1 kapsamını tanımlar. `CLAUDE.md` ile birlikte okunmalıdır.*
+*Bu doküman Listur v1.4 kapsamını tanımlar. `CLAUDE.md` ile birlikte okunmalıdır.*
