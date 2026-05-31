@@ -19,9 +19,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # pnpm sürümü package.json packageManager alanından okunur
       - uses: pnpm/action-setup@v4
-        with:
-          version: 9
 
       - uses: actions/setup-node@v4
         with:
@@ -95,7 +94,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const fs = require('fs');
-            const core = require('@actions/core');
+            // NOT: github-script@v7 `core`, `github`, `context`, `glob`, `io`, `exec`, `fetch` global'lerini otomatik enjekte eder; require ETMEYİN — "Identifier already declared" verir.
             let body = '## 🧪 Playwright E2E Test Sonuçları\n\n';
 
             try {
