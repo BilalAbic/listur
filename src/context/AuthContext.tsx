@@ -107,35 +107,35 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     let isMounted = true
 
     // Fallback: INITIAL_SESSION 3sn içinde gelmezse loading'i kapat.
-    // Bu timeout, INITIAL_SESSION alındığında AWAIT'TEN ÖNCE temizlenir —
-    // aksi hâlde fetchProfile sırasında erken tetiklenip profile=null iken
-    // loading=false olur ve "Profil yüklenemedi" hatası görünür.
     const timeout = setTimeout(() => {
       if (isMounted) setLoading(false)
     }, 3000)
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
+      (event, newSession) => {
         if (!isMounted) return
-
-        // CRITICAL: clearTimeout AWAIT'TEN ÖNCE — race condition önlenir.
-        // fetchProfile yavaş olsa bile timeout artık loading'i erken kapatamaz.
-        if (event === 'INITIAL_SESSION') {
-          clearTimeout(timeout)
-        }
 
         setSession(newSession)
         setUser(newSession?.user ?? null)
 
+        // CRITICAL: loading'i fetchProfile'dan ÖNCE kapat.
+        // Profil sayfası `authLoading` bekliyor; user objesi hazır olduktan
+        // sonra spinner'ı kapatıp sayfanın kendi sorgusunu yapmasına izin ver.
+        // fetchProfile arka planda çalışır; Header ve diğer profile-bağımlı
+        // bileşenler hazır olunca re-render olur.
+        if (event === 'INITIAL_SESSION') {
+          clearTimeout(timeout)
+          if (isMounted) setLoading(false)
+        }
+
         if (newSession?.user) {
-          await fetchProfile(newSession.user)
+          // Fire-and-forget: hata durumunda yakala ama akışı blokleme.
+          fetchProfile(newSession.user).catch((err) => {
+            console.error('[Auth] background fetchProfile error:', err)
+          })
         } else {
           setProfile(null)
           setOrganizerAppStatus(null)
-        }
-
-        if (event === 'INITIAL_SESSION') {
-          if (isMounted) setLoading(false)
         }
       }
     )

@@ -25,9 +25,17 @@ export default function ProfilPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  // Profili doğrudan Supabase'den çek
+  // Profili doğrudan Supabase'den çek (8sn timeout — takılmasın)
   const fetchPageProfile = useCallback(async (userId: string) => {
     setProfileLoading(true)
+
+    // Timeout guard: 8sn içinde sorgu dönmezse loading'i kapat ve hata göster.
+    // Bu, "yükleniyor" animasyonunda sonsuz takılmayı önler.
+    const timeoutId = setTimeout(() => {
+      console.warn('[ProfilPage] fetchProfile timeout (8s) — releasing spinner')
+      setProfileLoading(false)
+    }, 8000)
+
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -62,7 +70,11 @@ export default function ProfilPage() {
       }
 
       setProfile(data)
+    } catch (err) {
+      console.error('[ProfilPage] fetchProfile unexpected error:', err)
+      setProfile(null)
     } finally {
+      clearTimeout(timeoutId)
       setProfileLoading(false)
     }
   }, [supabase, user?.email])
