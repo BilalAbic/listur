@@ -19,6 +19,9 @@ interface ModalProps {
   children: ReactNode
 }
 
+const FOCUSABLE_SELECTOR =
+  'a[href], area[href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), button:not([disabled]), iframe, [tabindex]:not([tabindex="-1"])'
+
 const SIZE_CLASSES = {
   sm: 'max-w-sm',
   md: 'max-w-lg',
@@ -44,14 +47,68 @@ export function Modal({
   ...rest
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null)
+  // Modal açılmadan önce focus'lu eleman — kapatıldığında geri verilir.
+  const triggerRef = useRef<Element | null>(null)
 
+  // Escape + focus trap birlikte tek useEffect'te yönetilir.
   useEffect(() => {
-    if (!open || !closeOnEscape) return
+    if (!open) return
+
+    // Açılınca trigger'ı kaydet ve modal içindeki ilk focusable'a focus ver.
+    triggerRef.current = document.activeElement
+    const focusFirstInside = () => {
+      const node = dialogRef.current
+      if (!node) return
+      const focusables = node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      if (focusables.length > 0) {
+        focusables[0]?.focus()
+      } else {
+        // İçinde focusable yoksa dialog'un kendisine focus (tabindex=-1)
+        node.focus()
+      }
+    }
+    // requestAnimationFrame: DOM render sonrası focus
+    const raf = requestAnimationFrame(focusFirstInside)
+
     const handleKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose()
+      if (e.key === 'Escape' && closeOnEscape) {
+        e.stopPropagation()
+        onClose()
+        return
+      }
+      // Focus trap: Tab/Shift+Tab modal sınırı içinde döngü
+      if (e.key !== 'Tab') return
+      const node = dialogRef.current
+      if (!node) return
+      const focusables = Array.from(
+        node.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
+      ).filter((el) => !el.hasAttribute('disabled'))
+      if (focusables.length === 0) {
+        e.preventDefault()
+        return
+      }
+      const first = focusables[0]!
+      const last = focusables[focusables.length - 1]!
+      const active = document.activeElement as HTMLElement | null
+      if (e.shiftKey && (active === first || !node.contains(active))) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && active === last) {
+        e.preventDefault()
+        first.focus()
+      }
     }
     window.addEventListener('keydown', handleKey)
-    return () => window.removeEventListener('keydown', handleKey)
+
+    // Kapanırken trigger'a focus iade et
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('keydown', handleKey)
+      const trigger = triggerRef.current
+      if (trigger instanceof HTMLElement) {
+        trigger.focus()
+      }
+    }
   }, [open, closeOnEscape, onClose])
 
   if (!open) return null
@@ -71,7 +128,8 @@ export function Modal({
     >
       <div
         ref={dialogRef}
-        className={`bg-white rounded-2xl shadow-2xl w-full ${SIZE_CLASSES[size]} p-6 sm:p-8 max-h-[90vh] overflow-y-auto`}
+        tabIndex={-1}
+        className={`bg-white rounded-2xl shadow-2xl w-full ${SIZE_CLASSES[size]} p-6 sm:p-8 max-h-[90vh] overflow-y-auto focus:outline-none`}
         onClick={(e) => e.stopPropagation()}
       >
         {title && (
