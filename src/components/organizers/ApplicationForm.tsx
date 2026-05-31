@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 
 interface Initial {
   requested_handle?: string
@@ -106,36 +108,27 @@ export function ApplicationForm({ initial }: Props) {
 
       {/* Website + Twitter + GitHub */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
-          <input
-            type="text"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            placeholder="acme.com"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Twitter / X</label>
-          <input
-            type="text"
-            value={twitter}
-            onChange={(e) => setTwitter(e.target.value)}
-            placeholder="@acme"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
-          <input
-            type="text"
-            value={github}
-            onChange={(e) => setGithub(e.target.value)}
-            placeholder="acme-tech"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-        </div>
+        <Input
+          label="Website"
+          type="text"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          placeholder="acme.com"
+        />
+        <Input
+          label="Twitter / X"
+          type="text"
+          value={twitter}
+          onChange={(e) => setTwitter(e.target.value)}
+          placeholder="@acme"
+        />
+        <Input
+          label="GitHub"
+          type="text"
+          value={github}
+          onChange={(e) => setGithub(e.target.value)}
+          placeholder="acme-tech"
+        />
       </div>
 
       {/* Reason */}
@@ -165,13 +158,9 @@ export function ApplicationForm({ initial }: Props) {
       )}
 
       <div className="flex items-center justify-end gap-3">
-        <button
-          type="submit"
-          disabled={busy}
-          className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-        >
+        <Button type="submit" disabled={busy}>
           {busy ? 'Gönderiliyor…' : 'Başvuruyu Gönder'}
-        </button>
+        </Button>
       </div>
     </form>
   )

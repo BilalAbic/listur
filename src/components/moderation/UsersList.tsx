@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+import { Button } from '@/components/ui/Button'
 
 interface UserItem {
   id: string
@@ -97,14 +98,10 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="İsim veya e-posta ara…"
+            aria-label="Kullanıcı ara"
             className="flex-1 px-3 py-2 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
-          <button
-            type="submit"
-            className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-medium hover:bg-indigo-700"
-          >
-            Ara
-          </button>
+          <Button type="submit">Ara</Button>
         </form>
         <select
           value={currentRole}
@@ -172,23 +169,23 @@ export function UsersList({ users, currentQ, currentRole, currentPage, totalPage
       {/* Sayfalama */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-2 mt-6">
-          <button
+          <Button
+            variant="secondary"
             onClick={() => navigate(currentQ, currentRole, currentPage - 1)}
             disabled={currentPage <= 1}
-            className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             ← Önceki
-          </button>
+          </Button>
           <span className="text-sm text-gray-500 px-2">
             {currentPage} / {totalPages}
           </span>
-          <button
+          <Button
+            variant="secondary"
             onClick={() => navigate(currentQ, currentRole, currentPage + 1)}
             disabled={currentPage >= totalPages}
-            className="px-4 py-2 rounded-xl border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Sonraki →
-          </button>
+          </Button>
         </div>
       )}
     </>
