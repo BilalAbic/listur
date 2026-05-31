@@ -26,10 +26,12 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // Auth token'ı yenile — bu çağrı kritik, kaldırma
+  // getSession() → JWT'yi cookie'den okur, ağ çağrısı yapmaz.
+  // getUser() ağ doğrulaması yaptığı için Edge Runtime'da zaman aşımına girebilir
+  // ve cookie'lerin karışmasına neden olabilir.
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+  } = await supabase.auth.getSession()
 
-  return { supabaseResponse, user, supabase }
+  return { supabaseResponse, user: session?.user ?? null, supabase }
 }

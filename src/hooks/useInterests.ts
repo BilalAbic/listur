@@ -46,16 +46,16 @@ export function useInterests() {
   }
 
   /** Modalın daha önce gösterilip gösterilmediğini kontrol et */
-  const isModalShown = (): boolean => {
+  const isModalShown = useCallback((): boolean => {
     if (typeof window === 'undefined') return true
     return localStorage.getItem(LS_KEY_SHOWN) === 'true'
-  }
+  }, [])
 
   /** Modalı gösterildi olarak işaretle */
-  const markModalShown = () => {
+  const markModalShown = useCallback(() => {
     if (typeof window === 'undefined') return
     localStorage.setItem(LS_KEY_SHOWN, 'true')
-  }
+  }, [])
 
   /**
    * Kullanıcı giriş yaptıktan sonra localStorage ilgi alanlarını

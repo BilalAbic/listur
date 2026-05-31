@@ -1,29 +1,97 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/context/AuthContext'
 import { createClient } from '@/lib/supabase/client'
 import { INTEREST_CATEGORIES } from '@/types/index'
 import type { InterestCategory } from '@/types/index'
+import type { Tables } from '@/types/database'
+
+type Profile = Tables<'profiles'>
 
 export default function ProfilPage() {
-  const { user, profile, loading, refreshProfile } = useAuth()
+  const { user, loading: authLoading, refreshProfile } = useAuth()
   const router = useRouter()
   const supabase = createClient()
 
+  // Profil doğrudan bu sayfada sorgulanır — AuthContext profile state'ine bağımlılık yok.
+  // AuthContext'in fetchProfile zincirindeki herhangi bir gecikme/hata sayfayı etkilemez.
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false)
   const [name, setName] = useState('')
   const [interests, setInterests] = useState<InterestCategory[]>([])
   const [notifyEmail, setNotifyEmail] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
+  // Profili doğrudan Supabase'den çek (8sn timeout — takılmasın)
+  const fetchPageProfile = useCallback(async (userId: string) => {
+    setProfileLoading(true)
+
+    // Timeout guard: 8sn içinde sorgu dönmezse loading'i kapat ve hata göster.
+    // Bu, "yükleniyor" animasyonunda sonsuz takılmayı önler.
+    const timeoutId = setTimeout(() => {
+      console.warn('[ProfilPage] fetchProfile timeout (8s) — releasing spinner')
+      setProfileLoading(false)
+    }, 8000)
+
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle()
+
+      if (error) {
+        console.error('[ProfilPage] fetchProfile error:', error.message)
+        setProfile(null)
+        return
+      }
+
+      if (!data) {
+        // Satır yok — oluştur
+        const { data: created, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userId,
+            email: user?.email ?? '',
+            name: '',
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('[ProfilPage] createProfile error:', createError.message)
+        } else {
+          setProfile(created)
+        }
+        return
+      }
+
+      setProfile(data)
+    } catch (err) {
+      console.error('[ProfilPage] fetchProfile unexpected error:', err)
+      setProfile(null)
+    } finally {
+      clearTimeout(timeoutId)
+      setProfileLoading(false)
+    }
+  }, [supabase, user?.email])
+
   // Giriş yapmamış kullanıcıyı yönlendir
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       router.push('/giris?redirect=/profil')
     }
-  }, [user, loading, router])
+  }, [user, authLoading, router])
+
+  // Kullanıcı hazır olunca profili çek
+  useEffect(() => {
+    if (user && !authLoading) {
+      fetchPageProfile(user.id)
+    }
+  }, [user, authLoading, fetchPageProfile])
 
   // Profil verisini forma yükle
   useEffect(() => {
@@ -54,49 +122,15 @@ export default function ProfilPage() {
     if (error) {
       setMessage({ type: 'error', text: 'Kaydedilirken hata oluştu.' })
     } else {
+      await fetchPageProfile(user.id)
       await refreshProfile()
       setMessage({ type: 'success', text: 'Profil güncellendi!' })
     }
     setSaving(false)
   }
 
-  // Loading timeout — 8 saniye sonra retry seçeneği sun
-  const [loadingTimedOut, setLoadingTimedOut] = useState(false)
-
-  useEffect(() => {
-    if (!loading) {
-      setLoadingTimedOut(false)
-      return
-    }
-    const timer = setTimeout(() => setLoadingTimedOut(true), 8000)
-    return () => clearTimeout(timer)
-  }, [loading])
-
-  if (loading) {
-    if (loadingTimedOut) {
-      return (
-        <div className="min-h-screen flex items-center justify-center px-4">
-          <div className="text-center max-w-sm">
-            <div className="w-14 h-14 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M12 3a9 9 0 110 18A9 9 0 0112 3z" />
-              </svg>
-            </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Yükleme uzun sürüyor</h2>
-            <p className="text-sm text-gray-500 mb-6">
-              Bağlantı sorunu olabilir. Sayfayı yenileyerek tekrar deneyin.
-            </p>
-            <button
-              onClick={() => window.location.reload()}
-              className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
-            >
-              Sayfayı Yenile
-            </button>
-          </div>
-        </div>
-      )
-    }
-
+  // Auth yüklenirken spinner
+  if (authLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full" />
@@ -105,6 +139,15 @@ export default function ProfilPage() {
   }
 
   if (!user) return null
+
+  // Profil yüklenirken spinner
+  if (profileLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full" />
+      </div>
+    )
+  }
 
   if (!profile) {
     return (
@@ -120,7 +163,7 @@ export default function ProfilPage() {
             Profil bilgileriniz alınırken bir sorun oluştu. Lütfen tekrar deneyin.
           </p>
           <button
-            onClick={() => refreshProfile()}
+            onClick={() => fetchPageProfile(user.id)}
             className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
           >
             Yenile

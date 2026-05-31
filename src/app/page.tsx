@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { EventCard } from '@/components/events/EventCard'
 import { EventFilters } from '@/components/events/EventFilters'
+import { TrendingStrip } from '@/components/discovery/TrendingStrip'
 import type { Tables } from '@/types/database'
 
 type Event = Tables<'events'>
@@ -19,26 +20,29 @@ function getParam(params: Record<string, string | string[] | undefined>, key: st
  * - Misafir ise: cookie listur_interests (useInterests hook'u localStorage ile birlikte yazar)
  */
 async function getUserInterests(): Promise<string[]> {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (user) {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('interests')
-      .eq('id', user.id)
-      .single()
-    return (profile?.interests as string[] | null) ?? []
-  }
-
-  // Misafir → cookie
-  const cookieStore = await cookies()
-  const raw = cookieStore.get('listur_interests')?.value
-  if (!raw) return []
   try {
+    const supabase = await createClient()
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+    if (userError || !user) {
+      // Oturum geçersiz veya misafir → cookie path
+    } else {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('interests')
+        .eq('id', user.id)
+        .maybeSingle()
+      return (profile?.interests as string[] | null) ?? []
+    }
+
+    // Misafir → cookie
+    const cookieStore = await cookies()
+    const raw = cookieStore.get('listur_interests')?.value
+    if (!raw) return []
     const parsed = JSON.parse(decodeURIComponent(raw))
     return Array.isArray(parsed) ? parsed : []
   } catch {
+    // Herhangi bir hata → ilgi alanı olmadan devam et (sayfa crash etmesin)
     return []
   }
 }
@@ -138,6 +142,13 @@ export default async function AnaSayfa({ searchParams }: { searchParams: SearchP
           Hackathon, meetup, workshop ve konferansları keşfet. Toplulukla buluş.
         </p>
       </div>
+
+      {/* Trending şerit — sadece filtre yokken göster */}
+      {!hasFilters && (
+        <Suspense fallback={null}>
+          <TrendingStrip />
+        </Suspense>
+      )}
 
       {/* Filtreler */}
       <div className="mb-8">

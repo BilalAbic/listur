@@ -7,22 +7,28 @@ import { INTEREST_CATEGORIES } from '@/types/index'
 import type { InterestCategory } from '@/types/index'
 
 export function InterestsModal() {
-  const { user, profile, refreshProfile } = useAuth()
+  const { user, profile, loading: authLoading, refreshProfile } = useAuth()
   const { isModalShown, markModalShown, setLocalInterests, updateSupabaseInterests } = useInterests()
   const [open, setOpen] = useState(false)
   const [selected, setSelected] = useState<InterestCategory[]>([])
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
-    // Modal zaten gösterildiyse açma
+    // 1. Initial auth check bitmeden karar verme
+    if (authLoading) return
+    // 2. Kullanıcı giriş yapmış ama profil henüz fetch edilmemiş (user set, profile null = loading)
+    //    Bu durumda modal açma — sonraki render'da profil gelince tekrar çalışır
+    if (user !== null && profile === null) return
+    // 3. Modal daha önce gösterildiyse açma
     if (isModalShown()) return
-    // Giriş yapmış kullanıcı zaten ilgi alanı seçmişse açma
-    if (user && profile && profile.interests.length > 0) {
+    // 4. Profili olan kullanıcı → zaten seçim yapmış, modal gereksiz
+    if (user && profile && (profile.interests as string[] | null)?.length) {
       markModalShown()
       return
     }
+    // 5. Misafir (user=null) veya ilgi alanı seçmemiş kullanıcı → aç
     setOpen(true)
-  }, [user, profile, isModalShown, markModalShown])
+  }, [user, profile, authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const toggle = (cat: InterestCategory) => {
     setSelected((prev) =>
@@ -55,11 +61,17 @@ export function InterestsModal() {
   if (!open) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="interests-modal-title"
+      data-testid="interests-modal"
+    >
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
         {/* Başlık */}
         <div className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">
+          <h2 id="interests-modal-title" className="text-2xl font-bold text-gray-900 mb-2">
             Seni hangi konular ilgilendiriyor?
           </h2>
           <p className="text-gray-500 text-sm">

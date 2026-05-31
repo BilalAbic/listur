@@ -17,7 +17,7 @@ export default async function ModeratorLayout({ children }: { children: React.Re
     .from('profiles')
     .select('role, name')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!profile || !['moderator', 'admin'].includes(profile.role)) {
     redirect('/')
