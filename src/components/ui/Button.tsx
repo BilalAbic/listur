@@ -56,7 +56,7 @@ function buildClassName(opts: {
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
-  { variant = 'primary', size = 'md', fullWidth = false, className, type, asLink, ...rest },
+  { variant = 'primary', size = 'md', fullWidth = false, className, type, asLink: _asLink, ...rest },
   ref
 ) {
   return (

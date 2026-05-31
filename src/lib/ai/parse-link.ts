@@ -131,7 +131,7 @@ export async function parseEventLink(url: string): Promise<ParsedEventData> {
   }
 
   // 3. GPT-4o fallback → sadece eksik alanlar için
-  console.log('GPT-4o fallback başlatılıyor...')
+  console.info('[parse-link] GPT-4o fallback başlatılıyor (eksik alanlar var)')
   const gptResult = await parseWithGPT4o(url, result)
 
   // 4. Birleştir: mevcut değerleri koru, sadece null/undefined olanları güncelle
