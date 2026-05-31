@@ -133,13 +133,14 @@ async function testA() {
   } catch (e) { log('A', 'A1', 'FAIL', e.message.slice(0, 120)) }
 
   // A2 — InterestsModal ilk açılış
+  // Modal başlığı "Seni hangi konular ilgilendiriyor?" — data-testid eklendi.
   try {
     await newContext()
     await goto('/')
     await page.waitForTimeout(1500)
-    const modalText = await page.locator('text=/İlgi alanı|İlgi Alanı|interests/i').count()
+    const modalDialog = await page.locator('[data-testid="interests-modal"], [role="dialog"]:has-text("ilgilendir")').count()
     const shot = await snap('A2', 'interests-modal')
-    log('A', 'A2', modalText > 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalText > 0}`, shot)
+    log('A', 'A2', modalDialog > 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalDialog > 0}`, shot)
   } catch (e) { log('A', 'A2', 'FAIL', e.message.slice(0, 120)) }
 
   // A3 — localStorage kontrolü (ilgi alanı seçimi sonrası)
@@ -165,9 +166,9 @@ async function testA() {
   try {
     await page.reload({ waitUntil: 'networkidle' })
     await page.waitForTimeout(800)
-    const modalText = await page.locator('text=/İlgi alanı|İlgi Alanı/i').count()
+    const modalDialog = await page.locator('[data-testid="interests-modal"], [role="dialog"]:has-text("ilgilendir")').count()
     const shot = await snap('A4', 'refresh-no-modal')
-    log('A', 'A4', modalText === 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalText > 0}`, shot)
+    log('A', 'A4', modalDialog === 0 ? 'PASS' : 'FAIL', `Modal görünür: ${modalDialog > 0}`, shot)
   } catch (e) { log('A', 'A4', 'FAIL', e.message.slice(0, 120)) }
 
   // A5 — Filtreler
@@ -615,15 +616,20 @@ async function testM() {
   } catch (e) { log('M', 'M2', 'FAIL', e.message.slice(0, 120)) }
 
   // M3 — /api/feed/trending public 200 + Cache-Control
+  // NOT: Vercel Edge CDN response header'ı re-encode edebiliyor —
+  // origin'de `public, s-maxage=300, ...` set ediyoruz ama proxy bunu
+  // `public, max-age=N` veya yalnızca `public`'e indirgeyebilir.
+  // Bu yüzden `private` OLMAMASI ve `public` veya `max-age` olması yeterli.
   try {
     const response = await page.context().request.get(`${BASE}/api/feed/trending?limit=5`)
-    const cacheCtrl = response.headers()['cache-control'] || ''
+    const cacheCtrl = (response.headers()['cache-control'] || '').toLowerCase()
     const json = await response.json().catch(() => null)
     const okStatus = response.status() === 200
     const hasResults = json && Array.isArray(json.results)
-    const isPublicCache = cacheCtrl.includes('public') && cacheCtrl.includes('s-maxage')
-    log('M', 'M3', (okStatus && hasResults && isPublicCache) ? 'PASS' : 'FAIL',
-      `Status: ${response.status()}, results: ${json?.count}, cache: ${cacheCtrl.slice(0, 50)}`)
+    const isPublicCacheable = !cacheCtrl.includes('private') &&
+      (cacheCtrl.includes('public') || cacheCtrl.includes('max-age'))
+    log('M', 'M3', (okStatus && hasResults && isPublicCacheable) ? 'PASS' : 'FAIL',
+      `Status: ${response.status()}, results: ${json?.count}, cache: ${cacheCtrl.slice(0, 60)}`)
   } catch (e) { log('M', 'M3', 'FAIL', e.message.slice(0, 120)) }
 
   // M4 — /api/feed/for-you misafir → 401
