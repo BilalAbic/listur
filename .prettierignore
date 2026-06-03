@@ -1,0 +1,9 @@
+.next/
+out/
+build/
+node_modules/
+docs/e2e-test/
+e2e-results.json
+pnpm-lock.yaml
+public/
+*.md

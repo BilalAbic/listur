@@ -33,7 +33,7 @@ export default async function OrganizatorBasvuruPage() {
           <div className="text-5xl mb-3">✨</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Zaten doğrulanmış organizatörsün</h1>
           <p className="text-gray-600 mb-6">
-            <span className="font-medium text-gray-900">@{profile.handle}</span> olarak Listur'da görünüyorsun.
+            <span className="font-medium text-gray-900">@{profile.handle}</span> olarak Listur&apos;da görünüyorsun.
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
@@ -69,7 +69,7 @@ export default async function OrganizatorBasvuruPage() {
           <div className="text-5xl mb-3">⏳</div>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Başvurun değerlendiriliyor</h1>
           <p className="text-gray-700 mb-1">
-            <span className="font-medium">@{openApp.requested_handle}</span> handle'ı için başvurun{' '}
+            <span className="font-medium">@{openApp.requested_handle}</span> handle&apos;ı için başvurun{' '}
             <span className="font-medium">
               {new Date(openApp.created_at).toLocaleDateString('tr-TR', {
                 day: 'numeric', month: 'long', year: 'numeric',
@@ -105,7 +105,7 @@ export default async function OrganizatorBasvuruPage() {
         <h1 className="text-3xl font-extrabold text-gray-900 mb-2">Organizatör Olarak Doğrulan</h1>
         <p className="text-gray-600 text-sm">
           Doğrulanmış organizatör olunca <code className="text-xs bg-gray-100 px-1.5 py-0.5 rounded">/organizator/handle</code>{' '}
-          adresinde public sayfan, takipçiler ve etkinlik analytics'i olur.
+          adresinde public sayfan, takipçiler ve etkinlik analytics&apos;i olur.
         </p>
       </header>
 

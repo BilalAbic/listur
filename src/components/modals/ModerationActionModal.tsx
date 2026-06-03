@@ -1,6 +1,8 @@
 'use client'
 
 import { useState } from 'react'
+import { Modal } from '@/components/ui/Modal'
+import { Button } from '@/components/ui/Button'
 
 interface Props {
   eventId: string
@@ -20,6 +22,7 @@ export function ModerationActionModal({ eventId, eventTitle, action, onSuccess, 
       title: 'Etkinliği Onayla',
       description: `"${eventTitle}" etkinliğini yayınlıyorsunuz.`,
       buttonLabel: 'Onayla ve Yayınla',
+      variant: 'primary' as const,
       buttonClass: 'bg-green-600 hover:bg-green-700',
       endpoint: 'approve',
       noteLabel: 'Not (opsiyonel)',
@@ -28,7 +31,8 @@ export function ModerationActionModal({ eventId, eventTitle, action, onSuccess, 
       title: 'Etkinliği Reddet',
       description: `"${eventTitle}" etkinliği reddedilecek. Gönderici bildirim alacak.`,
       buttonLabel: 'Reddet',
-      buttonClass: 'bg-red-600 hover:bg-red-700',
+      variant: 'danger' as const,
+      buttonClass: '',
       endpoint: 'reject',
       noteLabel: 'Ret sebebi (gönderici görecek)',
     },
@@ -36,7 +40,8 @@ export function ModerationActionModal({ eventId, eventTitle, action, onSuccess, 
       title: 'Etkinliği Kaldır',
       description: `"${eventTitle}" yayından kaldırılacak.`,
       buttonLabel: 'Kaldır',
-      buttonClass: 'bg-red-600 hover:bg-red-700',
+      variant: 'danger' as const,
+      buttonClass: '',
       endpoint: 'remove',
       noteLabel: 'Kaldırma sebebi',
     },
@@ -66,39 +71,35 @@ export function ModerationActionModal({ eventId, eventTitle, action, onSuccess, 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-        <h3 className="text-lg font-bold text-gray-900 mb-2">{config.title}</h3>
-        <p className="text-sm text-gray-500 mb-5">{config.description}</p>
+    <Modal open onClose={onCancel} size="md" title={config.title}>
+      <p className="text-sm text-gray-500 mb-5">{config.description}</p>
 
-        <div className="mb-5">
-          <label className="block text-sm font-medium text-gray-700 mb-1">{config.noteLabel}</label>
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            rows={3}
-            className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
-          />
-        </div>
-
-        {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
-
-        <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50"
-          >
-            İptal
-          </button>
-          <button
-            onClick={handleSubmit}
-            disabled={loading}
-            className={`flex-1 py-2.5 rounded-xl text-white text-sm font-semibold disabled:opacity-50 transition-colors ${config.buttonClass}`}
-          >
-            {loading ? 'İşleniyor…' : config.buttonLabel}
-          </button>
-        </div>
+      <div className="mb-5">
+        <label className="block text-sm font-medium text-gray-700 mb-1">{config.noteLabel}</label>
+        <textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          rows={3}
+          className="w-full px-3 py-2 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
+        />
       </div>
-    </div>
+
+      {error && <p className="text-sm text-red-600 mb-3">{error}</p>}
+
+      <div className="flex gap-3">
+        <Button variant="secondary" fullWidth onClick={onCancel}>
+          İptal
+        </Button>
+        <Button
+          variant={config.variant}
+          fullWidth
+          onClick={handleSubmit}
+          disabled={loading}
+          className={config.buttonClass}
+        >
+          {loading ? 'İşleniyor…' : config.buttonLabel}
+        </Button>
+      </div>
+    </Modal>
   )
 }

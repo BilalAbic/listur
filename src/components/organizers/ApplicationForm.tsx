@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 
 interface Initial {
   requested_handle?: string
@@ -69,12 +71,13 @@ export function ApplicationForm({ initial }: Props) {
     <form onSubmit={handleSubmit} className="space-y-5">
       {/* Handle */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="app-handle" className="block text-sm font-medium text-gray-700 mb-1">
           Handle <span className="text-red-500">*</span>
         </label>
         <div className="flex items-center rounded-xl border border-gray-200 focus-within:ring-2 focus-within:ring-indigo-500 overflow-hidden">
           <span className="bg-gray-50 px-3 py-2.5 text-sm text-gray-500 border-r border-gray-200">@</span>
           <input
+            id="app-handle"
             type="text"
             value={handle}
             onChange={(e) => setHandle(e.target.value.toLowerCase().replace(/[^a-z0-9_-]/g, ''))}
@@ -92,8 +95,9 @@ export function ApplicationForm({ initial }: Props) {
 
       {/* Bio */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+        <label htmlFor="app-bio" className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
         <textarea
+          id="app-bio"
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           rows={3}
@@ -106,42 +110,34 @@ export function ApplicationForm({ initial }: Props) {
 
       {/* Website + Twitter + GitHub */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Website</label>
-          <input
-            type="text"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            placeholder="acme.com"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Twitter / X</label>
-          <input
-            type="text"
-            value={twitter}
-            onChange={(e) => setTwitter(e.target.value)}
-            placeholder="@acme"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">GitHub</label>
-          <input
-            type="text"
-            value={github}
-            onChange={(e) => setGithub(e.target.value)}
-            placeholder="acme-tech"
-            className="w-full px-3 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-          />
-        </div>
+        <Input
+          label="Website"
+          type="text"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          placeholder="acme.com"
+        />
+        <Input
+          label="Twitter / X"
+          type="text"
+          value={twitter}
+          onChange={(e) => setTwitter(e.target.value)}
+          placeholder="@acme"
+        />
+        <Input
+          label="GitHub"
+          type="text"
+          value={github}
+          onChange={(e) => setGithub(e.target.value)}
+          placeholder="acme-tech"
+        />
       </div>
 
       {/* Reason */}
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">Neden başvuruyorsun?</label>
+        <label htmlFor="app-reason" className="block text-sm font-medium text-gray-700 mb-1">Neden başvuruyorsun?</label>
         <textarea
+          id="app-reason"
           value={reason}
           onChange={(e) => setReason(e.target.value)}
           rows={3}
@@ -165,13 +161,9 @@ export function ApplicationForm({ initial }: Props) {
       )}
 
       <div className="flex items-center justify-end gap-3">
-        <button
-          type="submit"
-          disabled={busy}
-          className="px-5 py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-        >
+        <Button type="submit" disabled={busy}>
           {busy ? 'Gönderiliyor…' : 'Başvuruyu Gönder'}
-        </button>
+        </Button>
       </div>
     </form>
   )

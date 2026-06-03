@@ -5,6 +5,8 @@ import { useAuth } from '@/context/AuthContext'
 import { useInterests } from '@/hooks/useInterests'
 import { INTEREST_CATEGORIES } from '@/types/index'
 import type { InterestCategory } from '@/types/index'
+import { Modal } from '@/components/ui/Modal'
+import { Button } from '@/components/ui/Button'
 
 export function InterestsModal() {
   const { user, profile, loading: authLoading, refreshProfile } = useAuth()
@@ -27,6 +29,7 @@ export function InterestsModal() {
       return
     }
     // 5. Misafir (user=null) veya ilgi alanı seçmemiş kullanıcı → aç
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setOpen(true)
   }, [user, profile, authLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -58,64 +61,58 @@ export function InterestsModal() {
     setOpen(false)
   }
 
-  if (!open) return null
-
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="interests-modal-title"
+    <Modal
+      open={open}
+      onClose={handleSkip}
+      size="md"
+      closeOnBackdrop={false} // İlk açılış modalı — bilinçli seçim istiyoruz
       data-testid="interests-modal"
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-8">
-        {/* Başlık */}
-        <div className="mb-6">
-          <h2 id="interests-modal-title" className="text-2xl font-bold text-gray-900 mb-2">
-            Seni hangi konular ilgilendiriyor?
-          </h2>
-          <p className="text-gray-500 text-sm">
-            Seçimlerine göre etkinlikleri öne çıkaracağız. İstediğin zaman değiştirebilirsin.
-          </p>
-        </div>
-
-        {/* Kategori grid */}
-        <div className="grid grid-cols-2 gap-2 mb-8">
-          {INTEREST_CATEGORIES.map((cat) => {
-            const isSelected = selected.includes(cat)
-            return (
-              <button
-                key={cat}
-                onClick={() => toggle(cat)}
-                className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all border-2 ${
-                  isSelected
-                    ? 'bg-indigo-600 border-indigo-600 text-white'
-                    : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50'
-                }`}
-              >
-                {cat}
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Butonlar */}
-        <div className="flex gap-3">
-          <button
-            onClick={handleSkip}
-            className="flex-1 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-medium hover:bg-gray-50 transition-colors"
-          >
-            Şimdilik atla
-          </button>
-          <button
-            onClick={handleSave}
-            disabled={saving || selected.length === 0}
-            className="flex-1 py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            {saving ? 'Kaydediliyor…' : `Devam et (${selected.length})`}
-          </button>
-        </div>
+      {/* Başlık */}
+      <div className="mb-6">
+        <h2 id="interests-modal-title" className="text-2xl font-bold text-gray-900 mb-2">
+          Seni hangi konular ilgilendiriyor?
+        </h2>
+        <p className="text-gray-500 text-sm">
+          Seçimlerine göre etkinlikleri öne çıkaracağız. İstediğin zaman değiştirebilirsin.
+        </p>
       </div>
-    </div>
+
+      {/* Kategori grid */}
+      <div className="grid grid-cols-2 gap-2 mb-8">
+        {INTEREST_CATEGORIES.map((cat) => {
+          const isSelected = selected.includes(cat)
+          return (
+            <button
+              key={cat}
+              onClick={() => toggle(cat)}
+              className={`px-3 py-2.5 rounded-xl text-sm font-medium text-left transition-all border-2 ${
+                isSelected
+                  ? 'bg-indigo-600 border-indigo-600 text-white'
+                  : 'bg-white border-gray-200 text-gray-700 hover:border-indigo-300 hover:bg-indigo-50'
+              }`}
+            >
+              {cat}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* Butonlar */}
+      <div className="flex gap-3">
+        <Button variant="secondary" fullWidth onClick={handleSkip}>
+          Şimdilik atla
+        </Button>
+        <Button
+          variant="primary"
+          fullWidth
+          onClick={handleSave}
+          disabled={saving || selected.length === 0}
+        >
+          {saving ? 'Kaydediliyor…' : `Devam et (${selected.length})`}
+        </Button>
+      </div>
+    </Modal>
   )
 }

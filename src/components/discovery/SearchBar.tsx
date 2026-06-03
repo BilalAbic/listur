@@ -23,8 +23,10 @@ export function SearchBar({ variant = 'compact', initialValue }: Props) {
   const router = useRouter()
   const [value, setValue] = useState(initialValue ?? '')
 
-  // initialValue değişirse (sayfa geçişi) input'u senkronla
+  // initialValue değişirse (sayfa geçişi) input'u senkronla — controlled input
+  // external prop ile sync pattern. React Compiler tavsiye, idiomatik.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setValue(initialValue ?? '')
   }, [initialValue])
 

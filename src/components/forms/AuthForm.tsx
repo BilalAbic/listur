@@ -4,9 +4,11 @@ import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { useInterests } from '@/hooks/useInterests'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
 
 type Tab = 'login' | 'signup' | 'magic'
-type OAuthProvider = 'google' | 'github'
+type OAuthProvider = 'google' | 'github' | 'linkedin_oidc'
 
 /**
  * Supabase emailRedirectTo için güvenli base URL döndürür.
@@ -64,6 +66,14 @@ function GitHubIcon() {
   )
 }
 
+function LinkedInIcon() {
+  return (
+    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="#0A66C2" aria-hidden="true">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+    </svg>
+  )
+}
+
 // ─── OAuth Buton Grubu ────────────────────────────────────────────────────────
 
 interface OAuthButtonsProps {
@@ -83,25 +93,23 @@ function OAuthButtons({ onOAuth, loading }: OAuthButtonsProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-3">
-        <button
-          type="button"
-          onClick={() => onOAuth('google')}
-          disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-        >
+      <div className="grid grid-cols-3 gap-3">
+        <Button variant="secondary" onClick={() => onOAuth('google')} disabled={loading}>
           <GoogleIcon />
           Google
-        </button>
-        <button
-          type="button"
-          onClick={() => onOAuth('github')}
-          disabled={loading}
-          className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 transition-colors"
-        >
+        </Button>
+        <Button variant="secondary" onClick={() => onOAuth('github')} disabled={loading}>
           <GitHubIcon />
           GitHub
-        </button>
+        </Button>
+        <Button
+          variant="secondary"
+          onClick={() => onOAuth('linkedin_oidc')}
+          disabled={loading}
+        >
+          <LinkedInIcon />
+          LinkedIn
+        </Button>
       </div>
     </div>
   )
@@ -281,33 +289,30 @@ export function AuthForm() {
       {tab === 'login' && (
         <>
           <form onSubmit={handleLogin} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-              <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                required placeholder="ornek@email.com"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-              <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                required placeholder="••••••••"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
+            <Input
+              label="E-posta"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="ornek@email.com"
+            />
+            <Input
+              label="Şifre"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="••••••••"
+            />
             {message && (
               <p className={`text-sm ${message.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                 {message.text}
               </p>
             )}
-            <button
-              type="submit" disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
+            <Button type="submit" fullWidth disabled={loading}>
               {loading ? 'Giriş yapılıyor…' : 'Giriş Yap'}
-            </button>
+            </Button>
           </form>
           <OAuthButtons onOAuth={handleOAuth} loading={loading} />
         </>
@@ -317,41 +322,39 @@ export function AuthForm() {
       {tab === 'signup' && (
         <>
           <form onSubmit={handleSignup} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ad Soyad</label>
-              <input
-                type="text" value={name} onChange={(e) => setName(e.target.value)}
-                required placeholder="Adınız Soyadınız"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-              <input
-                type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-                required placeholder="ornek@email.com"
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Şifre</label>
-              <input
-                type="password" value={password} onChange={(e) => setPassword(e.target.value)}
-                required placeholder="En az 8 karakter" minLength={8}
-                className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-              />
-            </div>
+            <Input
+              label="Ad Soyad"
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="Adınız Soyadınız"
+            />
+            <Input
+              label="E-posta"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="ornek@email.com"
+            />
+            <Input
+              label="Şifre"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              placeholder="En az 8 karakter"
+              minLength={8}
+            />
             {message && (
               <p className={`text-sm ${message.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
                 {message.text}
               </p>
             )}
-            <button
-              type="submit" disabled={loading}
-              className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-            >
+            <Button type="submit" fullWidth disabled={loading}>
               {loading ? 'Hesap oluşturuluyor…' : 'Kayıt Ol'}
-            </button>
+            </Button>
           </form>
           <OAuthButtons onOAuth={handleOAuth} loading={loading} />
         </>
@@ -363,25 +366,22 @@ export function AuthForm() {
           <p className="text-sm text-gray-500">
             E-posta adresinize şifresiz giriş bağlantısı göndereceğiz.
           </p>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">E-posta</label>
-            <input
-              type="email" value={email} onChange={(e) => setEmail(e.target.value)}
-              required placeholder="ornek@email.com"
-              className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
-            />
-          </div>
+          <Input
+            label="E-posta"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            placeholder="ornek@email.com"
+          />
           {message && (
             <p className={`text-sm ${message.type === 'error' ? 'text-red-600' : 'text-green-600'}`}>
               {message.text}
             </p>
           )}
-          <button
-            type="submit" disabled={loading}
-            className="w-full py-2.5 rounded-xl bg-indigo-600 text-white font-semibold text-sm hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-          >
+          <Button type="submit" fullWidth disabled={loading}>
             {loading ? 'Gönderiliyor…' : 'Bağlantı Gönder'}
-          </button>
+          </Button>
         </form>
       )}
     </div>
