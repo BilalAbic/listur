@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { generateSlug } from '@/lib/utils/slug'
 
@@ -42,6 +42,7 @@ export async function POST(request: NextRequest) {
     source_url: string
     cover_image_og?: string
     parse_source?: 'og' | 'gpt4o' | 'manual'
+    tags?: unknown
   }
 
   try {
@@ -60,6 +61,9 @@ export async function POST(request: NextRequest) {
       { status: 400 }
     )
   }
+
+  // Tags validation — max 8, kebab-case, max 30 char/tag
+  const tags = normalizeTags(body.tags)
 
   const supabaseAdmin = createAdminClient()
 
@@ -92,6 +96,7 @@ export async function POST(request: NextRequest) {
       organizer_id: user.id,
       status,
       slug,
+      tags,
       published_at: isVerified ? new Date().toISOString() : null,
     })
     .select()
@@ -120,4 +125,30 @@ export async function POST(request: NextRequest) {
       ? 'Etkinlik yayınlandı!'
       : 'Etkinlik gönderildi. Moderatör onayından sonra yayınlanacak.',
   })
+}
+
+/**
+ * Tag dizisini normalize et: küçük harf, kebab-case, ASCII, max 30 char, max 8 tag.
+ * Geçersiz tip veya boş array için [] döner.
+ */
+function normalizeTags(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return []
+  const result: string[] = []
+  for (const item of raw) {
+    if (typeof item !== 'string') continue
+    const cleaned = item
+      .toLowerCase()
+      .replace(/ğ/g, 'g').replace(/ü/g, 'u').replace(/ş/g, 's')
+      .replace(/ı/g, 'i').replace(/ö/g, 'o').replace(/ç/g, 'c')
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '')
+      .slice(0, 30)
+    if (cleaned && !result.includes(cleaned)) {
+      result.push(cleaned)
+      if (result.length >= 8) break
+    }
+  }
+  return result
 }

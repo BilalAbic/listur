@@ -5,9 +5,11 @@ import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { ReportButton } from '@/components/events/ReportButton'
 import { ShareButtons } from '@/components/events/ShareButtons'
-import { FavoriteButton } from '@/components/engagement/FavoriteButton'
+import { FavoriteButtonWrapper } from '@/components/engagement/FavoriteButtonWrapper'
 import { RsvpButton } from '@/components/engagement/RsvpButton'
 import { CalendarExportMenu } from '@/components/engagement/CalendarExportMenu'
+import { OrganizerCard } from '@/components/organizers/OrganizerCard'
+import { TagChip } from '@/components/discovery/TagChip'
 import { getBaseUrl } from '@/lib/site'
 
 type Params = Promise<{ slug: string }>
@@ -26,9 +28,12 @@ export const dynamic = 'force-dynamic'
 const fetchEventBySlug = cache(async (slug: string) => {
   try {
     const supabase = await createClient()
+    // Organizer profil mini bilgisini left join ile çek (organizer_id NULL olabilir).
     const { data, error } = await supabase
       .from('events')
-      .select('*')
+      .select(
+        '*, organizer:profiles!events_organizer_id_fkey(id, handle, name, verified_at, is_organizer)'
+      )
       .eq('slug', slug)
       .eq('status', 'published')
       .maybeSingle()
@@ -158,9 +163,23 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
       </div>
 
       {/* Başlık */}
-      <h1 className="text-3xl font-extrabold text-gray-900 mb-6 leading-tight">
+      <h1 className="text-3xl font-extrabold text-gray-900 mb-2 leading-tight">
         {event.title}
       </h1>
+
+      {/* Organizatör (handle'ı varsa) */}
+      {event.organizer && event.organizer.is_organizer && event.organizer.handle && (
+        <div className="mb-6">
+          <OrganizerCard
+            organizer={{
+              handle: event.organizer.handle,
+              name: event.organizer.name,
+              verified_at: event.organizer.verified_at,
+            }}
+            size="chip"
+          />
+        </div>
+      )}
 
       {/* Meta bilgiler */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -202,7 +221,7 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
 
       {/* Engagement şeridi: favori / RSVP / sayaçlar */}
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 mb-8 flex flex-wrap items-center gap-3">
-        <FavoriteButton
+        <FavoriteButtonWrapper
           eventId={event.id}
           variant="full"
           redirectTo={`/etkinlik/${event.slug}`}
@@ -244,8 +263,17 @@ export default async function EtkinlikDetay({ params }: { params: Params }) {
 
       {/* Açıklama */}
       {event.description && (
-        <div className="prose prose-gray max-w-none mb-8">
+        <div className="prose prose-gray max-w-none mb-6">
           <p className="text-gray-700 leading-relaxed whitespace-pre-line">{event.description}</p>
+        </div>
+      )}
+
+      {/* Etiketler */}
+      {event.tags && event.tags.length > 0 && (
+        <div className="flex flex-wrap items-center gap-2 mb-8">
+          {event.tags.map((tag: string) => (
+            <TagChip key={tag} tag={tag} size="md" />
+          ))}
         </div>
       )}
 

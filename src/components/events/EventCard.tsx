@@ -1,9 +1,9 @@
-'use client'
-
 import Link from 'next/link'
 import Image from 'next/image'
 import type { Tables } from '@/types/database'
-import { FavoriteButton } from '@/components/engagement/FavoriteButton'
+import { FavoriteButtonWrapper } from '@/components/engagement/FavoriteButtonWrapper'
+import { Badge, categoryTone } from '@/components/ui/Badge'
+import { RegistrationLink } from './RegistrationLink'
 
 type Event = Tables<'events'>
 
@@ -11,19 +11,6 @@ interface EventCardProps {
   event: Event
   /** Sağ-üst köşede favori ikonu göster. Default: true */
   showFavoriteOverlay?: boolean
-}
-
-const categoryColors: Record<string, string> = {
-  'Yapay Zeka / ML': 'bg-purple-100 text-purple-700',
-  'Blockchain / Web3': 'bg-orange-100 text-orange-700',
-  'Mobil Geliştirme': 'bg-blue-100 text-blue-700',
-  'Backend / DevOps': 'bg-green-100 text-green-700',
-  'Siber Güvenlik': 'bg-red-100 text-red-700',
-  'Girişimcilik / Startup': 'bg-yellow-100 text-yellow-700',
-  'Tasarım / UX': 'bg-pink-100 text-pink-700',
-  'Oyun Geliştirme': 'bg-indigo-100 text-indigo-700',
-  'Veri Bilimi': 'bg-teal-100 text-teal-700',
-  'Açık Kaynak': 'bg-emerald-100 text-emerald-700',
 }
 
 function formatDate(dateStr: string): string {
@@ -36,7 +23,6 @@ function formatDate(dateStr: string): string {
 }
 
 export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps) {
-  const catColor = categoryColors[event.category] ?? 'bg-gray-100 text-gray-600'
   const isUpcoming = new Date(event.start_date) > new Date()
 
   return (
@@ -61,7 +47,7 @@ export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps)
           )}
           {/* Favori overlay (sol-üst) */}
           {showFavoriteOverlay && (
-            <FavoriteButton
+            <FavoriteButtonWrapper
               eventId={event.id}
               variant="overlay"
               redirectTo={`/etkinlik/${event.slug}`}
@@ -69,8 +55,10 @@ export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps)
           )}
           {/* Online etiketi (sağ-üst) */}
           {event.is_online && (
-            <span className="absolute top-3 right-3 bg-white/90 text-indigo-700 text-xs font-semibold px-2.5 py-1 rounded-full backdrop-blur-sm">
-              Online
+            <span className="absolute top-3 right-3 backdrop-blur-sm">
+              <Badge tone="indigo" className="bg-white/90">
+                Online
+              </Badge>
             </span>
           )}
         </div>
@@ -78,9 +66,9 @@ export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps)
         {/* İçerik */}
         <div className="p-5 flex flex-col flex-1 gap-3">
           {/* Kategori etiketi */}
-          <span className={`self-start text-xs font-semibold px-2.5 py-1 rounded-full ${catColor}`}>
+          <Badge tone={categoryTone(event.category)} className="self-start">
             {event.category}
-          </span>
+          </Badge>
 
           {/* Başlık */}
           <h3 className="font-semibold text-gray-900 text-base leading-snug line-clamp-2 group-hover:text-indigo-600 transition-colors">
@@ -111,15 +99,7 @@ export function EventCard({ event, showFavoriteOverlay = true }: EventCardProps)
 
           {/* Kayıt butonu */}
           {event.registration_url && (
-            <a
-              href={event.registration_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={(e) => e.stopPropagation()}
-              className="mt-2 w-full text-center py-2 rounded-xl bg-indigo-50 text-indigo-700 text-sm font-semibold hover:bg-indigo-100 transition-colors"
-            >
-              Kayıt Ol →
-            </a>
+            <RegistrationLink url={event.registration_url} />
           )}
         </div>
       </article>

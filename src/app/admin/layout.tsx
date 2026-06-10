@@ -17,7 +17,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     .from('profiles')
     .select('role, name')
     .eq('id', user.id)
-    .single()
+    .maybeSingle()
 
   if (!profile || profile.role !== 'admin') {
     redirect('/')
@@ -28,6 +28,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     { href: '/admin/etkinlikler', label: 'Etkinlikler' },
     { href: '/admin/raporlar', label: 'Raporlar' },
     { href: '/admin/kullanicilar', label: 'Kullanıcılar' },
+    { href: '/admin/organizator-basvurulari', label: 'Organizatör Başvuruları' },
   ]
 
   return (

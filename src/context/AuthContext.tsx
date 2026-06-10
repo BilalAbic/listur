@@ -12,6 +12,8 @@ interface AuthContextValue {
   profile: Profile | null
   session: Session | null
   loading: boolean
+  /** null = sorgulanmadı/yok, 'open' = beklemede, 'resolved' = sonuçlandı */
+  organizerAppStatus: 'open' | 'resolved' | null
   signOut: () => Promise<void>
   refreshProfile: () => Promise<void>
 }
@@ -21,6 +23,7 @@ const AuthContext = createContext<AuthContextValue>({
   profile: null,
   session: null,
   loading: true,
+  organizerAppStatus: null,
   signOut: async () => {},
   refreshProfile: async () => {},
 })
@@ -30,65 +33,134 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [organizerAppStatus, setOrganizerAppStatus] = useState<'open' | 'resolved' | null>(null)
 
   const supabase = createClient()
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    setProfile(data)
+  const fetchProfile = useCallback(async (supabaseUser: User) => {
+    // ── 1. Profil çek ──────────────────────────────────────────────────────────
+    // Ayrı try-catch: organizatör sorgusu hata verse bile profile=null olmaz.
+    try {
+      const result = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', supabaseUser.id)
+        .maybeSingle()
+
+      if (result.error) {
+        console.error('[Auth] fetchProfile error:', result.error.message)
+        setProfile(null)
+        return
+      }
+
+      // `let` çünkü satır oluşturma branch'inde yeniden atanıyor (insert sonrası).
+      let profileData = result.data
+
+      // Profile satırı yok — trigger başarısız olmuş olabilir, otomatik oluştur.
+      if (!profileData) {
+        const { data: created, error: createError } = await supabase
+          .from('profiles')
+          .insert({
+            id: supabaseUser.id,
+            email: supabaseUser.email ?? '',
+            name: (supabaseUser.user_metadata?.name as string | undefined)
+              ?? (supabaseUser.user_metadata?.full_name as string | undefined)
+              ?? '',
+          })
+          .select()
+          .single()
+
+        if (createError) {
+          console.error('[Auth] createProfile error:', createError.message)
+          setProfile(null)
+          return
+        }
+        profileData = created
+      }
+
+      setProfile(profileData)
+    } catch (err) {
+      console.error('[Auth] fetchProfile unexpected error:', err)
+      setProfile(null)
+      return
+    }
+
+    // ── 2. Organizatör başvuru durumu ──────────────────────────────────────────
+    // Ayrı try-catch: bu sorgu başarısız olursa profileya dokunmaz.
+    try {
+      const { data: appData } = await supabase
+        .from('organizer_applications')
+        .select('status')
+        .eq('user_id', supabaseUser.id)
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle()
+
+      setOrganizerAppStatus((appData?.status ?? null) as 'open' | 'resolved' | null)
+    } catch {
+      setOrganizerAppStatus(null)
+    }
   }, [supabase])
 
   const refreshProfile = useCallback(async () => {
-    if (user) await fetchProfile(user.id)
+    if (user) await fetchProfile(user)
   }, [user, fetchProfile])
 
   useEffect(() => {
-    // İlk oturum yükle — .catch() ile her durumda loading=false garantilenir
-    supabase.auth.getSession()
-      .then(({ data: { session } }) => {
-        setSession(session)
-        setUser(session?.user ?? null)
-        if (session?.user) {
-          fetchProfile(session.user.id).finally(() => setLoading(false))
-        } else {
-          setLoading(false)
-        }
-      })
-      .catch(() => {
-        // Network hatası, parse hatası vb. — yine de loading'i kapat
-        setLoading(false)
-      })
+    let isMounted = true
 
-    // Auth state değişikliklerini dinle — try/finally ile loading garantili kapanır
+    // Fallback: INITIAL_SESSION 3sn içinde gelmezse loading'i kapat.
+    const timeout = setTimeout(() => {
+      if (isMounted) setLoading(false)
+    }, 3000)
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        try {
-          setSession(session)
-          setUser(session?.user ?? null)
-          if (session?.user) {
-            await fetchProfile(session.user.id)
-          } else {
-            setProfile(null)
-          }
-        } finally {
-          setLoading(false)
+      (event, newSession) => {
+        if (!isMounted) return
+
+        setSession(newSession)
+        setUser(newSession?.user ?? null)
+
+        // CRITICAL: loading'i fetchProfile'dan ÖNCE kapat.
+        // Profil sayfası `authLoading` bekliyor; user objesi hazır olduktan
+        // sonra spinner'ı kapatıp sayfanın kendi sorgusunu yapmasına izin ver.
+        // fetchProfile arka planda çalışır; Header ve diğer profile-bağımlı
+        // bileşenler hazır olunca re-render olur.
+        if (event === 'INITIAL_SESSION') {
+          clearTimeout(timeout)
+          if (isMounted) setLoading(false)
+        }
+
+        if (newSession?.user) {
+          // Fire-and-forget: hata durumunda yakala ama akışı blokleme.
+          fetchProfile(newSession.user).catch((err) => {
+            console.error('[Auth] background fetchProfile error:', err)
+          })
+        } else {
+          setProfile(null)
+          setOrganizerAppStatus(null)
         }
       }
     )
 
-    return () => subscription.unsubscribe()
+    return () => {
+      isMounted = false
+      clearTimeout(timeout)
+      subscription.unsubscribe()
+    }
   }, [supabase, fetchProfile])
 
   const signOut = async () => {
-    await supabase.auth.signOut()
+    try {
+      await supabase.auth.signOut()
+    } catch {
+      // signOut network hatası verse de sayfayı yenile — middleware session'ı temizler
+    }
+    window.location.href = '/'
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, session, loading, signOut, refreshProfile }}>
+    <AuthContext.Provider value={{ user, profile, session, loading, organizerAppStatus, signOut, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   )

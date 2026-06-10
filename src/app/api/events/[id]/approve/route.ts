@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { type NextRequest, NextResponse } from 'next/server'
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { uploadEventCover } from '@/lib/storage/upload-cover'
 import type { Database } from '@/types/database'
@@ -22,10 +22,10 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
 
   const supabaseAdmin = createAdminClient()
 
-  // Etkinliği bul
+  // Etkinliği bul (organizer_id da takipçi bildirimi için gerekli)
   const { data: event } = await supabaseAdmin
     .from('events')
-    .select('id, title, status, cover_image_og, cover_image, slug')
+    .select('id, title, status, cover_image_og, cover_image, slug, organizer_id')
     .eq('id', eventId)
     .single()
 
@@ -98,34 +98,70 @@ export async function PATCH(request: NextRequest, { params }: { params: Params }
     .limit(1)
     .single()
 
+  // İki bildirim akışı:
+  //  A) İlgi alanı eşleşen kullanıcılara `new_event`
+  //  B) Takipçilere `organizer_new_event` (interests'la yakalananları DEDUPE et)
+  // Hangi kullanıcılara hangi bildirim gittiği `notifiedUserIds` Set'inde tutulur.
+  const notifiedUserIds = new Set<string>()
+
   if (submission) {
     await supabaseAdmin.from('notifications').insert({
       user_id: submission.submitted_by,
       event_id: eventId,
       type: 'submission_approved',
     })
+    notifiedUserIds.add(submission.submitted_by)
+  }
 
-    // Etkinliğin ilgi alanıyla eşleşen kullanıcılara bildirim gönder
-    const { data: eventData } = await supabaseAdmin
-      .from('events')
-      .select('category')
-      .eq('id', eventId)
-      .single()
+  // (A) Interests eşleşmesi
+  const { data: eventData } = await supabaseAdmin
+    .from('events')
+    .select('category')
+    .eq('id', eventId)
+    .single()
 
-    if (eventData) {
-      const { data: matchingUsers } = await supabaseAdmin
-        .from('profiles')
-        .select('id')
-        .contains('interests', [eventData.category])
-        .neq('id', submission.submitted_by) // Gönderici zaten bildirim aldı
+  if (eventData) {
+    let interestsQuery = supabaseAdmin
+      .from('profiles')
+      .select('id')
+      .contains('interests', [eventData.category])
 
-      if (matchingUsers && matchingUsers.length > 0) {
-        const notifs = matchingUsers.map((u) => ({
-          user_id: u.id,
+    if (submission) {
+      interestsQuery = interestsQuery.neq('id', submission.submitted_by)
+    }
+
+    const { data: matchingUsers } = await interestsQuery
+
+    if (matchingUsers && matchingUsers.length > 0) {
+      const notifs = matchingUsers.map((u) => ({
+        user_id: u.id,
+        event_id: eventId,
+        type: 'new_event' as const,
+      }))
+      await supabaseAdmin.from('notifications').insert(notifs)
+      matchingUsers.forEach((u) => notifiedUserIds.add(u.id))
+    }
+  }
+
+  // (B) Takipçilere organizer_new_event (interests dedupe)
+  if (event.organizer_id) {
+    const { data: followers } = await supabaseAdmin
+      .from('organizer_follows')
+      .select('follower_id')
+      .eq('organizer_id', event.organizer_id)
+
+    if (followers && followers.length > 0) {
+      const followerIds = followers
+        .map((f) => f.follower_id)
+        .filter((id) => !notifiedUserIds.has(id) && id !== event.organizer_id)
+
+      if (followerIds.length > 0) {
+        const followerNotifs = followerIds.map((uid) => ({
+          user_id: uid,
           event_id: eventId,
-          type: 'new_event' as const,
+          type: 'organizer_new_event' as const,
         }))
-        await supabaseAdmin.from('notifications').insert(notifs)
+        await supabaseAdmin.from('notifications').insert(followerNotifs)
       }
     }
   }

@@ -11,6 +11,7 @@ const PROTECTED_ROUTES: Record<string, string[]> = {
   '/profil': ['user', 'verified_user', 'moderator', 'admin'],
   '/bildirimler': ['user', 'verified_user', 'moderator', 'admin'],
   '/etkinlik-gonder': ['user', 'verified_user', 'moderator', 'admin'],
+  '/kesfet/sana-ozel': ['user', 'verified_user', 'moderator', 'admin'],
 }
 
 export async function middleware(request: NextRequest) {
