@@ -3,6 +3,7 @@
 # 🎯 Listur
 
 **Türkiye'nin Teknoloji Etkinlik Platformu**
+
 **Öğrenme ve pratik yapma amacıyla geliştirilen bir eğitim projesi.**
 
 Hackathon, meetup, workshop ve konferansları keşfet. Toplulukla buluş.
